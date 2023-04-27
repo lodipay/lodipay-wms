@@ -77,7 +77,7 @@ while (for every ачаа)
   else (үгүй)
   endif
   |Ачаа хүлээн авагч|
-  :Барааг агуулахад бүртгэх;
+  :Барааг хүлээж авч order-д бүртгэх;
 endwhile
 stop
 @enduml
