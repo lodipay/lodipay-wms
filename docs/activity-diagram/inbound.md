@@ -1,4 +1,4 @@
-# Activity Diagram
+# Inbound Process
 
 ```plantuml
 @startuml
