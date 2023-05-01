@@ -1,4 +1,4 @@
-### Product receive sequence diagram 
+### Inventory receive sequence diagram 
 
 ```plantuml
 
@@ -8,29 +8,63 @@ participant "WHS" as whs
 participant "Database" as db
 participant "Event bus" as eb
 
+!$statusPending = "PENDING"
+!$statusReceived = "RECEIVED"
+!$inventoryStatusOrdered = "ORDERED"
+!$inventoryStatusExtra = "EXTRA"
+!$inventoryStatusDamaged = "DAMAGED"
+!$inventoryStatusOrdered = "ORDERED"
+!$inventoryStatusWrong = "WRONG"
+
 staff -> whs ++: Get order list page
-whs -> db ++: Get orders
+note right 
+    status=$statusPending, wh_id={id}, page={page_number}
+end note
+whs -> db ++: Get orders 
 db --> whs --: Return orders
 whs --> staff --: Orders list page
 
+
+
+staff -> whs ++: Search order by filter
+note right
+    status=$statusPending | $statusReceived 
+    inventory_status=$inventoryStatusOrdered | $inventoryStatusExtra | $inventoryStatusDamaged | $inventoryStatusWrong
+end note
+whs -> db : Get orders by filter
+db --> whs: Return filter result 
+whs --> staff --: Orders list by query page
+
+
+
 staff -> staff ++--: Select order
 
+
+
 staff -> whs ++: Get selected order information
+note right
+    order_id={order_id}
+end note
 whs -> db ++: Get selected order by ID
-db --> whs --: Return selected order information
-whs --> staff --: Selected order page
+db --> whs --: Return order information & inventory list
+whs --> staff --: Selected order page && inventory list
 
-staff -> staff ++--: Check order
 
-staff -> whs ++: Get register product page
-whs --> staff --: Product register page
+staff -> staff ++--: Fill required inventory information
 
-staff -> whs++: Register product with amount and information
-whs -> db ++: Save product information \n (amount, exp date \n status="ORDERED"|"MORE"|"DAMAGED"|"WRONG" etc...)
-
-db --> whs --: Return saved product
-whs -> eb: Received product information
-whs --> staff: Saved product information page
+staff -> whs++: Save the inventory information
+note right
+    order_id={order_id}
+    inventory_id={inventory_id}
+    quantity={items_quantity}
+    exp_date={expire_date}
+    inventory_status=$inventoryStatusOrdered | $inventoryStatusExtra | $inventoryStatusDamaged | $inventoryStatusWrong
+    notes={notes}
+end note
+whs -> db ++: Save inventory information
+db --> whs --: Return saved inventories
+whs ->> eb: Received inventories information
+whs --> staff: Saved inventories information page
 
 @enduml
 ```
