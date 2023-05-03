@@ -9,12 +9,10 @@ services:
       - POSTGRES_USER=${WHS_DB_USER:-admin}
       - POSTGRES_PASSWORD=${WHS_DB_PASSWORD:-password}
       - POSTGRES_DB=${WHS_DB:-whs}
-    networks:
-      - postgres
     volumes:
-      - /data/postgres:/data/postgres
+      - postgres-data:/data/postgres
  
-  whs:
+  app:
     build:
       dockerfile: Dockerfile
       context: .
@@ -23,11 +21,11 @@ services:
       - ${WHS_PORT:-13000}:13000
     depends_on:
       - postgres
-    networks:
-      - postgres
     volumes:
-      - ./:/app
- 
-networks:
-  postgres:
-    driver: bridge
+      - ./config:/app/config
+      - ./src:/app/src
+      - ./test:/app/test
+      - ./types:/app/types
+
+volumes:
+  postgres-data:
