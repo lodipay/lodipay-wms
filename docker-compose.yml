@@ -22,10 +22,7 @@ services:
     depends_on:
       - postgres
     volumes:
-      - ./config:/app/config
-      - ./src:/app/src
-      - ./test:/app/test
-      - ./types:/app/types
+      - .:/app:rw,cached
 
 volumes:
   postgres-data:
