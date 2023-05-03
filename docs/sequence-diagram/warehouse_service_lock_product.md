@@ -9,6 +9,7 @@ participant service
 participant lockRepo
 participant lockInventoryRepo
 participant inventoryRepo
+participant "E-commerce" as ecom
 
 !$getMethod="GET"
 !$patchMethod="PATCH"
@@ -38,9 +39,9 @@ admin -> controller ++: $getMethod inventory by name
 note right: ?inventory-name=:inventoryName&page=:number 
 controller -> service ++: getInventory
 note right: :inventoryName=string, page=number
-service -> inventoryRepo ++: findMany()
+service -> ecom ++: Get inventory information
 note right: {"name": inventoryName, skip: page - 1, take: perPage}
-inventoryRepo --> service --: Return inventory list
+ecom --> service --: Return inventory list
 note right: $inventoryDto []
 service --> controller --: Return inventory list
 note right: $inventoryDto []
