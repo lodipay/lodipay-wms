@@ -1,0 +1,28 @@
+version: "3"
+
+services:
+  postgres:
+    image: postgres:15.2
+    ports:
+      - ${WHS_DB_PORT:-5432}:5432
+    environment:
+      - POSTGRES_USER=${WHS_DB_USER:-admin}
+      - POSTGRES_PASSWORD=${WHS_DB_PASSWORD:-password}
+      - POSTGRES_DB=${WHS_DB:-whs}
+    volumes:
+      - postgres-data:/data/postgres
+ 
+  app:
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: development
+    ports:
+      - ${WHS_PORT:-13000}:13000
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app:rw,cached
+
+volumes:
+  postgres-data:
