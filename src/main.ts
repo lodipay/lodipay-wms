@@ -5,12 +5,15 @@ import { VersioningType } from '@nestjs/common';
 
 import { ConfigService } from '@nestjs/config';
 import { CONFIG_NAME_MAIN, MainConfig } from '../config/MainConfig';
-import winstonLoggerService from './common/services/winston-logger.service';
+import { LoggerFactory } from './common/factory/logger.factory';
 
 async function bootstrap() {
+    const logOptions = process.env.LOG_OPTIONS;
     const app = await NestFactory.create(AppModule, {
-        logger:
-            process.env.LOG_TRANSPORT === 'dev' ? winstonLoggerService : false,
+        logger: LoggerFactory.create(
+            process.env.LOG_TRANSPORT,
+            logOptions ? JSON.parse(logOptions) : null,
+        ),
     });
     const configService = app.get<ConfigService>(ConfigService);
     const mainConfig = configService.get(CONFIG_NAME_MAIN) as MainConfig;
