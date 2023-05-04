@@ -1,17 +1,17 @@
 import { Options } from '@mikro-orm/core';
 import { TSMigrationGenerator } from '@mikro-orm/migrations';
-import { config } from 'dotenv';
 import CONSTANTS from '../src/common/constants/constants.const';
+import * as dotenv from 'dotenv';
 
-const dbConfig = config({ path: '.env' }).parsed;
+dotenv.config();
 
-const MikroOrmConfig: Options = {
+const mikroOrmConfig: Options = {
     type: 'postgresql',
-    host: dbConfig.WHS_DB_HOST,
-    port: +dbConfig.WHS_DB_PORT,
-    user: dbConfig.WHS_DB_USER,
-    password: dbConfig.WHS_DB_PASSWORD,
-    dbName: dbConfig.WHS_DB,
+    host: process.env.WHS_DB_HOST,
+    port: +process.env.WHS_DB_PORT,
+    user: process.env.WHS_DB_USER,
+    password: process.env.WHS_DB_PASSWORD,
+    dbName: process.env.WHS_DB,
     entities: CONSTANTS.entities,
     migrations: {
         tableName: 'micro_orm_migrations',
@@ -23,10 +23,10 @@ const MikroOrmConfig: Options = {
         allOrNothing: true, // wrap all migrations in master transaction
         dropTables: true, // allow to disable table dropping
         safe: false, // allow to disable table and column dropping
-        // snapshot: true, // save snapshot when creating new migrations
+        snapshot: false,
         emit: 'ts', // migration generation mode
         generator: TSMigrationGenerator, // migration generator, e.g. to allow custom formatting
     },
 };
 
-export default MikroOrmConfig;
+export default mikroOrmConfig;

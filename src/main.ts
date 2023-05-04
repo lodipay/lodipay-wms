@@ -10,7 +10,7 @@ import winstonLoggerService from './common/services/winston-logger.service';
 async function bootstrap() {
     const app = await NestFactory.create(AppModule, {
         logger:
-            process.env.LOG_TRANSPORT === 'dev' ? winstonLoggerService : false,
+            process.env.LOG_TRANSPORT === 'file' ? winstonLoggerService : false,
     });
     const configService = app.get<ConfigService>(ConfigService);
     const mainConfig = configService.get(CONFIG_NAME_MAIN) as MainConfig;
