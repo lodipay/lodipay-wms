@@ -1,18 +1,26 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { WarehouseService } from './warehouse.service';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { CreateWarehouseDto } from './dto/create-warehouse.dto';
 import { UpdateWarehouseDto } from './dto/update-warehouse.dto';
+import { Warehouse } from './entities/warehouse.entity';
+import { WarehouseService } from './warehouse.service';
 
-@Controller('warehouse')
+@Controller('warehouses')
 export class WarehouseController {
   constructor(private readonly warehouseService: WarehouseService) {}
 
   @Post()
-  create(@Body() createWarehouseDto: CreateWarehouseDto) {
-    return this.warehouseService.create(createWarehouseDto);
+  @ApiCreatedResponse({ type: Warehouse })
+  create(@Body() dto: CreateWarehouseDto) {
+    return this.warehouseService.create(dto);
   }
 
   @Get()
+  @ApiOkResponse({
+    description: 'Returns all warehouses',
+    type: Warehouse,
+    isArray: true,
+  })
   findAll() {
     return this.warehouseService.findAll();
   }
