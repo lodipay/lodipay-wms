@@ -17,9 +17,14 @@ variables:
   GITLAB_TOKEN: ${NPM_ACCESS_TOKEN}
 
 stages:
+  - lint
   - test
   - release
 
+lint:commit:
+  stage: lint
+  script:
+    - echo "${CI_COMMIT_MESSAGE}" | npx commitlint
 test:
   stage: test
   before_script:
