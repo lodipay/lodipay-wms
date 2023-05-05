@@ -6,6 +6,7 @@ import { VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CONFIG_NAME_MAIN, MainConfig } from '../config/MainConfig';
 import { LoggerFactory } from './common/factory/logger.factory';
+import helmet from 'helmet';
 
 async function bootstrap() {
     const logOptions = process.env.LOG_OPTIONS;
@@ -15,6 +16,7 @@ async function bootstrap() {
             logOptions ? JSON.parse(logOptions) : null,
         ),
     });
+    await app.use(helmet);
     const configService = app.get<ConfigService>(ConfigService);
     const mainConfig = configService.get(CONFIG_NAME_MAIN) as MainConfig;
 
