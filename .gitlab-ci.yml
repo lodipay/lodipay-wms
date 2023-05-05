@@ -25,13 +25,13 @@ lint:commit:
 
 test:
   stage: test
+  coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
   before_script:
     - npm install
   script:
     - npm run test
     - npm run test:e2e
     - npm run test:cov
-  coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
   artifacts:
     when: always
     reports:
