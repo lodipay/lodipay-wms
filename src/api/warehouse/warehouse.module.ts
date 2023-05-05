@@ -1,8 +1,8 @@
-import { Module } from '@nestjs/common';
-import { WarehouseService } from './warehouse.service';
-import { WarehouseController } from './warehouse.controller';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { Module } from '@nestjs/common';
 import { Warehouse } from './entities/warehouse.entity';
+import { WarehouseController } from './warehouse.controller';
+import { WarehouseService } from './warehouse.service';
 
 @Module({
   controllers: [WarehouseController],

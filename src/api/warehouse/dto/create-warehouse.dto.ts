@@ -1,12 +1,17 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 
 export class CreateWarehouseDto {
+  /**
+   * Warehouse name
+   * @example WH1
+   */
   @IsString()
-  @ApiProperty({ example: 'WH1', description: 'Warehouse name' })
   readonly name: string;
 
+  /**
+   * Warehouse description
+   * @example 'Warehouse 1'
+   */
   @IsString()
-  @ApiProperty({ example: 'warehouse 1', description: 'Warehouse description' })
   readonly description: string;
 }

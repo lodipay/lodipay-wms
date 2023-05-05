@@ -25,7 +25,7 @@ export class WarehouseService {
   }
 
   findOne(id: number): Promise<Warehouse> {
-    return this.warehouseRepository.findOneOrFail({ id });
+    return this.warehouseRepository.findOne({ id });
   }
 
   async update(id: number, updateWarehouseDto: UpdateWarehouseDto): Promise<Warehouse> {

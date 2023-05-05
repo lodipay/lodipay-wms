@@ -1,17 +1,29 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
-import { ApiProperty } from '@nestjs/swagger';
+import { Entity, PrimaryKey, Property, Unique } from '@mikro-orm/core';
 
 @Entity()
 export class Warehouse {
+  /**
+   * Warehouse id
+   * @example '100'
+   */
   @PrimaryKey()
   id: number;
 
+  /**
+   * Warehouse name
+   *
+   * @example 'WH1'
+   */
   @Property()
-  @ApiProperty({ example: 'WH1', description: 'Warehouse name' })
+  @Unique()
   name: string;
 
+  /**
+   * Warehouse description
+   *
+   * @example 'warehouse 1'
+   */
   @Property()
-  @ApiProperty({ example: 'warehouse 1', description: 'Warehouse description' })
   description: string;
 
   constructor(name: string, description: string) {
