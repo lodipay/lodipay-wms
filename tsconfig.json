@@ -18,5 +18,5 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false
   },
-  "include": ["src", "config", "public", "libs", "types"]
+  "include": ["src", "config", "public", "libs", "types", "test"]
 }
