@@ -13,3 +13,6 @@ dist
 /var/log*
 
 .snapshot-whs.json
+
+junit.xml
+coverage
