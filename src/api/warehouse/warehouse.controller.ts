@@ -2,6 +2,16 @@ import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/commo
 import { ApiTags } from '@nestjs/swagger';
 import { ApiGenericListResponse } from 'src/common/decorator/api-generic-list-response.decorator';
 import { ApiGenericResponse } from 'src/common/decorator/api-generic-response.decorator';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
+import { WarehouseService } from './warehouse.service';
 import { CreateWarehouseDto } from './dto/create-warehouse.dto';
 import { UpdateWarehouseDto } from './dto/update-warehouse.dto';
 import { Warehouse } from './entities/warehouse.entity';
@@ -31,9 +41,11 @@ export class WarehouseController {
   }
 
   @Patch(':id')
-  @ApiGenericResponse(Warehouse)
-  update(@Param('id') id: string, @Body() updateWarehouseDto: UpdateWarehouseDto) {
-    return this.warehouseService.update(parseInt(id), updateWarehouseDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateWarehouseDto: UpdateWarehouseDto,
+  ) {
+    return this.warehouseService.update(+id, updateWarehouseDto);
   }
 
   @Delete(':id')
