@@ -44,6 +44,6 @@ release:
   before_script:
     - cp .gitlab/npmrc .npmrc
   script:
-    - semantic-release
+    - npx run semantic-release
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
