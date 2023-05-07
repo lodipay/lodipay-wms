@@ -17,14 +17,9 @@ COPY . .
 
 # Install dependencies from package-lock.json, see https://docs.npmjs.com/cli/v7/commands/npm-ci
 RUN npm ci
+RUN chmod +x ./start_dev.sh
 
-# Copy application sources (.ts, .tsx, js)
-COPY src/ src/
-
-# Build application (produces dist/ folder)
-# RUN npm run build
-
-CMD [ "npm", "run", "start:dev" ]
+ENTRYPOINT [ "bash", "-c", "./start_dev.sh" ]
 
 # Runtime (production) layer
 FROM node:20-alpine as production
