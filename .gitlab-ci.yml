@@ -21,6 +21,10 @@ lint:commit:
   stage: lint
   script:
     - echo "${CI_COMMIT_MESSAGE}" | npx commitlint
+
+lint:code:
+  stage: lint
+  script:
     - npm run lint
 
 test:
