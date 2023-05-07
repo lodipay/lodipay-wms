@@ -80,7 +80,12 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "coverageReporters": ["html", "text", "text-summary", "cobertura"],
+    "coverageReporters": [
+      "html",
+      "text",
+      "text-summary",
+      "cobertura"
+    ],
     "testEnvironment": "node",
     "coverageThreshold": {
       "global": {
@@ -95,6 +100,24 @@
     "useTsNode": true,
     "configPaths": [
       "./config/microOrmConfig.ts"
+    ]
+  },
+  "release": {
+    "branches": [
+      "main"
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/npm",
+      "@semantic-release/gitlab",
+      [
+        "@semantic-release/git",
+        {
+          "asset": ["package.json"],
+          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        }
+      ]
     ]
   }
 }
