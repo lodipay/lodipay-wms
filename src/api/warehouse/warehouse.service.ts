@@ -1,4 +1,5 @@
 import { EntityRepository, wrap } from '@mikro-orm/core';
+import { EntityManager } from '@mikro-orm/knex';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
 import { CreateWarehouseDto } from './dto/create-warehouse.dto';
@@ -10,12 +11,13 @@ export class WarehouseService {
   constructor(
     @InjectRepository(Warehouse)
     private readonly warehouseRepository: EntityRepository<Warehouse>,
+    private readonly em: EntityManager,
   ) {}
 
   async create(dto: CreateWarehouseDto): Promise<Warehouse> {
     const warehouse = new Warehouse(dto.name, dto.description);
 
-    await this.warehouseRepository.persistAndFlush(warehouse);
+    this.em.persistAndFlush(warehouse);
 
     return warehouse;
   }
@@ -31,12 +33,19 @@ export class WarehouseService {
   async update(id: number, updateWarehouseDto: UpdateWarehouseDto): Promise<Warehouse> {
     const warehouse = await this.findOne(id);
     wrap(warehouse).assign(updateWarehouseDto);
-    await this.warehouseRepository.persistAndFlush(warehouse);
+
+    await this.em.persistAndFlush(warehouse);
 
     return warehouse;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} warehouse`;
+  async remove(id: number) {
+    const warehouse = await this.findOne(id);
+
+    if (warehouse) {
+      await this.em.removeAndFlush(warehouse);
+    }
+
+    return 'success';
   }
 }

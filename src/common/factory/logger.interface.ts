@@ -1,4 +1,4 @@
-import { LogLevel, LoggerService } from '@nestjs/common';
+import { LoggerService, LogLevel } from '@nestjs/common';
 
 export interface LoggerInterface {
   create(transport: string, options): LoggerService | boolean | LogLevel;
