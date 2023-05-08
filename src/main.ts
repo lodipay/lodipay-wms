@@ -1,11 +1,10 @@
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 import { ConfigService } from '@nestjs/config';
 import { CONFIG_NAME_MAIN, MainConfig } from '../config/MainConfig';
-import { GenericResponseDto } from './common/dto/generic-response.dto';
 import { LoggerFactory } from './common/factory/logger.factory';
 
 async function bootstrap() {
