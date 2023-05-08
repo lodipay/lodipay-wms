@@ -90,7 +90,6 @@ describe('WarehouseService', () => {
 
     jest.spyOn(em, 'assign').mockImplementation((obj1: Warehouse, obj2: Warehouse) => {
       const mergedObj = Object.assign({}, obj1, obj2);
-      console.log(mergedObj, obj1, obj2);
       obj1.id = mergedObj.id;
       obj1.name = mergedObj.name;
       obj1.description = mergedObj.description;
