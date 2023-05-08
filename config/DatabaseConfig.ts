@@ -1,4 +1,3 @@
-import { TSMigrationGenerator } from '@mikro-orm/migrations';
 import { MikroOrmModuleOptions, MikroOrmOptionsFactory } from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
 import mikroOrmConfig from './microOrmConfig';

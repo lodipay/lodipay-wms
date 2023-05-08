@@ -1,11 +1,10 @@
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 import { ConfigService } from '@nestjs/config';
 import { CONFIG_NAME_MAIN, MainConfig } from '../config/MainConfig';
-import { GenericResponseDto } from './common/dto/generic-response.dto';
 import { LoggerFactory } from './common/factory/logger.factory';
 
 async function bootstrap() {
@@ -20,18 +19,10 @@ async function bootstrap() {
     type: VersioningType.URI,
     prefix: 'v1',
   });
-
-  app.useGlobalPipes(
-    new ValidationPipe({
-      enableDebugMessages: true,
-      disableErrorMessages: false,
-    }),
-  );
+  app.setGlobalPrefix('v1');
 
   const config = new DocumentBuilder().setTitle('Lodi WHS').setDescription('Lodi warehouse system').setVersion('1.0').addTag('cats').build();
-  const document = SwaggerModule.createDocument(app, config, {
-    extraModels: [GenericResponseDto],
-  });
+  const document = SwaggerModule.createDocument(app, config);
   const swaggerPath = 'swagger';
   SwaggerModule.setup(swaggerPath, app, document);
 
