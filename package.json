@@ -9,7 +9,8 @@
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
-    "start:dev": "npm start -- --watch",
+    "start:watch": "npm start -- --watch",
+    "start:dev": "npm run build && npm run database:prepare && npm run start:watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
@@ -19,7 +20,10 @@
     "test:cov": "jest --coverage --ci --reporters=default --reporters=jest-junit --watchAll=false",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "semantic-release": "semantic-release"
+    "semantic-release": "semantic-release",
+    "migration:up": "npx mikro-orm migration:up",
+    "seeder:run": "npx mikro-orm seeder:run",
+    "database:prepare": "npx mikro-orm migration:fresh --seed"
   },
   "dependencies": {
     "@mikro-orm/cli": "^5.7.4",

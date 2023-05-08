@@ -17,9 +17,8 @@ COPY . .
 
 # Install dependencies from package-lock.json, see https://docs.npmjs.com/cli/v7/commands/npm-ci
 RUN npm ci
-RUN chmod +x ./start_dev.sh
 
-ENTRYPOINT [ "bash", "-c", "./start_dev.sh" ]
+CMD [ "npm", "run", "start:dev" ]
 
 # Runtime (production) layer
 FROM node:20-alpine as production
