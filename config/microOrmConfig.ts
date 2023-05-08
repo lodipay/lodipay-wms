@@ -31,7 +31,7 @@ const mikroOrmConfig: Options = {
     path: 'dist/src/database/seeders', // path to the folder with seeders
     pathTs: 'src/database/seeders', // path to the folder with TS seeders (if used, we should put path to compiled files in `path`)
     // defaultSeeder: 'DatabaseSeeder', // default seeder class name
-    glob: '!(*.d).seeder.{js,ts}', // how to match seeder files (all .js and .ts files, but not .d.ts)
+    glob: '!(*.d).{js,ts}', // how to match seeder files (all .js and .ts files, but not .d.ts)
     emit: 'ts', // seeder generation mode
     fileName: (className: string) => className, // seeder file naming convention
   },
