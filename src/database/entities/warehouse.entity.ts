@@ -1,4 +1,5 @@
-import { Entity, PrimaryKey, Property, Unique } from '@mikro-orm/core';
+import { Collection, Entity, OneToMany, PrimaryKey, Property, Unique } from '@mikro-orm/core';
+import { Location } from './location.entity';
 
 @Entity()
 export class Warehouse {
@@ -25,6 +26,9 @@ export class Warehouse {
    */
   @Property()
   description: string;
+
+  @OneToMany({ entity: () => Location, mappedBy: 'warehouse', orphanRemoval: true })
+  locations = new Collection<Location>(this);
 
   constructor(name: string, description: string) {
     this.name = name;
