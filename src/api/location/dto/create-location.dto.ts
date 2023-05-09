@@ -1,19 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { Expose, Type } from 'class-transformer';
-import { IsOptional, IsString } from 'class-validator';
-import { Warehouse } from '../../warehouse/entities/warehouse.entity';
+import { IsNumber, IsString } from 'class-validator';
 
 export class CreateLocationDto {
-  @ApiProperty()
   @IsString()
   code: string;
 
-  @Type(() => Warehouse)
-  @Expose()
-  warehouse: Warehouse;
+  @IsNumber()
+  warehouseId: number;
 
-  @ApiProperty()
   @IsString()
-  @IsOptional()
-  description: string;
+  description?: string;
 }

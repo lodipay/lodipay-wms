@@ -1,5 +1,5 @@
 import { Entity, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/core';
-import { Warehouse } from '../../api/warehouse/entities/warehouse.entity';
+import { Warehouse } from './warehouse.entity';
 
 @Entity()
 export class Location {

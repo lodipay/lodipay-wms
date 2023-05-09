@@ -2,9 +2,9 @@ import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/commo
 import { ApiTags } from '@nestjs/swagger';
 import { ApiGenericListResponse } from '../../common/decorator/api-generic-list-response.decorator';
 import { ApiGenericResponse } from '../../common/decorator/api-generic-response.decorator';
+import { Warehouse } from '../../database/entities/warehouse.entity';
 import { CreateWarehouseDto } from './dto/create-warehouse.dto';
 import { UpdateWarehouseDto } from './dto/update-warehouse.dto';
-import { Warehouse } from './entities/warehouse.entity';
 import { WarehouseService } from './warehouse.service';
 
 @Controller('warehouses')

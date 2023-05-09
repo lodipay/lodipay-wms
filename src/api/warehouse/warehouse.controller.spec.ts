@@ -1,9 +1,9 @@
 import { Collection, EntityManager } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { Test, TestingModule } from '@nestjs/testing';
+import { Warehouse } from '../../database/entities/warehouse.entity';
 import { CreateWarehouseDto } from './dto/create-warehouse.dto';
 import { UpdateWarehouseDto } from './dto/update-warehouse.dto';
-import { Warehouse } from './entities/warehouse.entity';
 import { WarehouseController } from './warehouse.controller';
 import { WarehouseService } from './warehouse.service';
 

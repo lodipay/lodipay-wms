@@ -1,8 +1,8 @@
 import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { Test, TestingModule } from '@nestjs/testing';
+import { Warehouse } from '../../database/entities/warehouse.entity';
 import { CreateWarehouseDto } from './dto/create-warehouse.dto';
-import { Warehouse } from './entities/warehouse.entity';
 import { WarehouseService } from './warehouse.service';
 
 describe('WarehouseService', () => {

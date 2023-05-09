@@ -1,7 +1,8 @@
+import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
 import { Location } from '../../database/entities/location.entity';
+import { Warehouse } from '../../database/entities/warehouse.entity';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
 
@@ -9,11 +10,14 @@ import { UpdateLocationDto } from './dto/update-location.dto';
 export class LocationService {
   constructor(
     @InjectRepository(Location) private readonly locationRepository: EntityRepository<Location>,
+    @InjectRepository(Warehouse) private readonly warehouseRepository: EntityRepository<Warehouse>,
 
     private readonly em: EntityManager,
   ) {}
 
-  async create({ code, warehouse, description }: CreateLocationDto) {
+  async create({ code, warehouseId, description }: CreateLocationDto) {
+    const warehouse = await this.warehouseRepository.findOne(warehouseId);
+
     const location = new Location(code, warehouse, description);
 
     return await this.locationRepository.upsert(location);
@@ -44,6 +48,6 @@ export class LocationService {
       await this.em.removeAndFlush(location);
     }
 
-    return 'success';
+    return 'deleted';
   }
 }

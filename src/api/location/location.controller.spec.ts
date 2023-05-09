@@ -1,8 +1,8 @@
+import { EntityManager } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
-import { EntityManager } from '@mikro-orm/postgresql';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Location } from '../../database/entities/location.entity';
-import { Warehouse } from '../warehouse/entities/warehouse.entity';
+import { Warehouse } from '../../database/entities/warehouse.entity';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { LocationController } from './location.controller';
 import { LocationService } from './location.service';
@@ -21,6 +21,10 @@ describe('LocationController', () => {
           useValue: jest.fn(),
         },
         {
+          provide: getRepositoryToken(Warehouse.name),
+          useValue: jest.fn(),
+        },
+        {
           provide: EntityManager,
           useFactory: jest.fn(() => ({
             flush: jest.fn(),
@@ -34,14 +38,17 @@ describe('LocationController', () => {
   });
 
   it('it should create new location', async () => {
+    const warehouse = new Warehouse('WH1', 'WH1 description');
+    warehouse.id = 1;
     const locationData = {
       code: 'abc',
       description: 'abc description',
-      warehouse: new Warehouse('WH1', 'WH1 description'),
+      warehouseId: 1,
     };
     jest.spyOn(service, 'create').mockImplementation((dto: CreateLocationDto) => {
-      const location = new Location(dto.code, dto.warehouse, dto.description);
+      const location = new Location(dto.code, warehouse, dto.description);
       location.id = 1;
+      location.warehouse = warehouse;
       return Promise.resolve(location);
     });
 
@@ -49,7 +56,9 @@ describe('LocationController', () => {
     expect(result).toBeInstanceOf(Location);
     expect(result).toEqual({
       id: 1,
-      ...locationData,
+      code: locationData.code,
+      description: locationData.description,
+      warehouse: warehouse,
     });
   });
 
@@ -75,7 +84,7 @@ describe('LocationController', () => {
     const locationData = new Location('location 1', new Warehouse('WH1', 'WH1 description'), 'location 1 description');
     locationData.id = 1;
 
-    jest.spyOn(service, 'update').mockImplementation((id: number, dto: CreateLocationDto) => {
+    jest.spyOn(service, 'update').mockImplementation(() => {
       return Promise.resolve(locationData);
     });
     expect(await controller.update('1', locationData)).toBe(locationData);

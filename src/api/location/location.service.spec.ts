@@ -1,8 +1,8 @@
+import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
-import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Location } from '../../database/entities/location.entity';
-import { Warehouse } from '../warehouse/entities/warehouse.entity';
+import { Warehouse } from '../../database/entities/warehouse.entity';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { LocationService } from './location.service';
 
@@ -32,6 +32,14 @@ describe('LocationService', () => {
             upsert: jest.fn(),
           })),
         },
+        {
+          provide: getRepositoryToken(Warehouse),
+          useFactory: jest.fn(() => ({
+            findAll: jest.fn(),
+            findOne: jest.fn(),
+            upsert: jest.fn(),
+          })),
+        },
       ],
     }).compile();
 
@@ -42,9 +50,10 @@ describe('LocationService', () => {
 
   it('it should create new location', async () => {
     const warehouse = new Warehouse('WH1', 'WH1 description');
+    warehouse.id = 1;
 
-    const dto: CreateLocationDto = { code: 'location-1-code', description: 'location description', warehouse };
-    const result = new Location(dto.code, dto.warehouse, dto.description);
+    const dto: CreateLocationDto = { code: 'location-1-code', description: 'location description', warehouseId: warehouse.id };
+    const result = new Location(dto.code, warehouse, dto.description);
 
     jest.spyOn(repository, 'upsert').mockImplementation((obj: Location) => {
       result.id = obj.id = 1;
@@ -119,6 +128,6 @@ describe('LocationService', () => {
       return Promise.resolve(result);
     });
 
-    expect(await service.remove(1)).toStrictEqual('success');
+    expect(await service.remove(1)).toStrictEqual('deleted');
   });
 });
