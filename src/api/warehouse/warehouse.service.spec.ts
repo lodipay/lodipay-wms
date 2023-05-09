@@ -55,7 +55,7 @@ describe('WarehouseService', () => {
   it('findAll', async () => {
     const result = [new Warehouse('WH1', 'WH1 description'), new Warehouse('WH2', 'WH2 description')];
 
-    jest.spyOn(repository, 'findAll').mockImplementation(() => {
+    jest.spyOn(repository, 'findAll').mockImplementation((): any => {
       return Promise.resolve(result);
     });
 
@@ -66,7 +66,7 @@ describe('WarehouseService', () => {
     const result = new Warehouse('WH1', 'WH1 description');
     result.id = 3;
 
-    jest.spyOn(repository, 'findOne').mockImplementation((options: any) => {
+    jest.spyOn(repository, 'findOne').mockImplementation((options: any): any => {
       expect(options.id).toBe(result.id);
       return Promise.resolve(result);
     });
@@ -111,7 +111,7 @@ describe('WarehouseService', () => {
     const result = new Warehouse('WH1', 'WH1 description');
     result.id = 3;
 
-    jest.spyOn(repository, 'findOne').mockImplementation((options: any) => {
+    jest.spyOn(repository, 'findOne').mockImplementation((options: any): any => {
       expect(options.id).toBe(result.id);
       return Promise.resolve(result);
     });

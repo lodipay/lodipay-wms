@@ -36,7 +36,7 @@ export class WarehouseController {
   }
 
   @Delete(':id')
-  @ApiGenericResponse()
+  @ApiGenericResponse('string')
   remove(@Param('id') id: string) {
     return this.warehouseService.remove(parseInt(id));
   }

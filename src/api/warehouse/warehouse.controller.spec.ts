@@ -1,4 +1,4 @@
-import { EntityManager } from '@mikro-orm/core';
+import { Collection, EntityManager } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateWarehouseDto } from './dto/create-warehouse.dto';
@@ -49,12 +49,12 @@ describe('WarehouseController', () => {
     });
 
     const result = await controller.create(data);
-
     expect(result).toBeInstanceOf(Warehouse);
-    expect(result).toEqual({
-      id: 1,
-      ...data,
-    });
+    expect(result.id).toBe(1);
+    expect(result.name).toBe(data.name);
+    expect(result.description).toBe(data.description);
+    expect(result.locations).toBeInstanceOf(Collection<Location>);
+    expect(result.locations).toHaveLength(0);
   });
 
   it('findAll', async () => {
