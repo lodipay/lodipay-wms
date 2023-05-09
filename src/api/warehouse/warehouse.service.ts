@@ -1,5 +1,4 @@
-import { EntityRepository, wrap } from '@mikro-orm/core';
-import { EntityManager } from '@mikro-orm/knex';
+import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
 import { CreateWarehouseDto } from './dto/create-warehouse.dto';
@@ -17,7 +16,7 @@ export class WarehouseService {
   async create(dto: CreateWarehouseDto): Promise<Warehouse> {
     const warehouse = new Warehouse(dto.name, dto.description);
 
-    this.em.persistAndFlush(warehouse);
+    await this.em.persistAndFlush(warehouse);
 
     return warehouse;
   }
@@ -32,7 +31,7 @@ export class WarehouseService {
 
   async update(id: number, updateWarehouseDto: UpdateWarehouseDto): Promise<Warehouse> {
     const warehouse = await this.findOne(id);
-    wrap(warehouse).assign(updateWarehouseDto);
+    this.em.assign(warehouse, updateWarehouseDto, { mergeObjects: true });
 
     await this.em.persistAndFlush(warehouse);
 
