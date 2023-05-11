@@ -1,6 +1,7 @@
 import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { Test, TestingModule } from '@nestjs/testing';
+import { getEntityManagerMockConfig, getRepositoryMockConfig } from '../../common/mock';
 import { Lock } from '../../database/entities/lock.entity';
 import { LockService } from './lock.service';
 
@@ -13,25 +14,7 @@ describe('LockService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        LockService,
-        {
-          provide: EntityManager,
-          useFactory: jest.fn(() => ({
-            flush: jest.fn(),
-            persistAndFlush: jest.fn(),
-            removeAndFlush: jest.fn(),
-            assign: jest.fn(),
-          })),
-        },
-        {
-          provide: getRepositoryToken(Lock),
-          useFactory: jest.fn(() => ({
-            findAll: jest.fn(),
-            findOne: jest.fn(),
-          })),
-        },
-      ],
+      providers: [LockService, getEntityManagerMockConfig(), getRepositoryMockConfig(Lock)],
     }).compile();
 
     service = module.get<LockService>(LockService);
@@ -58,7 +41,10 @@ describe('LockService', () => {
   });
 
   it('findAll', async () => {
-    const result = [new Lock('E-commerce', yesterday, tomorrow), new Lock('Deliver to warehouse 1', yesterday, tomorrow)];
+    const result = [
+      new Lock('E-commerce', yesterday, tomorrow),
+      new Lock('Deliver to warehouse 1', yesterday, tomorrow),
+    ];
 
     jest.spyOn(repository, 'findAll').mockImplementation((): any => {
       return Promise.resolve(result);

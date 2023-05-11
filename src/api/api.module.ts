@@ -7,4 +7,4 @@ import { WarehouseModule } from './warehouse/warehouse.module';
 @Module({
   imports: [WarehouseModule, LocationModule, InventoryModule, LockModule],
 })
-export class ApiModule { }
+export class ApiModule {}

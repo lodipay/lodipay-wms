@@ -1,4 +1,13 @@
-import { Collection, Entity, Filter, ManyToOne, OneToMany, PrimaryKey, Property, Unique } from '@mikro-orm/core';
+import {
+  Collection,
+  Entity,
+  Filter,
+  ManyToOne,
+  OneToMany,
+  PrimaryKey,
+  Property,
+  Unique,
+} from '@mikro-orm/core';
 
 @Entity()
 @Filter({ name: 'mainFilter', cond: args => args })

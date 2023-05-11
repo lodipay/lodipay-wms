@@ -27,7 +27,11 @@ export class Warehouse {
   @Property()
   description: string;
 
-  @OneToMany({ entity: () => Location, mappedBy: 'warehouse', orphanRemoval: true })
+  @OneToMany({
+    entity: () => Location,
+    mappedBy: 'warehouse',
+    orphanRemoval: true,
+  })
   locations = new Collection<Location>(this);
 
   constructor(name: string, description: string) {

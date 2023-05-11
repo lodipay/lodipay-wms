@@ -1,6 +1,6 @@
-import { Collection, EntityManager } from '@mikro-orm/core';
-import { getRepositoryToken } from '@mikro-orm/nestjs';
+import { Collection } from '@mikro-orm/core';
 import { Test, TestingModule } from '@nestjs/testing';
+import { getEntityManagerMockConfig, getRepositoryMockConfig } from '../../common/mock';
 import { Warehouse } from '../../database/entities/warehouse.entity';
 import { CreateWarehouseDto } from './dto/create-warehouse.dto';
 import { UpdateWarehouseDto } from './dto/update-warehouse.dto';
@@ -16,19 +16,8 @@ describe('WarehouseController', () => {
       controllers: [WarehouseController],
       providers: [
         WarehouseService,
-        {
-          provide: EntityManager,
-          useFactory: jest.fn(() => ({
-            flush: jest.fn(),
-          })),
-        },
-        {
-          provide: getRepositoryToken(Warehouse),
-          useFactory: jest.fn(() => ({
-            findAll: jest.fn(),
-            findOne: jest.fn(),
-          })),
-        },
+        getEntityManagerMockConfig(),
+        getRepositoryMockConfig(Warehouse),
       ],
     }).compile();
 
@@ -58,7 +47,10 @@ describe('WarehouseController', () => {
   });
 
   it('findAll', async () => {
-    const result = [new Warehouse('WH1', 'WH1 description'), new Warehouse('WH2', 'WH2 description')];
+    const result = [
+      new Warehouse('WH1', 'WH1 description'),
+      new Warehouse('WH2', 'WH2 description'),
+    ];
     jest.spyOn(warehouseService, 'findAll').mockImplementation(() => Promise.resolve(result));
     expect(await controller.findAll()).toBe(result);
   });

@@ -32,8 +32,8 @@ export class FilterService {
     );
 
     const paginatedDto = new PaginatedDto();
-    paginatedDto.limit = limit;
-    paginatedDto.page = page;
+    paginatedDto.limit = +limit;
+    paginatedDto.page = +page;
     paginatedDto.total = count;
     paginatedDto.result = result;
     paginatedDto.totalPage = Math.ceil(count / limit);

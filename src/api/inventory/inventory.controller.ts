@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { ApiPaginatedResponse } from 'src/common/decorator/api-paginated-response.decorator';
+import { ApiPaginatedResponse } from '../../common/decorator/api-paginated-response.decorator';
 import { FilterDto } from '../../common/dto/filter.dto';
 import { Inventory } from '../../database/entities/inventory.entity';
 import { CreateInventoryDto } from './dto/create-inventory.dto';

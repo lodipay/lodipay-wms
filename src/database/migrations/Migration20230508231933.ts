@@ -4,7 +4,9 @@ export class Migration20230508231933 extends Migration {
   async up(): Promise<void> {
     this.addSql('alter table "location" add column "warehouse_id" int not null;');
     this.addSql('alter table "location" drop constraint "location_name_unique";');
-    this.addSql('alter table "location" add constraint "location_warehouse_id_foreign" foreign key ("warehouse_id") references "warehouse" ("id") on update cascade;');
+    this.addSql(
+      'alter table "location" add constraint "location_warehouse_id_foreign" foreign key ("warehouse_id") references "warehouse" ("id") on update cascade;',
+    );
     this.addSql('alter table "location" rename column "name" to "code";');
     this.addSql('alter table "location" add constraint "location_code_unique" unique ("code");');
   }

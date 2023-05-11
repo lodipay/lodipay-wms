@@ -1,6 +1,6 @@
 import { QueryOrder } from '@mikro-orm/core';
 import { ApiProperty } from '@nestjs/swagger';
-import { QueryDto } from 'src/common/dto/query.dto';
+import { QueryDto } from '../../common/dto/query.dto';
 
 export class FilterDto {
   @ApiProperty({ required: false, example: '20' })

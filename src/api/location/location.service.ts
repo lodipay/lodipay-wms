@@ -9,8 +9,10 @@ import { UpdateLocationDto } from './dto/update-location.dto';
 @Injectable()
 export class LocationService {
   constructor(
-    @InjectRepository(Location) private readonly locationRepository: EntityRepository<Location>,
-    @InjectRepository(Warehouse) private readonly warehouseRepository: EntityRepository<Warehouse>,
+    @InjectRepository(Location)
+    private readonly locationRepository: EntityRepository<Location>,
+    @InjectRepository(Warehouse)
+    private readonly warehouseRepository: EntityRepository<Warehouse>,
 
     private readonly em: EntityManager,
   ) {}

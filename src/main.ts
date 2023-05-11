@@ -14,7 +14,10 @@ import { LoggerFactory } from './common/factory/logger.factory';
 async function bootstrap() {
   const logOptions = process.env.LOG_OPTIONS;
   const app = await NestFactory.create(AppModule, {
-    logger: LoggerFactory.create(process.env.LOG_TRANSPORT, logOptions ? JSON.parse(logOptions) : null),
+    logger: LoggerFactory.create(
+      process.env.LOG_TRANSPORT,
+      logOptions ? JSON.parse(logOptions) : null,
+    ),
   });
 
   app.useGlobalPipes(
@@ -32,7 +35,12 @@ async function bootstrap() {
   });
   app.setGlobalPrefix('v1');
 
-  const config = new DocumentBuilder().setTitle('Lodi WHS').setDescription('Lodi warehouse system').setVersion('1.0').addTag('cats').build();
+  const config = new DocumentBuilder()
+    .setTitle('Lodi WHS')
+    .setDescription('Lodi warehouse system')
+    .setVersion('1.0')
+    .addTag('cats')
+    .build();
   const document = SwaggerModule.createDocument(app, config, {
     extraModels: [GenericResponseDto, PaginatedDto, FilterDto, QueryDto],
   });

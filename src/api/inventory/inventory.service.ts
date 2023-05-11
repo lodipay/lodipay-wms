@@ -1,7 +1,7 @@
 import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
-import { FilterDto } from 'src/common/dto/filter.dto';
+import { FilterDto } from '../../common/dto/filter.dto';
 import { FilterService } from '../../common/service/filter.service';
 import { Inventory } from '../../database/entities/inventory.entity';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
@@ -10,7 +10,8 @@ import { UpdateInventoryDto } from './dto/update-inventory.dto';
 @Injectable()
 export class InventoryService {
   constructor(
-    @InjectRepository(Inventory) private readonly inventoryRepository: EntityRepository<Inventory>,
+    @InjectRepository(Inventory)
+    private readonly inventoryRepository: EntityRepository<Inventory>,
     private readonly em: EntityManager,
     private readonly filterService: FilterService,
   ) {}
@@ -28,14 +29,23 @@ export class InventoryService {
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} inventory`;
+    return this.inventoryRepository.findOne({ id });
   }
 
-  update(id: number, updateInventoryDto: UpdateInventoryDto) {
-    return `This action updates a #${id} inventory`;
+  async update(id: number, updateInventoryDto: UpdateInventoryDto) {
+    const entity = await this.findOne(id);
+    this.em.assign(entity, updateInventoryDto, { mergeObjects: true });
+    await this.em.persistAndFlush(entity);
+
+    return entity;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} inventory`;
+  async remove(id: number) {
+    const entity = await this.findOne(id);
+    if (entity) {
+      this.em.removeAndFlush(entity);
+    }
+
+    return 'deleted';
   }
 }

@@ -63,7 +63,11 @@ describe('LockController', () => {
   });
 
   it('findOne', async () => {
-    const result = new Lock('E-commerce', new Date(Date.now() - 1000 * 60 * 60 * 24), new Date(Date.now()));
+    const result = new Lock(
+      'E-commerce',
+      new Date(Date.now() - 1000 * 60 * 60 * 24),
+      new Date(Date.now()),
+    );
     jest.spyOn(lockService, 'findOne').mockImplementation((id: number) => {
       result.id = id;
       return Promise.resolve(result);
@@ -72,7 +76,11 @@ describe('LockController', () => {
   });
 
   it('update', async () => {
-    const demoLock = new Lock('E-commerce', new Date(Date.now() - 1000 * 60 * 60 * 24), new Date(Date.now()));
+    const demoLock = new Lock(
+      'E-commerce',
+      new Date(Date.now() - 1000 * 60 * 60 * 24),
+      new Date(Date.now()),
+    );
     const result = demoLock;
     result.id = 1;
 

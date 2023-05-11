@@ -72,7 +72,11 @@ describe('LocationController', () => {
   });
 
   it('should find one location', async () => {
-    const result = new Location('location 1', new Warehouse('WH1', 'WH1 description'), 'location 1 description');
+    const result = new Location(
+      'location 1',
+      new Warehouse('WH1', 'WH1 description'),
+      'location 1 description',
+    );
     jest.spyOn(service, 'findOne').mockImplementation((id: number) => {
       result.id = id;
       return Promise.resolve(result);
@@ -81,7 +85,11 @@ describe('LocationController', () => {
   });
 
   it('should update location', async () => {
-    const locationData = new Location('location 1', new Warehouse('WH1', 'WH1 description'), 'location 1 description');
+    const locationData = new Location(
+      'location 1',
+      new Warehouse('WH1', 'WH1 description'),
+      'location 1 description',
+    );
     locationData.id = 1;
 
     jest.spyOn(service, 'update').mockImplementation(() => {
