@@ -1,6 +1,7 @@
 import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
+import { Destination } from '../../database/entities/destination.entity';
 import { Warehouse } from '../../database/entities/warehouse.entity';
 import { CreateWarehouseDto } from './dto/create-warehouse.dto';
 import { UpdateWarehouseDto } from './dto/update-warehouse.dto';
@@ -10,12 +11,20 @@ export class WarehouseService {
   constructor(
     @InjectRepository(Warehouse)
     private readonly warehouseRepository: EntityRepository<Warehouse>,
+
+    @InjectRepository(Destination)
+    private readonly destinationRepository: EntityRepository<Destination>,
+
     private readonly em: EntityManager,
   ) {}
 
   async create(dto: CreateWarehouseDto): Promise<Warehouse> {
     const warehouse = new Warehouse(dto.name, dto.description);
+    const destination = await this.destinationRepository.findOne({
+      id: dto.destinationId,
+    });
 
+    warehouse.destination = destination;
     await this.em.persistAndFlush(warehouse);
 
     return warehouse;
