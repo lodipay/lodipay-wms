@@ -1,12 +1,12 @@
 import {
   Collection,
   Entity,
-  OneToOne,
   OneToMany,
-  PrimaryKey,
+  OneToOne,
   Property,
   Unique,
 } from '@mikro-orm/core';
+import { Destination } from './destination.entity';
 import { Location } from './location.entity';
 import { ParentEntity } from './parent.entity';
 

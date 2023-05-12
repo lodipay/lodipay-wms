@@ -101,24 +101,34 @@ describe('OrderController', () => {
   it('should find all orders', async () => {
     const result = [order1, order2];
 
-    jest.spyOn(service, 'findAll').mockImplementation(() => Promise.resolve(result));
+    jest
+      .spyOn(service, 'findAll')
+      .mockImplementation(() => Promise.resolve(result));
 
     expect(await controller.findAll()).toBe(result);
   });
 
   it('should update an order', async () => {
     const result = new Order();
-    jest.spyOn(service, 'update').mockImplementation((id: number, dto: UpdateOrderDto) => {
-      (result.name = dto.name), (result.description = dto.description), (result.createdBy = dto.createdBy);
-      result.id = id;
-      result.from = fromDestination;
-      result.to = toDestination;
-      result.createdAt = new Date();
-      result.createdAt = new Date();
-      return Promise.resolve(result);
-    });
+    jest
+      .spyOn(service, 'update')
+      .mockImplementation((id: number, dto: UpdateOrderDto) => {
+        (result.name = dto.name),
+          (result.description = dto.description),
+          (result.createdBy = dto.createdBy);
+        result.id = id;
+        result.from = fromDestination;
+        result.to = toDestination;
+        result.createdAt = new Date();
+        result.createdAt = new Date();
+        return Promise.resolve(result);
+      });
 
-    expect(await controller.update('1', { name: 'order10' })).toBeInstanceOf(Order);
-    expect(await controller.update('1', { name: 'order10' })).toStrictEqual(result);
+    expect(await controller.update('1', { name: 'order10' })).toBeInstanceOf(
+      Order,
+    );
+    expect(await controller.update('1', { name: 'order10' })).toStrictEqual(
+      result,
+    );
   });
 });

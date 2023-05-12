@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { DestinationService } from './destination.service';
 import { CreateDestinationDto } from './dto/create-destination.dto';
@@ -25,7 +33,10 @@ export class DestinationController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateDestinationDto: UpdateDestinationDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateDestinationDto: UpdateDestinationDto,
+  ) {
     return this.destinationService.update(+id, updateDestinationDto);
   }
 

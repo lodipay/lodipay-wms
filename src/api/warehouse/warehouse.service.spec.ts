@@ -25,7 +25,9 @@ describe('WarehouseService', () => {
 
     service = module.get<WarehouseService>(WarehouseService);
     em = module.get<EntityManager>(EntityManager);
-    whRepository = module.get<EntityRepository<Warehouse>>(getRepositoryToken(Warehouse));
+    whRepository = module.get<EntityRepository<Warehouse>>(
+      getRepositoryToken(Warehouse),
+    );
   });
 
   it('create', async () => {
@@ -64,10 +66,12 @@ describe('WarehouseService', () => {
     const result = new Warehouse('WH1', 'WH1 description');
     result.id = 3;
 
-    jest.spyOn(whRepository, 'findOne').mockImplementation((options: any): any => {
-      expect(options.id).toBe(result.id);
-      return Promise.resolve(result);
-    });
+    jest
+      .spyOn(whRepository, 'findOne')
+      .mockImplementation((options: any): any => {
+        expect(options.id).toBe(result.id);
+        return Promise.resolve(result);
+      });
 
     expect(await service.findOne(3)).toStrictEqual(result);
   });
@@ -111,10 +115,12 @@ describe('WarehouseService', () => {
     const result = new Warehouse('WH1', 'WH1 description');
     result.id = 3;
 
-    jest.spyOn(whRepository, 'findOne').mockImplementation((options: any): any => {
-      expect(options.id).toBe(result.id);
-      return Promise.resolve(result);
-    });
+    jest
+      .spyOn(whRepository, 'findOne')
+      .mockImplementation((options: any): any => {
+        expect(options.id).toBe(result.id);
+        return Promise.resolve(result);
+      });
 
     expect(await service.remove(3)).toStrictEqual('success');
   });

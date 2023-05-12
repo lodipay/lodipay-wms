@@ -19,10 +19,15 @@ export class DestinationService {
   ) {}
 
   async create(createDestinationDto: CreateDestinationDto) {
-    const dest = new Destination(createDestinationDto.name, createDestinationDto.description);
+    const dest = new Destination(
+      createDestinationDto.name,
+      createDestinationDto.description,
+    );
 
     if (createDestinationDto.warehouseId) {
-      dest.warehouse = await this.whRepo.findOne(createDestinationDto.warehouseId);
+      dest.warehouse = await this.whRepo.findOne(
+        createDestinationDto.warehouseId,
+      );
     }
 
     await this.em.persistAndFlush(dest);
@@ -41,7 +46,9 @@ export class DestinationService {
     const destination = await this.findOne(id);
 
     if (updateDestinationDto.warehouseId) {
-      destination.warehouse = await this.whRepo.findOne(updateDestinationDto.warehouseId);
+      destination.warehouse = await this.whRepo.findOne(
+        updateDestinationDto.warehouseId,
+      );
     }
 
     this.em.assign(destination, updateDestinationDto, { mergeObjects: true });

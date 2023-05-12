@@ -45,56 +45,91 @@ describe('DestinationController', () => {
 
     controller = module.get<DestinationController>(DestinationController);
     service = module.get<DestinationService>(DestinationService);
-    whRepo = module.get<EntityRepository<Warehouse>>(getRepositoryToken(Warehouse));
-    createDto = new CreateDestinationDto(faker.address.street(), faker.address.streetAddress(), 1);
-    warehouse = new Warehouse(faker.company.name(), faker.company.catchPhrase());
+    whRepo = module.get<EntityRepository<Warehouse>>(
+      getRepositoryToken(Warehouse),
+    );
+    createDto = new CreateDestinationDto(
+      faker.address.street(),
+      faker.address.streetAddress(),
+      1,
+    );
+    warehouse = new Warehouse(
+      faker.company.name(),
+      faker.company.catchPhrase(),
+    );
     warehouse.id = createDto.warehouseId;
   });
 
   it('should create without warehouse', async () => {
-    jest.spyOn(service, 'create').mockImplementation((dto: CreateDestinationDto) => {
-      const destination = new Destination(dto.name, dto.description);
-      destination.id = 1;
+    jest
+      .spyOn(service, 'create')
+      .mockImplementation((dto: CreateDestinationDto) => {
+        const destination = new Destination(dto.name, dto.description);
+        destination.id = 1;
 
-      return Promise.resolve(destination);
+        return Promise.resolve(destination);
+      });
+
+    const result = await controller.create({
+      name: createDto.name,
+      description: createDto.description,
     });
-
-    const result = await controller.create({ name: createDto.name, description: createDto.description });
     expect(result).toBeInstanceOf(Destination);
-    expect(result).toEqual({ id: 1, name: createDto.name, description: createDto.description, createdAt: expect.any(Date) });
+    expect(result).toEqual({
+      id: 1,
+      name: createDto.name,
+      description: createDto.description,
+      createdAt: expect.any(Date),
+    });
   });
 
   it('should create with warehouse', async () => {
     const whId = 1;
     warehouse.id = whId;
-    jest.spyOn(service, 'create').mockImplementation((dto: CreateDestinationDto) => {
-      const destination = new Destination(dto.name, dto.description);
-      destination.id = 1;
+    jest
+      .spyOn(service, 'create')
+      .mockImplementation((dto: CreateDestinationDto) => {
+        const destination = new Destination(dto.name, dto.description);
+        destination.id = 1;
 
-      destination.warehouse = warehouse;
-      return Promise.resolve(destination);
-    });
+        destination.warehouse = warehouse;
+        return Promise.resolve(destination);
+      });
 
     const result = await controller.create(createDto);
     expect(result).toBeInstanceOf(Destination);
-    expect(result).toEqual({ id: 1, name: createDto.name, description: createDto.description, warehouse: warehouse, createdAt: expect.any(Date) });
+    expect(result).toEqual({
+      id: 1,
+      name: createDto.name,
+      description: createDto.description,
+      warehouse: warehouse,
+      createdAt: expect.any(Date),
+    });
   });
 
   it('should findAll', async () => {
     const result = [];
     const loopTimes = 5;
     for (let i = 0; i < loopTimes; i++) {
-      const destination = new Destination(faker.address.street(), faker.address.streetAddress());
+      const destination = new Destination(
+        faker.address.street(),
+        faker.address.streetAddress(),
+      );
       destination.id = i + 1;
       if (i % 2 === 0) {
-        const warehouse = new Warehouse(faker.company.name(), faker.company.catchPhrase());
+        const warehouse = new Warehouse(
+          faker.company.name(),
+          faker.company.catchPhrase(),
+        );
         warehouse.id = i + 1;
         destination.warehouse = warehouse;
       }
       result.push(destination);
     }
 
-    jest.spyOn(service, 'findAll').mockImplementation(() => Promise.resolve(result));
+    jest
+      .spyOn(service, 'findAll')
+      .mockImplementation(() => Promise.resolve(result));
     expect(await controller.findAll()).toHaveLength(loopTimes);
     expect(await controller.findAll()).toEqual(result);
   });
@@ -109,21 +144,34 @@ describe('DestinationController', () => {
   });
 
   it('should update destination without warehouse', async () => {
-    const destination = new Destination(faker.address.street(), faker.address.streetAddress());
+    const destination = new Destination(
+      faker.address.street(),
+      faker.address.streetAddress(),
+    );
     destination.id = 1;
     destination.createdAt = new Date();
 
-    jest.spyOn(service, 'update').mockImplementation((_: number, dto: UpdateDestinationDto) => {
-      destination.name = dto.name;
-      destination.description = dto.description;
+    jest
+      .spyOn(service, 'update')
+      .mockImplementation((_: number, dto: UpdateDestinationDto) => {
+        destination.name = dto.name;
+        destination.description = dto.description;
 
-      return Promise.resolve(destination);
-    });
-    expect(await controller.update('1', { name: createDto.name, description: createDto.description })).toBe(destination);
+        return Promise.resolve(destination);
+      });
+    expect(
+      await controller.update('1', {
+        name: createDto.name,
+        description: createDto.description,
+      }),
+    ).toBe(destination);
   });
 
   it('should update destination with warehouse', async () => {
-    const destination = new Destination(faker.address.street(), faker.address.streetAddress());
+    const destination = new Destination(
+      faker.address.street(),
+      faker.address.streetAddress(),
+    );
     destination.id = 1;
     destination.createdAt = new Date();
 
@@ -134,15 +182,23 @@ describe('DestinationController', () => {
       return Promise.resolve(warehouse);
     });
 
-    jest.spyOn(service, 'update').mockImplementation((_: number, dto: UpdateDestinationDto) => {
-      destination.name = dto.name;
-      destination.description = dto.description;
-      destination.warehouse = warehouse;
-      destination.updatedAt = new Date();
+    jest
+      .spyOn(service, 'update')
+      .mockImplementation((_: number, dto: UpdateDestinationDto) => {
+        destination.name = dto.name;
+        destination.description = dto.description;
+        destination.warehouse = warehouse;
+        destination.updatedAt = new Date();
 
-      return Promise.resolve(destination);
-    });
-    expect(await controller.update('1', { name: createDto.name, description: createDto.description, warehouseId: whId })).toEqual(destination);
+        return Promise.resolve(destination);
+      });
+    expect(
+      await controller.update('1', {
+        name: createDto.name,
+        description: createDto.description,
+        warehouseId: whId,
+      }),
+    ).toEqual(destination);
   });
 
   it('should remove', async () => {

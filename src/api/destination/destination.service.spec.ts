@@ -46,13 +46,24 @@ describe('DestinationService', () => {
       ],
     }).compile();
 
-    createDto = new CreateDestinationDto(faker.address.street(), faker.address.streetAddress(), 1);
+    createDto = new CreateDestinationDto(
+      faker.address.street(),
+      faker.address.streetAddress(),
+      1,
+    );
 
     service = module.get<DestinationService>(DestinationService);
     em = module.get<EntityManager>(EntityManager);
-    destRepo = module.get<EntityRepository<Destination>>(getRepositoryToken(Destination));
-    whRepo = module.get<EntityRepository<Warehouse>>(getRepositoryToken(Warehouse));
-    warehouse = new Warehouse(faker.company.name(), faker.company.catchPhrase());
+    destRepo = module.get<EntityRepository<Destination>>(
+      getRepositoryToken(Destination),
+    );
+    whRepo = module.get<EntityRepository<Warehouse>>(
+      getRepositoryToken(Warehouse),
+    );
+    warehouse = new Warehouse(
+      faker.company.name(),
+      faker.company.catchPhrase(),
+    );
     warehouse.id = createDto.warehouseId;
   });
 
@@ -66,7 +77,12 @@ describe('DestinationService', () => {
       return Promise.resolve();
     });
 
-    expect(await service.create({ name: createDto.name, description: createDto.description })).toEqual({
+    expect(
+      await service.create({
+        name: createDto.name,
+        description: createDto.description,
+      }),
+    ).toEqual({
       ...result,
       createdAt: expect.any(Date),
     });
@@ -114,10 +130,16 @@ describe('DestinationService', () => {
     const result = [];
     const loopTimes = 5;
     for (let i = 0; i < loopTimes; i++) {
-      const destination = new Destination(faker.address.street(), faker.address.streetAddress());
+      const destination = new Destination(
+        faker.address.street(),
+        faker.address.streetAddress(),
+      );
       destination.id = i + 1;
       if (i % 2 === 0) {
-        const warehouse = new Warehouse(faker.company.name(), faker.company.catchPhrase());
+        const warehouse = new Warehouse(
+          faker.company.name(),
+          faker.company.catchPhrase(),
+        );
         warehouse.id = i + 1;
         destination.warehouse = warehouse;
       }
@@ -156,23 +178,31 @@ describe('DestinationService', () => {
     };
 
     jest.spyOn(service, 'findOne').mockImplementation(() => {
-      const destination = new Destination(createDto.name, createDto.description);
+      const destination = new Destination(
+        createDto.name,
+        createDto.description,
+      );
       destination.id = result.id;
 
       return Promise.resolve(destination);
     });
 
-    jest.spyOn(em, 'assign').mockImplementation((obj1: Destination, obj2: Destination) => {
-      const mergedObj = { ...obj1, ...obj2 };
-      obj1.id = mergedObj.id;
-      obj1.name = mergedObj.name;
-      obj1.description = mergedObj.description;
-      obj1.updatedAt = new Date();
+    jest
+      .spyOn(em, 'assign')
+      .mockImplementation((obj1: Destination, obj2: Destination) => {
+        const mergedObj = { ...obj1, ...obj2 };
+        obj1.id = mergedObj.id;
+        obj1.name = mergedObj.name;
+        obj1.description = mergedObj.description;
+        obj1.updatedAt = new Date();
 
-      return obj1;
-    });
+        return obj1;
+      });
 
-    const updatedResult = new Destination(createDto.name, createDto.description);
+    const updatedResult = new Destination(
+      createDto.name,
+      createDto.description,
+    );
     updatedResult.id = 1;
     updatedResult.createdAt = new Date();
     updatedResult.updatedAt = new Date();

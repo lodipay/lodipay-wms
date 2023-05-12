@@ -63,20 +63,38 @@ describe('OrderService', () => {
       toDestinationId: 1,
       createdBy: 'user1',
     };
-    testOrder = new Order(testOrderData.name, testOrderData.description, testOrderData.createdBy);
+    testOrder = new Order(
+      testOrderData.name,
+      testOrderData.description,
+      testOrderData.createdBy,
+    );
 
-    testOrderDto = new CreateOrderDto(testOrderData.name, testOrderData.description, testOrderData.fromDestinationId, testOrderData.toDestinationId, testOrderData.createdBy);
+    testOrderDto = new CreateOrderDto(
+      testOrderData.name,
+      testOrderData.description,
+      testOrderData.fromDestinationId,
+      testOrderData.toDestinationId,
+      testOrderData.createdBy,
+    );
 
     tolgoit = new Destination('Tolgoit', 'Tolgoit description');
     zaisan = new Destination('Zaisan', 'Zaisan description');
 
-    destRepo = module.get<EntityRepository<Destination>>(getRepositoryToken(Destination));
+    destRepo = module.get<EntityRepository<Destination>>(
+      getRepositoryToken(Destination),
+    );
     orderRepo = module.get<EntityRepository<Order>>(getRepositoryToken(Order));
     em = module.get<EntityManager>(EntityManager);
   });
 
   it('should create an order', async () => {
-    const createDto = new CreateOrderDto(testOrderDto.name, testOrderDto.description, testOrderDto.fromDestinationId, testOrderDto.toDestinationId, testOrderDto.description);
+    const createDto = new CreateOrderDto(
+      testOrderDto.name,
+      testOrderDto.description,
+      testOrderDto.fromDestinationId,
+      testOrderDto.toDestinationId,
+      testOrderDto.description,
+    );
 
     jest
       .spyOn(destRepo, 'findOne')
@@ -163,7 +181,10 @@ describe('OrderService', () => {
       return Promise.resolve(order);
     });
 
-    const updatedResult = new Order(testOrderDto.name, testOrderDto.description);
+    const updatedResult = new Order(
+      testOrderDto.name,
+      testOrderDto.description,
+    );
     updatedResult.id = 1;
     updatedResult.name = testOrder.name;
     updatedResult.description = testOrder.description;

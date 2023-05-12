@@ -27,8 +27,12 @@ export class OrderService {
     order.name = createOrderDto.name;
     order.description = createOrderDto.description;
     order.createdBy = createOrderDto.createdBy;
-    order.from = await this.destRepository.findOne({ id: createOrderDto.fromDestinationId });
-    order.to = await this.destRepository.findOne({ id: createOrderDto.toDestinationId });
+    order.from = await this.destRepository.findOne({
+      id: createOrderDto.fromDestinationId,
+    });
+    order.to = await this.destRepository.findOne({
+      id: createOrderDto.toDestinationId,
+    });
 
     await this.em.persistAndFlush(order);
     return order;
@@ -45,10 +49,14 @@ export class OrderService {
   async update(id: number, updateOrderDto: UpdateOrderDto) {
     const order = await this.findOne(id);
     if (updateOrderDto.toDestinationId) {
-      order.to = await this.destRepository.findOne({ id: updateOrderDto.toDestinationId });
+      order.to = await this.destRepository.findOne({
+        id: updateOrderDto.toDestinationId,
+      });
     }
     if (updateOrderDto.fromDestinationId) {
-      order.from = await this.destRepository.findOne({ id: updateOrderDto.fromDestinationId });
+      order.from = await this.destRepository.findOne({
+        id: updateOrderDto.fromDestinationId,
+      });
     }
     order.createdBy = updateOrderDto.createdBy;
     order.name = updateOrderDto.name;
