@@ -83,10 +83,10 @@ describe('WarehouseService', () => {
       description: 'WH1 description',
     };
 
-    jest.spyOn(service, 'findOne').mockImplementation(() => {
-      const warehouse = new Warehouse(result.name, result.description);
-      warehouse.id = result.id;
+    const warehouse = new Warehouse(result.name, result.description);
+    warehouse.id = result.id;
 
+    jest.spyOn(service, 'findOne').mockImplementation(() => {
       return Promise.resolve(warehouse);
     });
 
@@ -102,7 +102,8 @@ describe('WarehouseService', () => {
       });
 
     const updatedResult = new Warehouse('WH-updated', result.description);
-    updatedResult.id = result.id;
+    updatedResult.id = warehouse.id;
+    updatedResult.createdAt = warehouse.createdAt;
 
     expect(
       await service.update(3, {
