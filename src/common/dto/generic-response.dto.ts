@@ -21,7 +21,11 @@ export class GenericResponseDto {
     this.message = message;
   }
 
-  static create(result: any, code: ResponseCode = ResponseCode.SUCCESS, message = 'success') {
+  static create(
+    result: any,
+    code: ResponseCode = ResponseCode.SUCCESS,
+    message = 'success',
+  ) {
     return new GenericResponseDto(result, code, message);
   }
 }

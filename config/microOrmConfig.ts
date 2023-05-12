@@ -1,5 +1,6 @@
 import { Options } from '@mikro-orm/core';
 import { TSMigrationGenerator } from '@mikro-orm/migrations';
+import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -13,6 +14,7 @@ const mikroOrmConfig: Options = {
   dbName: process.env.WHS_DB,
   entities: ['dist/src/**/*.entity.{js,ts}'],
   entitiesTs: ['src/**/*.entity.ts'],
+  metadataProvider: TsMorphMetadataProvider,
   migrations: {
     tableName: 'mikro_orm_migrations',
     path: 'dist/src/database/migrations',

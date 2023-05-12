@@ -45,12 +45,14 @@ describe('LocationController', () => {
       description: 'abc description',
       warehouseId: 1,
     };
-    jest.spyOn(service, 'create').mockImplementation((dto: CreateLocationDto) => {
-      const location = new Location(dto.code, warehouse, dto.description);
-      location.id = 1;
-      location.warehouse = warehouse;
-      return Promise.resolve(location);
-    });
+    jest
+      .spyOn(service, 'create')
+      .mockImplementation((dto: CreateLocationDto) => {
+        const location = new Location(dto.code, warehouse, dto.description);
+        location.id = 1;
+        location.warehouse = warehouse;
+        return Promise.resolve(location);
+      });
 
     const result = await controller.create(locationData);
     expect(result).toBeInstanceOf(Location);
@@ -64,15 +66,29 @@ describe('LocationController', () => {
 
   it('should find all locations', async () => {
     const result = [
-      new Location('location 1', new Warehouse('WH1', 'WH1 description'), 'location 1 description'),
-      new Location('location 2', new Warehouse('WH2', 'WH2 description'), 'location 2 description'),
+      new Location(
+        'location 1',
+        new Warehouse('WH1', 'WH1 description'),
+        'location 1 description',
+      ),
+      new Location(
+        'location 2',
+        new Warehouse('WH2', 'WH2 description'),
+        'location 2 description',
+      ),
     ];
-    jest.spyOn(service, 'findAll').mockImplementation(() => Promise.resolve(result));
+    jest
+      .spyOn(service, 'findAll')
+      .mockImplementation(() => Promise.resolve(result));
     expect(await controller.findAll()).toBe(result);
   });
 
   it('should find one location', async () => {
-    const result = new Location('location 1', new Warehouse('WH1', 'WH1 description'), 'location 1 description');
+    const result = new Location(
+      'location 1',
+      new Warehouse('WH1', 'WH1 description'),
+      'location 1 description',
+    );
     jest.spyOn(service, 'findOne').mockImplementation((id: number) => {
       result.id = id;
       return Promise.resolve(result);
@@ -81,7 +97,11 @@ describe('LocationController', () => {
   });
 
   it('should update location', async () => {
-    const locationData = new Location('location 1', new Warehouse('WH1', 'WH1 description'), 'location 1 description');
+    const locationData = new Location(
+      'location 1',
+      new Warehouse('WH1', 'WH1 description'),
+      'location 1 description',
+    );
     locationData.id = 1;
 
     jest.spyOn(service, 'update').mockImplementation(() => {

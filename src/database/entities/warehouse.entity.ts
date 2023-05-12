@@ -1,5 +1,12 @@
-import { Collection, Entity, OneToMany, OneToOne, Property, Unique } from '@mikro-orm/core';
-import { Destination } from './destination.entity';
+import {
+  Collection,
+  Entity,
+  OneToOne,
+  OneToMany,
+  PrimaryKey,
+  Property,
+  Unique,
+} from '@mikro-orm/core';
 import { Location } from './location.entity';
 import { ParentEntity } from './parent.entity';
 
@@ -22,7 +29,11 @@ export class Warehouse extends ParentEntity {
   @Property()
   description: string;
 
-  @OneToMany({ entity: () => Location, mappedBy: 'warehouse', orphanRemoval: true })
+  @OneToMany({
+    entity: () => Location,
+    mappedBy: 'warehouse',
+    orphanRemoval: true,
+  })
   locations = new Collection<Location>(this);
 
   @OneToOne(() => Destination, destination => destination.warehouse)

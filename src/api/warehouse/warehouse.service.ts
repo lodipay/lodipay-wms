@@ -29,7 +29,10 @@ export class WarehouseService {
     return this.warehouseRepository.findOne({ id });
   }
 
-  async update(id: number, updateWarehouseDto: UpdateWarehouseDto): Promise<Warehouse> {
+  async update(
+    id: number,
+    updateWarehouseDto: UpdateWarehouseDto,
+  ): Promise<Warehouse> {
     const warehouse = await this.findOne(id);
     this.em.assign(warehouse, updateWarehouseDto, { mergeObjects: true });
 
