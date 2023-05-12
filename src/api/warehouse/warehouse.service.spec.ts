@@ -54,7 +54,7 @@ describe('WarehouseService', () => {
     const result = new Warehouse(dto.name, dto.description);
     const destination = new Destination('Test', 'Test destination');
 
-    jest.spyOn(destRepository, 'findOne').mockImplementation((options: any): any => {
+    jest.spyOn(destRepository, 'findOne').mockImplementation((): any => {
       destination.id = 1;
       return Promise.resolve(destination);
     });

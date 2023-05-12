@@ -71,7 +71,7 @@ describe('DestinationService', () => {
     const result = new Destination(dto.name, dto.description);
     result.id = 1;
 
-    jest.spyOn(repository, 'findOne').mockImplementation((options: any): any => {
+    jest.spyOn(repository, 'findOne').mockImplementation((): any => {
       return Promise.resolve(result);
     });
 
