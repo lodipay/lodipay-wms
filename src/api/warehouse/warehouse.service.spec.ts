@@ -1,4 +1,4 @@
-import { EntityManager, EntityRepository } from '@mikro-orm/core';
+import { Collection, EntityManager, EntityRepository } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Destination } from '../../database/entities/destination.entity';
@@ -66,14 +66,13 @@ describe('WarehouseService', () => {
       return Promise.resolve();
     });
 
-    expect(await service.create(dto)).toEqual({
-      createdAt: expect.any(Date),
-      destination: expect.objectContaining({
-        ...destination,
-        createdAt: expect.any(Date),
-      }),
-      ...result,
-    });
+    expect(await service.create(dto)).toBeInstanceOf(Warehouse);
+    expect(result.id).toBe(1);
+    expect(result.name).toBe(dto.name);
+    expect(result.description).toBe(dto.description);
+    expect(result.destination).toBe(destination);
+    expect(result.locations).toBeInstanceOf(Collection);
+    expect(result.createdAt).toBeInstanceOf(Date);
   });
 
   it('findAll', async () => {
