@@ -102,19 +102,27 @@ describe('DestinationService', () => {
       obj1.id = mergedObj.id;
       obj1.name = mergedObj.name;
       obj1.description = mergedObj.description;
+      obj1.updatedAt = new Date();
 
       return obj1;
     });
 
     const updatedResult = new Destination(dto.name, dto.description);
     updatedResult.id = 1;
+    updatedResult.createdAt = new Date();
+    updatedResult.updatedAt = new Date();
 
     expect(
       await service.update(1, {
         name: dto.name,
         description: dto.description,
       }),
-    ).toStrictEqual(updatedResult);
+    ).toEqual({
+      ...updatedResult,
+      name: dto.name,
+      description: dto.description,
+      updatedAt: expect.any(Date),
+    });
   });
 
   it('should remove', async () => {

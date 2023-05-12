@@ -103,6 +103,7 @@ describe('OrderService', () => {
       createdBy: createDto.createdBy,
       from: expect.any(Destination),
       to: expect.any(Destination),
+      createdAt: expect.any(Date),
     });
   });
 
@@ -183,8 +184,8 @@ describe('OrderService', () => {
       createdBy: order.createdBy,
       from: expect.any(Destination),
       to: expect.any(Destination),
-      updatedAt: updatedResult.updatedAt,
-      createdAt: updatedResult.createdAt,
+      updatedAt: expect.any(Date),
+      createdAt: expect.any(Date),
     });
   });
 });
