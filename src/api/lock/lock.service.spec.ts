@@ -1,7 +1,10 @@
 import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { Test, TestingModule } from '@nestjs/testing';
-import { getEntityManagerMockConfig, getRepositoryMockConfig } from '../../common/mock';
+import {
+  getEntityManagerMockConfig,
+  getRepositoryMockConfig,
+} from '../../common/mock';
 import { Lock } from '../../database/entities/lock.entity';
 import { LockService } from './lock.service';
 
@@ -14,7 +17,11 @@ describe('LockService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [LockService, getEntityManagerMockConfig(), getRepositoryMockConfig(Lock)],
+      providers: [
+        LockService,
+        getEntityManagerMockConfig(),
+        getRepositoryMockConfig(Lock),
+      ],
     }).compile();
 
     service = module.get<LockService>(LockService);
@@ -57,10 +64,12 @@ describe('LockService', () => {
     const result = new Lock('Deliver to warehouse 2', yesterday, tomorrow);
     result.id = 1;
 
-    jest.spyOn(repository, 'findOne').mockImplementation((options: any): any => {
-      expect(options.id).toBe(result.id);
-      return Promise.resolve(result);
-    });
+    jest
+      .spyOn(repository, 'findOne')
+      .mockImplementation((options: any): any => {
+        expect(options.id).toBe(result.id);
+        return Promise.resolve(result);
+      });
 
     expect(await service.findOne(1)).toStrictEqual(result);
   });
@@ -89,7 +98,11 @@ describe('LockService', () => {
       return obj1;
     });
 
-    const updatedResult = new Lock('Delivery to warehouse 1', result.from, result.to);
+    const updatedResult = new Lock(
+      'Delivery to warehouse 1',
+      result.from,
+      result.to,
+    );
     updatedResult.id = result.id;
 
     expect(
@@ -105,10 +118,12 @@ describe('LockService', () => {
     const result = new Lock('Delivery to warehouse 1');
     result.id = 1;
 
-    jest.spyOn(repository, 'findOne').mockImplementation((options: any): any => {
-      expect(options.id).toBe(result.id);
-      return Promise.resolve(result);
-    });
+    jest
+      .spyOn(repository, 'findOne')
+      .mockImplementation((options: any): any => {
+        expect(options.id).toBe(result.id);
+        return Promise.resolve(result);
+      });
 
     expect(await service.remove(1)).toStrictEqual('success');
   });

@@ -1,3 +1,4 @@
+import { InvalidArgumentException } from '@/common/exception/invalid.argument.exception';
 import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
@@ -43,9 +44,48 @@ export class InventoryService {
   async remove(id: number) {
     const entity = await this.findOne(id);
     if (entity) {
-      this.em.removeAndFlush(entity);
+      await this.em.removeAndFlush(entity);
     }
 
     return 'deleted';
+  }
+
+  async setParent(id: number, parentId: number) {
+    if (!id || id === parentId) {
+      throw new InvalidArgumentException('invalid inventory id');
+    }
+    const entity = await this.findOne(id);
+    if (!entity) {
+      throw new InvalidArgumentException('invalid inventory id');
+    }
+
+    if (!parentId) {
+      throw new InvalidArgumentException('invalid inventory id');
+    }
+    const parent = await this.findOne(parentId);
+
+    if (!parent || parent.parent) {
+      throw new InvalidArgumentException('invalid inventory id');
+    }
+
+    entity.parent = parent;
+    await this.em.persistAndFlush(entity);
+
+    return entity;
+  }
+
+  async unsetParent(id: number) {
+    if (!id) {
+      throw new InvalidArgumentException('invalid inventory id');
+    }
+
+    const entity = await this.findOne(id);
+    if (!entity || !entity.parent) {
+      throw new InvalidArgumentException('invalid inventory id');
+    }
+
+    entity.parent = null;
+    await this.em.persistAndFlush(entity);
+    return entity;
   }
 }

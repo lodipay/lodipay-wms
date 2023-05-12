@@ -1,6 +1,9 @@
 import { Collection } from '@mikro-orm/core';
 import { Test, TestingModule } from '@nestjs/testing';
-import { getEntityManagerMockConfig, getRepositoryMockConfig } from '../../common/mock';
+import {
+  getEntityManagerMockConfig,
+  getRepositoryMockConfig,
+} from '../../common/mock';
 import { Warehouse } from '../../database/entities/warehouse.entity';
 import { CreateWarehouseDto } from './dto/create-warehouse.dto';
 import { UpdateWarehouseDto } from './dto/update-warehouse.dto';
@@ -30,12 +33,14 @@ describe('WarehouseController', () => {
       name: 'WH1',
       description: 'WH1 description',
     };
-    jest.spyOn(warehouseService, 'create').mockImplementation((dto: CreateWarehouseDto) => {
-      const warehouse = new Warehouse(dto.name, dto.description);
-      warehouse.id = 1;
+    jest
+      .spyOn(warehouseService, 'create')
+      .mockImplementation((dto: CreateWarehouseDto) => {
+        const warehouse = new Warehouse(dto.name, dto.description);
+        warehouse.id = 1;
 
-      return Promise.resolve(warehouse);
-    });
+        return Promise.resolve(warehouse);
+      });
 
     const result = await controller.create(data);
     expect(result).toBeInstanceOf(Warehouse);
@@ -51,7 +56,9 @@ describe('WarehouseController', () => {
       new Warehouse('WH1', 'WH1 description'),
       new Warehouse('WH2', 'WH2 description'),
     ];
-    jest.spyOn(warehouseService, 'findAll').mockImplementation(() => Promise.resolve(result));
+    jest
+      .spyOn(warehouseService, 'findAll')
+      .mockImplementation(() => Promise.resolve(result));
     expect(await controller.findAll()).toBe(result);
   });
 

@@ -1,10 +1,19 @@
-import { Collection, EntityManager, EntityRepository, QueryOrder } from '@mikro-orm/core';
+import { InvalidArgumentException } from '@/common/exception/invalid.argument.exception';
+import {
+  Collection,
+  EntityManager,
+  EntityRepository,
+  QueryOrder,
+} from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { Test, TestingModule } from '@nestjs/testing';
 import { classToPlain, plainToClass } from 'class-transformer';
 import { DateTime } from 'luxon';
 import { PaginatedDto } from '../../common/dto/paginated.dto';
-import { getEntityManagerMockConfig, getRepositoryMockConfig } from '../../common/mock';
+import {
+  getEntityManagerMockConfig,
+  getRepositoryMockConfig,
+} from '../../common/mock';
 import { FilterService } from '../../common/service/filter.service';
 import { Inventory } from '../../database/entities/inventory.entity';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
@@ -30,7 +39,9 @@ describe('InventoryService', () => {
     service = module.get<InventoryService>(InventoryService);
     filterService = module.get<FilterService>(FilterService);
     em = module.get<EntityManager>(EntityManager);
-    repository = module.get<EntityRepository<Inventory>>(getRepositoryToken(Inventory));
+    repository = module.get<EntityRepository<Inventory>>(
+      getRepositoryToken(Inventory),
+    );
   });
 
   it('create', async () => {
@@ -50,15 +61,17 @@ describe('InventoryService', () => {
       ...data,
     };
 
-    jest.spyOn(em, 'assign').mockImplementation((obj1: Inventory, obj2: CreateInventoryDto) => {
-      const mergedObj = Object.assign({}, obj1, obj2);
+    jest
+      .spyOn(em, 'assign')
+      .mockImplementation((obj1: Inventory, obj2: CreateInventoryDto) => {
+        const mergedObj = Object.assign({}, obj1, obj2);
 
-      for (const key in mergedObj) {
-        obj1[key] = mergedObj[key];
-      }
+        for (const key in mergedObj) {
+          obj1[key] = mergedObj[key];
+        }
 
-      return obj1;
-    });
+        return obj1;
+      });
 
     jest.spyOn(em, 'persistAndFlush').mockImplementation((obj: Inventory) => {
       obj.id = expectedData.id;
@@ -91,10 +104,12 @@ describe('InventoryService', () => {
 
     const entity = plainToClass(Inventory, data);
 
-    jest.spyOn(repository, 'findOne').mockImplementation((options: any): any => {
-      expect(options.id).toBe(entity.id);
-      return Promise.resolve(entity);
-    });
+    jest
+      .spyOn(repository, 'findOne')
+      .mockImplementation((options: any): any => {
+        expect(options.id).toBe(entity.id);
+        return Promise.resolve(entity);
+      });
 
     expect(await service.findOne(3)).toStrictEqual(entity);
   });
@@ -119,15 +134,17 @@ describe('InventoryService', () => {
       return Promise.resolve(entity);
     });
 
-    jest.spyOn(em, 'assign').mockImplementation((obj1: Inventory, obj2: UpdateInventoryDto) => {
-      const mergedObj = Object.assign({}, obj1, obj2);
+    jest
+      .spyOn(em, 'assign')
+      .mockImplementation((obj1: Inventory, obj2: UpdateInventoryDto) => {
+        const mergedObj = Object.assign({}, obj1, obj2);
 
-      for (const key in mergedObj) {
-        obj1[key] = mergedObj[key];
-      }
+        for (const key in mergedObj) {
+          obj1[key] = mergedObj[key];
+        }
 
-      return obj1;
-    });
+        return obj1;
+      });
 
     const resultEntity = plainToClass(Inventory, {
       ...data,
@@ -156,10 +173,12 @@ describe('InventoryService', () => {
 
     const entity = plainToClass(Inventory, data);
 
-    jest.spyOn(repository, 'findOne').mockImplementation((options: any): any => {
-      expect(options.id).toBe(entity.id);
-      return Promise.resolve(entity);
-    });
+    jest
+      .spyOn(repository, 'findOne')
+      .mockImplementation((options: any): any => {
+        expect(options.id).toBe(entity.id);
+        return Promise.resolve(entity);
+      });
 
     expect(await service.remove(3)).toStrictEqual('deleted');
   });
@@ -204,7 +223,7 @@ describe('InventoryService', () => {
         weight: 10,
       },
     ].map(data => plainToClass(Inventory, data));
-    jest.spyOn(filterService, 'search').mockImplementation((entityClass, filterDto) => {
+    jest.spyOn(filterService, 'search').mockImplementation((_, filterDto) => {
       expect(filterDto).toStrictEqual(query);
       const paginatedDto = new PaginatedDto();
       paginatedDto.result = result;
@@ -224,5 +243,202 @@ describe('InventoryService', () => {
     paginatedDto.totalPage = 10;
 
     expect(await service.search(query)).toStrictEqual(paginatedDto);
+  });
+
+  it('should throw exception on setParent when entity is not found', async () => {
+    jest
+      .spyOn(repository, 'findOne')
+      .mockImplementationOnce((options: any) => {
+        expect(options.id).toBe(3);
+        return Promise.resolve(null);
+      })
+      .mockImplementationOnce((options: any): any => {
+        expect(options.id).toBe(4);
+        const data = {
+          id: 4,
+          sku: 'SKU123123',
+          name: 'Female Shirt',
+          description:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+          quantity: 10,
+          expiryDate: DateTime.now().plus({ year: 1 }).toISO(),
+          batchCode: 'BATCH123',
+          weight: 10,
+        };
+
+        return Promise.resolve(plainToClass(Inventory, data));
+      });
+    await expect(service.setParent(3, 4)).rejects.toThrow(
+      InvalidArgumentException,
+    );
+  });
+
+  it('should throw exception on setParent when parent is not found', async () => {
+    jest
+      .spyOn(repository, 'findOne')
+      .mockImplementationOnce((options: any): any => {
+        expect(options.id).toBe(3);
+        const data = {
+          id: options.id,
+          sku: 'SKU123123',
+          name: 'Female Shirt',
+          description:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+          quantity: 10,
+          expiryDate: DateTime.now().plus({ year: 1 }).toISO(),
+          batchCode: 'BATCH123',
+          weight: 10,
+        };
+
+        return Promise.resolve(plainToClass(Inventory, data));
+      })
+      .mockImplementationOnce((options: any): any => {
+        expect(options.id).toBe(4);
+        return Promise.resolve(null);
+      });
+    await expect(service.setParent(3, 4)).rejects.toThrow(
+      InvalidArgumentException,
+    );
+  });
+
+  it('should throw exception on when the parent is a child', async () => {
+    jest
+      .spyOn(repository, 'findOne')
+      .mockImplementationOnce((options: any): any => {
+        expect(options.id).toBe(3);
+        const data = {
+          id: options.id,
+          sku: 'SKU123123',
+          name: 'Female Shirt',
+          description:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+          quantity: 10,
+          expiryDate: DateTime.now().plus({ year: 1 }).toISO(),
+          batchCode: 'BATCH123',
+          weight: 10,
+        };
+
+        return Promise.resolve(plainToClass(Inventory, data));
+      })
+      .mockImplementationOnce((options: any): any => {
+        const parentData = {
+          id: 5,
+          sku: 'SKU123125',
+          name: 'Female Shirt',
+          description:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+          quantity: 10,
+          expiryDate: DateTime.now().plus({ year: 1 }).toISO(),
+          batchCode: 'BATCH123',
+          weight: 10,
+        };
+
+        expect(options.id).toBe(4);
+
+        const data = {
+          id: options.id,
+          sku: 'SKU123124',
+          name: 'Female Shirt',
+          description:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+          quantity: 10,
+          expiryDate: DateTime.now().plus({ year: 1 }).toISO(),
+          batchCode: 'BATCH123',
+          weight: 10,
+        };
+        const entity = plainToClass(Inventory, data);
+        entity.parent = plainToClass(Inventory, parentData);
+
+        return Promise.resolve(entity);
+      });
+    await expect(service.setParent(3, 4)).rejects.toThrow(
+      InvalidArgumentException,
+    );
+  });
+
+  it('should throw exception on when entity and parent are the same', async () => {
+    await expect(service.setParent(3, 3)).rejects.toThrow(
+      InvalidArgumentException,
+    );
+  });
+
+  it('setParent', async () => {
+    jest
+      .spyOn(repository, 'findOne')
+      .mockImplementationOnce((options: any): any => {
+        expect(options.id).toBe(3);
+        const data = {
+          id: options.id,
+          sku: 'SKU123123',
+          name: 'Female Shirt',
+          description:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+          quantity: 10,
+          expiryDate: DateTime.now().plus({ year: 1 }).toISO(),
+          batchCode: 'BATCH123',
+          weight: 10,
+        };
+
+        return Promise.resolve(plainToClass(Inventory, data));
+      })
+      .mockImplementationOnce((options: any): any => {
+        expect(options.id).toBe(4);
+
+        const data = {
+          id: options.id,
+          sku: 'SKU123124',
+          name: 'Female Shirt',
+          description:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+          quantity: 10,
+          expiryDate: DateTime.now().plus({ year: 1 }).toISO(),
+          batchCode: 'BATCH123',
+          weight: 10,
+        };
+        const entity = plainToClass(Inventory, data);
+
+        return Promise.resolve(entity);
+      });
+    const entity = await service.setParent(3, 4);
+    expect(entity.parent).not.toBeNull();
+    expect(entity.parent.id).toBe(4);
+  });
+
+  it('unsetParent', async () => {
+    jest
+      .spyOn(repository, 'findOne')
+      .mockImplementationOnce((options: any): any => {
+        expect(options.id).toBe(3);
+        const data = {
+          id: options.id,
+          sku: 'SKU123123',
+          name: 'Female Shirt',
+          description:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+          quantity: 10,
+          expiryDate: DateTime.now().plus({ year: 1 }).toISO(),
+          batchCode: 'BATCH123',
+          weight: 10,
+        };
+
+        const parentData = {
+          id: 5,
+          sku: 'SKU123125',
+          name: 'Female Shirt',
+          description:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+          quantity: 10,
+          expiryDate: DateTime.now().plus({ year: 1 }).toISO(),
+          batchCode: 'BATCH123',
+          weight: 10,
+        };
+
+        const entity = plainToClass(Inventory, data);
+        entity.parent = plainToClass(Inventory, parentData);
+
+        return Promise.resolve(entity);
+      });
+    const entity = await service.unsetParent(3);
+    expect(entity.parent).toBeNull();
   });
 });

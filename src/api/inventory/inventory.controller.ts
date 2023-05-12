@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiPaginatedResponse } from '../../common/decorator/api-paginated-response.decorator';
 import { FilterDto } from '../../common/dto/filter.dto';
@@ -29,12 +38,25 @@ export class InventoryController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateInventoryDto: UpdateInventoryDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateInventoryDto: UpdateInventoryDto,
+  ) {
     return this.inventoryService.update(+id, updateInventoryDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.inventoryService.remove(+id);
+  }
+
+  @Post(':id/set-parent/:parentId')
+  setParent(@Param('id') id: string, @Param('parentId') parentId: string) {
+    return this.inventoryService.setParent(+id, +parentId);
+  }
+
+  @Post(':id/unset-parent')
+  unsetParent(@Param('id') id: string) {
+    return this.inventoryService.unsetParent(+id);
   }
 }

@@ -1,7 +1,10 @@
 import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { Test, TestingModule } from '@nestjs/testing';
-import { getEntityManagerMockConfig, getRepositoryMockConfig } from '../../common/mock';
+import {
+  getEntityManagerMockConfig,
+  getRepositoryMockConfig,
+} from '../../common/mock';
 import { Location } from '../../database/entities/location.entity';
 import { Warehouse } from '../../database/entities/warehouse.entity';
 import { CreateLocationDto } from './dto/create-location.dto';
@@ -24,7 +27,9 @@ describe('LocationService', () => {
 
     service = module.get<LocationService>(LocationService);
     em = module.get<EntityManager>(EntityManager);
-    repository = module.get<EntityRepository<Location>>(getRepositoryToken(Location));
+    repository = module.get<EntityRepository<Location>>(
+      getRepositoryToken(Location),
+    );
   });
 
   it('should create new location', async () => {
@@ -92,18 +97,24 @@ describe('LocationService', () => {
       description: 'location-1 description',
     };
     jest.spyOn(service, 'findOne').mockImplementation(() => {
-      const locationData = new Location(result.code, result.warehouse, result.description);
+      const locationData = new Location(
+        result.code,
+        result.warehouse,
+        result.description,
+      );
       locationData.id = result.id;
       return Promise.resolve(locationData);
     });
-    jest.spyOn(em, 'assign').mockImplementation((obj1: Location, obj2: Location) => {
-      const mergedObj = Object.assign({}, obj1, obj2);
-      obj1.id = mergedObj.id;
-      obj1.code = mergedObj.code;
-      obj1.description = mergedObj.description;
-      obj1.warehouse = mergedObj.warehouse;
-      return obj1;
-    });
+    jest
+      .spyOn(em, 'assign')
+      .mockImplementation((obj1: Location, obj2: Location) => {
+        const mergedObj = Object.assign({}, obj1, obj2);
+        obj1.id = mergedObj.id;
+        obj1.code = mergedObj.code;
+        obj1.description = mergedObj.description;
+        obj1.warehouse = mergedObj.warehouse;
+        return obj1;
+      });
     const updatedResult = new Location(
       'location-1-updated-code',
       new Warehouse('WH1', 'WH1 description'),

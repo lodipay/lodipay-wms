@@ -3,9 +3,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { plainToClass } from 'class-transformer';
 import { DateTime } from 'luxon';
 import { PaginatedDto } from '../../common/dto/paginated.dto';
-import { getEntityManagerMockConfig, getRepositoryMockConfig } from '../../common/mock';
+import {
+  getEntityManagerMockConfig,
+  getRepositoryMockConfig,
+} from '../../common/mock';
 import { FilterService } from '../../common/service/filter.service';
 import { Inventory } from '../../database/entities/inventory.entity';
+import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';
 import { InventoryController } from './inventory.controller';
 import { InventoryService } from './inventory.service';
@@ -45,7 +49,9 @@ describe('InventoryController', () => {
       return Promise.resolve(plainToClass(Inventory, { ...data, id: 2 }));
     });
 
-    expect(await controller.create(data)).toEqual(plainToClass(Inventory, { ...data, id: 2 }));
+    expect(
+      await controller.create(plainToClass(CreateInventoryDto, data)),
+    ).toEqual(plainToClass(Inventory, { ...data, id: 2 }));
   });
 
   it('findOne', async () => {
@@ -66,7 +72,9 @@ describe('InventoryController', () => {
       return Promise.resolve(plainToClass(Inventory, data));
     });
 
-    expect(await controller.findOne(data.id.toString())).toEqual(plainToClass(Inventory, data));
+    expect(await controller.findOne(data.id.toString())).toEqual(
+      plainToClass(Inventory, data),
+    );
   });
 
   it('remove', async () => {
@@ -91,17 +99,19 @@ describe('InventoryController', () => {
       weight: 10,
     };
 
-    jest.spyOn(service, 'update').mockImplementation((id, dto: UpdateInventoryDto) => {
-      expect(id).toBe(data.id);
-      expect(dto.sku).toBe('SKU-UPDATED');
+    jest
+      .spyOn(service, 'update')
+      .mockImplementation((id, dto: UpdateInventoryDto) => {
+        expect(id).toBe(data.id);
+        expect(dto.sku).toBe('SKU-UPDATED');
 
-      return Promise.resolve(
-        plainToClass(Inventory, {
-          ...data,
-          ...dto,
-        }),
-      );
-    });
+        return Promise.resolve(
+          plainToClass(Inventory, {
+            ...data,
+            ...dto,
+          }),
+        );
+      });
 
     expect(
       await controller.update(data.id.toString(), {

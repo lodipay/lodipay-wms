@@ -8,6 +8,7 @@ import {
   Property,
   Unique,
 } from '@mikro-orm/core';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 @Filter({ name: 'mainFilter', cond: args => args })
@@ -100,4 +101,13 @@ export class Inventory {
 
   @ManyToOne({ entity: () => Inventory })
   parent?: Inventory;
+
+  get parentId() {
+    return this.parent?.id;
+  }
+
+  @ApiProperty()
+  get parentKey() {
+    return this.parent?.id;
+  }
 }

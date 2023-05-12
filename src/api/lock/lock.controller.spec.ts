@@ -41,12 +41,14 @@ describe('LockController', () => {
       from: new Date(Date.now() - 1000 * 60 * 60 * 24),
       to: new Date(Date.now()),
     };
-    jest.spyOn(lockService, 'create').mockImplementation((dto: CreateLockDto) => {
-      const lock = new Lock(dto.reason, dto.from, dto.to);
-      lock.id = 1;
+    jest
+      .spyOn(lockService, 'create')
+      .mockImplementation((dto: CreateLockDto) => {
+        const lock = new Lock(dto.reason, dto.from, dto.to);
+        lock.id = 1;
 
-      return Promise.resolve(lock);
-    });
+        return Promise.resolve(lock);
+      });
 
     const result = await controller.create(data);
     expect(result).toBeInstanceOf(Lock);
@@ -55,10 +57,20 @@ describe('LockController', () => {
 
   it('findAll', async () => {
     const result = [
-      new Lock('E-commerce', new Date(Date.now() - 1000 * 60 * 60 * 24), new Date(Date.now())),
-      new Lock('Vendor', new Date(Date.now() - 1000 * 60 * 60 * 24), new Date(Date.now())),
+      new Lock(
+        'E-commerce',
+        new Date(Date.now() - 1000 * 60 * 60 * 24),
+        new Date(Date.now()),
+      ),
+      new Lock(
+        'Vendor',
+        new Date(Date.now() - 1000 * 60 * 60 * 24),
+        new Date(Date.now()),
+      ),
     ];
-    jest.spyOn(lockService, 'findAll').mockImplementation(() => Promise.resolve(result));
+    jest
+      .spyOn(lockService, 'findAll')
+      .mockImplementation(() => Promise.resolve(result));
     expect(await controller.findAll()).toBe(result);
   });
 

@@ -10,6 +10,7 @@ import { GenericResponseDto } from './common/dto/generic-response.dto';
 import { PaginatedDto } from './common/dto/paginated.dto';
 import { QueryDto } from './common/dto/query.dto';
 import { LoggerFactory } from './common/factory/logger.factory';
+import { BaseExceptionFilter } from './common/filter/base.exception.filter';
 
 async function bootstrap() {
   const logOptions = process.env.LOG_OPTIONS;
@@ -23,8 +24,11 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
+      transformOptions: { enableImplicitConversion: true },
     }),
   );
+
+  app.useGlobalFilters(new BaseExceptionFilter());
 
   const configService = app.get<ConfigService>(ConfigService);
   const mainConfig = configService.get(CONFIG_NAME_MAIN) as MainConfig;
@@ -48,7 +52,9 @@ async function bootstrap() {
   SwaggerModule.setup(swaggerPath, app, document);
 
   await app.listen(process.env.WHS_PORT);
-  console.log(`Lodi WHS project is running on: http://0.0.0.0:${mainConfig.port}`);
+  console.log(
+    `Lodi WHS project is running on: http://0.0.0.0:${mainConfig.port}`,
+  );
   console.log(`Swagger path: http://0.0.0.0:${mainConfig.port}/${swaggerPath}`);
 }
 bootstrap();

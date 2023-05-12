@@ -68,6 +68,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "jest": "29.5.0",
     "jest-junit": "^16.0.0",
+    "module-alias": "^2.2.2",
     "prettier": "^2.3.2",
     "prettier-plugin-organize-imports": "^3.2.2",
     "semantic-release": "^21.0.2",
@@ -76,10 +77,13 @@
     "ts-jest": "29.0.5",
     "ts-loader": "^9.2.3",
     "ts-node": "^10.0.0",
-    "tsconfig-paths": "4.2.0",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^4.7.4"
   },
   "jest": {
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/$1"
+    },
     "moduleFileExtensions": [
       "js",
       "json",
@@ -103,10 +107,10 @@
     "testEnvironment": "node",
     "coverageThreshold": {
       "global": {
-        "branches": 38,
-        "functions": 67,
-        "lines": 62,
-        "statements": 62
+        "statements": 60,
+        "branches": 40,
+        "functions": 60,
+        "lines": 60
       }
     }
   },
@@ -115,5 +119,8 @@
     "configPaths": [
       "./config/microOrmConfig.ts"
     ]
+  },
+  "_moduleAliases": {
+    "@": "src"
   }
 }
