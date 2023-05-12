@@ -32,6 +32,7 @@ describe('WarehouseController', () => {
     const data = {
       name: 'WH1',
       description: 'WH1 description',
+      destinationId: 1,
     };
     jest
       .spyOn(warehouseService, 'create')

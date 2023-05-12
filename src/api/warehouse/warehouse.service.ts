@@ -10,12 +10,12 @@ export class WarehouseService {
   constructor(
     @InjectRepository(Warehouse)
     private readonly warehouseRepository: EntityRepository<Warehouse>,
+
     private readonly em: EntityManager,
   ) {}
 
   async create(dto: CreateWarehouseDto): Promise<Warehouse> {
     const warehouse = new Warehouse(dto.name, dto.description);
-
     await this.em.persistAndFlush(warehouse);
 
     return warehouse;

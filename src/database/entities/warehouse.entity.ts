@@ -2,21 +2,16 @@ import {
   Collection,
   Entity,
   OneToMany,
-  PrimaryKey,
+  OneToOne,
   Property,
   Unique,
 } from '@mikro-orm/core';
+import { Destination } from './destination.entity';
 import { Location } from './location.entity';
+import { ParentEntity } from './parent.entity';
 
 @Entity()
-export class Warehouse {
-  /**
-   * Warehouse id
-   * @example '100'
-   */
-  @PrimaryKey()
-  id: number;
-
+export class Warehouse extends ParentEntity {
   /**
    * Warehouse name
    *
@@ -41,7 +36,11 @@ export class Warehouse {
   })
   locations = new Collection<Location>(this);
 
+  @OneToOne(() => Destination, destination => destination.warehouse)
+  destination: Destination;
+
   constructor(name: string, description: string) {
+    super();
     this.name = name;
     this.description = description;
   }
