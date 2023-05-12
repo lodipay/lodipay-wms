@@ -15,4 +15,12 @@ export class CreateOrderDto {
 
   @IsNumber()
   toDestinationId: number;
+
+  constructor(name: string, description: string, fromDestinationId?: number, toDestinationId?: number, createdBy?: string) {
+    this.name = name;
+    this.description = description;
+    this.fromDestinationId = fromDestinationId;
+    this.toDestinationId = toDestinationId;
+    this.createdBy = createdBy;
+  }
 }

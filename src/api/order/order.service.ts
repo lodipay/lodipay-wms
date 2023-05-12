@@ -43,9 +43,13 @@ export class OrderService {
   }
 
   async update(id: number, updateOrderDto: UpdateOrderDto) {
-    const order = await this.orderRepository.findOne(id);
-    order.to = await this.destRepository.findOne({ id: updateOrderDto.toDestinationId });
-    order.from = await this.destRepository.findOne({ id: updateOrderDto.fromDestinationId });
+    const order = await this.findOne(id);
+    if (updateOrderDto.toDestinationId) {
+      order.to = await this.destRepository.findOne({ id: updateOrderDto.toDestinationId });
+    }
+    if (updateOrderDto.fromDestinationId) {
+      order.from = await this.destRepository.findOne({ id: updateOrderDto.fromDestinationId });
+    }
     order.createdBy = updateOrderDto.createdBy;
     order.name = updateOrderDto.name;
     order.description = updateOrderDto.description;
