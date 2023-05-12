@@ -25,7 +25,7 @@ export class Warehouse extends ParentEntity {
   @OneToMany({ entity: () => Location, mappedBy: 'warehouse', orphanRemoval: true })
   locations = new Collection<Location>(this);
 
-  @OneToOne(() => Destination, destination => destination.warehouse, { owner: true })
+  @OneToOne(() => Destination, destination => destination.warehouse)
   destination: Destination;
 
   constructor(name: string, description: string) {

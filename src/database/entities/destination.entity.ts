@@ -17,7 +17,7 @@ export class Destination extends ParentEntity {
   @Property()
   description: string;
 
-  @OneToOne(() => Warehouse, warehouse => warehouse.destination)
+  @OneToOne(() => Warehouse, warehouse => warehouse.destination, { owner: true })
   warehouse?: Warehouse;
 
   @OneToMany(() => Order, order => order.from)

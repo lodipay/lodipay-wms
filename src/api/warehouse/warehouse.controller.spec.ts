@@ -1,7 +1,6 @@
 import { Collection, EntityManager } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { Test, TestingModule } from '@nestjs/testing';
-import { Destination } from '../../database/entities/destination.entity';
 import { Warehouse } from '../../database/entities/warehouse.entity';
 import { CreateWarehouseDto } from './dto/create-warehouse.dto';
 import { UpdateWarehouseDto } from './dto/update-warehouse.dto';
@@ -11,8 +10,6 @@ import { WarehouseService } from './warehouse.service';
 describe('WarehouseController', () => {
   let controller: WarehouseController;
   let warehouseService: WarehouseService;
-
-  const testDestination = new Destination('Tolgoit', 'Tolgoit description');
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -27,13 +24,6 @@ describe('WarehouseController', () => {
         },
         {
           provide: getRepositoryToken(Warehouse),
-          useFactory: jest.fn(() => ({
-            findAll: jest.fn(),
-            findOne: jest.fn(),
-          })),
-        },
-        {
-          provide: getRepositoryToken(Destination),
           useFactory: jest.fn(() => ({
             findAll: jest.fn(),
             findOne: jest.fn(),
@@ -54,7 +44,6 @@ describe('WarehouseController', () => {
     };
     jest.spyOn(warehouseService, 'create').mockImplementation((dto: CreateWarehouseDto) => {
       const warehouse = new Warehouse(dto.name, dto.description);
-      warehouse.destination = testDestination;
       warehouse.id = 1;
 
       return Promise.resolve(warehouse);
@@ -72,18 +61,12 @@ describe('WarehouseController', () => {
   it('findAll', async () => {
     const result = [new Warehouse('WH1', 'WH1 description'), new Warehouse('WH2', 'WH2 description')];
 
-    result.forEach((wh, i) => {
-      const newTestDestination = { ...testDestination, id: i + 1 };
-      wh.destination = newTestDestination;
-    });
-
     jest.spyOn(warehouseService, 'findAll').mockImplementation(() => Promise.resolve(result));
     expect(await controller.findAll()).toBe(result);
   });
 
   it('findOne', async () => {
     const result = new Warehouse('WH1', 'WH1 description');
-    result.destination = testDestination;
     jest.spyOn(warehouseService, 'findOne').mockImplementation((id: number) => {
       result.id = id;
       return Promise.resolve(result);
@@ -93,7 +76,6 @@ describe('WarehouseController', () => {
 
   it('update', async () => {
     const result = new Warehouse('WH1-1', 'WH1 description');
-    result.destination = testDestination;
     result.id = 1;
 
     jest.spyOn(warehouseService, 'update').mockImplementation(() => {

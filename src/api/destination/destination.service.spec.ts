@@ -1,18 +1,20 @@
 import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
+import { faker } from '@mikro-orm/seeder';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Destination } from '../../database/entities/destination.entity';
+import { Warehouse } from '../../database/entities/warehouse.entity';
 import { DestinationService } from './destination.service';
+import { CreateDestinationDto } from './dto/create-destination.dto';
 
 describe('DestinationService', () => {
   let service: DestinationService;
   let em: EntityManager;
-  let repository: EntityRepository<Destination>;
+  let destRepo: EntityRepository<Destination>;
+  let whRepo: EntityRepository<Warehouse>;
+  let warehouse: Warehouse;
 
-  const dto = {
-    name: 'Zaisan',
-    description: 'Zaisan description',
-  };
+  let createDto: CreateDestinationDto;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -34,44 +36,107 @@ describe('DestinationService', () => {
             findOne: jest.fn(),
           })),
         },
+        {
+          provide: getRepositoryToken(Warehouse),
+          useFactory: jest.fn(() => ({
+            findAll: jest.fn(),
+            findOne: jest.fn(),
+          })),
+        },
       ],
     }).compile();
 
+    createDto = new CreateDestinationDto(faker.address.street(), faker.address.streetAddress(), 1);
+
     service = module.get<DestinationService>(DestinationService);
     em = module.get<EntityManager>(EntityManager);
-    repository = module.get<EntityRepository<Destination>>(getRepositoryToken(Destination));
+    destRepo = module.get<EntityRepository<Destination>>(getRepositoryToken(Destination));
+    whRepo = module.get<EntityRepository<Warehouse>>(getRepositoryToken(Warehouse));
+    warehouse = new Warehouse(faker.company.name(), faker.company.catchPhrase());
+    warehouse.id = createDto.warehouseId;
   });
 
-  it('should create', async () => {
-    const result = new Destination(dto.name, dto.description);
+  it('should create destination without warehouse', async () => {
+    const result = new Destination(createDto.name, createDto.description);
 
     jest.spyOn(em, 'persistAndFlush').mockImplementation((obj: Destination) => {
       result.id = obj.id = 1;
+      result.warehouse = undefined;
 
       return Promise.resolve();
     });
 
-    expect(await service.create(dto)).toEqual({
+    expect(await service.create({ name: createDto.name, description: createDto.description })).toEqual({
+      ...result,
+      createdAt: expect.any(Date),
+    });
+  });
+
+  it('should create destination with warehouse', async () => {
+    const result = new Destination(createDto.name, createDto.description);
+
+    jest.spyOn(whRepo, 'findOne').mockImplementation((): any => {
+      return Promise.resolve(warehouse);
+    });
+
+    jest.spyOn(em, 'persistAndFlush').mockImplementation((obj: Destination) => {
+      result.id = obj.id = 1;
+      warehouse.id = 1;
+      result.warehouse = warehouse;
+      result.createdAt = new Date();
+
+      return Promise.resolve();
+    });
+
+    expect(await service.create(createDto)).toEqual({
+      ...result,
+      createdAt: expect.any(Date),
+    });
+  });
+
+  it('should create destination without warehouse', async () => {
+    const result = new Destination(createDto.name, createDto.description);
+
+    jest.spyOn(em, 'persistAndFlush').mockImplementation((obj: Destination) => {
+      result.id = obj.id = 1;
+      result.createdAt = new Date();
+
+      return Promise.resolve();
+    });
+
+    expect(await service.create(createDto)).toEqual({
       ...result,
       createdAt: expect.any(Date),
     });
   });
 
   it('should findAll', async () => {
-    const result = [new Destination(`${dto.name} 1`, `${dto.description} 1`), new Destination(`${dto.name} 2`, `${dto.description} 2`)];
+    const result = [];
+    const loopTimes = 5;
+    for (let i = 0; i < loopTimes; i++) {
+      const destination = new Destination(faker.address.street(), faker.address.streetAddress());
+      destination.id = i + 1;
+      if (i % 2 === 0) {
+        const warehouse = new Warehouse(faker.company.name(), faker.company.catchPhrase());
+        warehouse.id = i + 1;
+        destination.warehouse = warehouse;
+      }
+      result.push(destination);
+    }
 
-    jest.spyOn(repository, 'findAll').mockImplementation((): any => {
+    jest.spyOn(destRepo, 'findAll').mockImplementation((): any => {
       return Promise.resolve(result);
     });
 
+    expect(await service.findAll()).toHaveLength(loopTimes);
     expect(await service.findAll()).toStrictEqual(result);
   });
 
   it('should findOne', async () => {
-    const result = new Destination(dto.name, dto.description);
+    const result = new Destination(createDto.name, createDto.description);
     result.id = 1;
 
-    jest.spyOn(repository, 'findOne').mockImplementation((): any => {
+    jest.spyOn(destRepo, 'findOne').mockImplementation((): any => {
       return Promise.resolve(result);
     });
 
@@ -84,14 +149,14 @@ describe('DestinationService', () => {
   it('should update', async () => {
     const result = {
       id: 1,
-      name: dto.name,
-      description: dto.description,
+      name: createDto.name,
+      description: createDto.description,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
     jest.spyOn(service, 'findOne').mockImplementation(() => {
-      const destination = new Destination(dto.name, dto.description);
+      const destination = new Destination(createDto.name, createDto.description);
       destination.id = result.id;
 
       return Promise.resolve(destination);
@@ -107,29 +172,29 @@ describe('DestinationService', () => {
       return obj1;
     });
 
-    const updatedResult = new Destination(dto.name, dto.description);
+    const updatedResult = new Destination(createDto.name, createDto.description);
     updatedResult.id = 1;
     updatedResult.createdAt = new Date();
     updatedResult.updatedAt = new Date();
 
     expect(
       await service.update(1, {
-        name: dto.name,
-        description: dto.description,
+        name: createDto.name,
+        description: createDto.description,
       }),
     ).toEqual({
       ...updatedResult,
-      name: dto.name,
-      description: dto.description,
+      name: createDto.name,
+      description: createDto.description,
       updatedAt: expect.any(Date),
     });
   });
 
   it('should remove', async () => {
-    const result = new Destination(dto.name, dto.description);
+    const result = new Destination(createDto.name, createDto.description);
     result.id = 1;
 
-    jest.spyOn(repository, 'findOne').mockImplementation((options: any): any => {
+    jest.spyOn(destRepo, 'findOne').mockImplementation((options: any): any => {
       expect(options.id).toBe(result.id);
       return Promise.resolve(result);
     });

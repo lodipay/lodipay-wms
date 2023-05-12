@@ -1,4 +1,4 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class CreateWarehouseDto {
   /**
@@ -14,9 +14,6 @@ export class CreateWarehouseDto {
    */
   @IsString()
   readonly description: string;
-
-  @IsNumber()
-  destinationId: number;
 
   constructor(name: string, description: string) {
     this.name = name;

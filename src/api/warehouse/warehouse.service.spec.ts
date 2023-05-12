@@ -1,7 +1,6 @@
 import { Collection, EntityManager, EntityRepository } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { Test, TestingModule } from '@nestjs/testing';
-import { Destination } from '../../database/entities/destination.entity';
 import { Warehouse } from '../../database/entities/warehouse.entity';
 import { CreateWarehouseDto } from './dto/create-warehouse.dto';
 import { WarehouseService } from './warehouse.service';
@@ -10,7 +9,6 @@ describe('WarehouseService', () => {
   let service: WarehouseService;
   let em: EntityManager;
   let whRepository: EntityRepository<Warehouse>;
-  let destRepository: EntityRepository<Destination>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -32,36 +30,21 @@ describe('WarehouseService', () => {
             findOne: jest.fn(),
           })),
         },
-        {
-          provide: getRepositoryToken(Destination),
-          useFactory: jest.fn(() => ({
-            findOne: jest.fn(),
-          })),
-        },
       ],
     }).compile();
 
     service = module.get<WarehouseService>(WarehouseService);
     em = module.get<EntityManager>(EntityManager);
     whRepository = module.get<EntityRepository<Warehouse>>(getRepositoryToken(Warehouse));
-    destRepository = module.get<EntityRepository<Destination>>(getRepositoryToken(Destination));
   });
 
   it('create', async () => {
     const dto = new CreateWarehouseDto('WH1', 'WH1 description');
-    dto.destinationId = 1;
 
     const result = new Warehouse(dto.name, dto.description);
-    const destination = new Destination('Test', 'Test destination');
-
-    jest.spyOn(destRepository, 'findOne').mockImplementation((): any => {
-      destination.id = 1;
-      return Promise.resolve(destination);
-    });
 
     jest.spyOn(em, 'persistAndFlush').mockImplementation((obj: Warehouse) => {
       result.id = obj.id = 1;
-      result.destination = destination;
 
       return Promise.resolve();
     });
@@ -70,7 +53,6 @@ describe('WarehouseService', () => {
     expect(result.id).toBe(1);
     expect(result.name).toBe(dto.name);
     expect(result.description).toBe(dto.description);
-    expect(result.destination).toBe(destination);
     expect(result.locations).toBeInstanceOf(Collection);
     expect(result.createdAt).toBeInstanceOf(Date);
   });
