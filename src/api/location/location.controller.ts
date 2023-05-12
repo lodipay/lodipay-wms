@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiGenericListResponse } from '../../common/decorator/api-generic-list-response.decorator';
 import { ApiGenericResponse } from '../../common/decorator/api-generic-response.decorator';
@@ -31,7 +39,10 @@ export class LocationController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateLocationDto: UpdateLocationDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateLocationDto: UpdateLocationDto,
+  ) {
     return this.locationService.update(+id, updateLocationDto);
   }
 

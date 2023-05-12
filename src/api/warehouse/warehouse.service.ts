@@ -10,12 +10,12 @@ export class WarehouseService {
   constructor(
     @InjectRepository(Warehouse)
     private readonly warehouseRepository: EntityRepository<Warehouse>,
+
     private readonly em: EntityManager,
   ) {}
 
   async create(dto: CreateWarehouseDto): Promise<Warehouse> {
     const warehouse = new Warehouse(dto.name, dto.description);
-
     await this.em.persistAndFlush(warehouse);
 
     return warehouse;
@@ -29,7 +29,10 @@ export class WarehouseService {
     return this.warehouseRepository.findOne({ id });
   }
 
-  async update(id: number, updateWarehouseDto: UpdateWarehouseDto): Promise<Warehouse> {
+  async update(
+    id: number,
+    updateWarehouseDto: UpdateWarehouseDto,
+  ): Promise<Warehouse> {
     const warehouse = await this.findOne(id);
     this.em.assign(warehouse, updateWarehouseDto, { mergeObjects: true });
 
