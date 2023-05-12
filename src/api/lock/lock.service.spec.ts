@@ -1,6 +1,10 @@
 import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { Test, TestingModule } from '@nestjs/testing';
+import {
+  getEntityManagerMockConfig,
+  getRepositoryMockConfig,
+} from '../../common/mock';
 import { Lock } from '../../database/entities/lock.entity';
 import { LockService } from './lock.service';
 
@@ -15,22 +19,8 @@ describe('LockService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         LockService,
-        {
-          provide: EntityManager,
-          useFactory: jest.fn(() => ({
-            flush: jest.fn(),
-            persistAndFlush: jest.fn(),
-            removeAndFlush: jest.fn(),
-            assign: jest.fn(),
-          })),
-        },
-        {
-          provide: getRepositoryToken(Lock),
-          useFactory: jest.fn(() => ({
-            findAll: jest.fn(),
-            findOne: jest.fn(),
-          })),
-        },
+        getEntityManagerMockConfig(),
+        getRepositoryMockConfig(Lock),
       ],
     }).compile();
 
@@ -58,7 +48,10 @@ describe('LockService', () => {
   });
 
   it('findAll', async () => {
-    const result = [new Lock('E-commerce', yesterday, tomorrow), new Lock('Deliver to warehouse 1', yesterday, tomorrow)];
+    const result = [
+      new Lock('E-commerce', yesterday, tomorrow),
+      new Lock('Deliver to warehouse 1', yesterday, tomorrow),
+    ];
 
     jest.spyOn(repository, 'findAll').mockImplementation((): any => {
       return Promise.resolve(result);
@@ -71,10 +64,12 @@ describe('LockService', () => {
     const result = new Lock('Deliver to warehouse 2', yesterday, tomorrow);
     result.id = 1;
 
-    jest.spyOn(repository, 'findOne').mockImplementation((options: any): any => {
-      expect(options.id).toBe(result.id);
-      return Promise.resolve(result);
-    });
+    jest
+      .spyOn(repository, 'findOne')
+      .mockImplementation((options: any): any => {
+        expect(options.id).toBe(result.id);
+        return Promise.resolve(result);
+      });
 
     expect(await service.findOne(1)).toStrictEqual(result);
   });
@@ -103,7 +98,11 @@ describe('LockService', () => {
       return obj1;
     });
 
-    const updatedResult = new Lock('Delivery to warehouse 1', result.from, result.to);
+    const updatedResult = new Lock(
+      'Delivery to warehouse 1',
+      result.from,
+      result.to,
+    );
     updatedResult.id = result.id;
 
     expect(
@@ -119,10 +118,12 @@ describe('LockService', () => {
     const result = new Lock('Delivery to warehouse 1');
     result.id = 1;
 
-    jest.spyOn(repository, 'findOne').mockImplementation((options: any): any => {
-      expect(options.id).toBe(result.id);
-      return Promise.resolve(result);
-    });
+    jest
+      .spyOn(repository, 'findOne')
+      .mockImplementation((options: any): any => {
+        expect(options.id).toBe(result.id);
+        return Promise.resolve(result);
+      });
 
     expect(await service.remove(1)).toStrictEqual('success');
   });
