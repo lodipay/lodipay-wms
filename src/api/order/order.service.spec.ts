@@ -1,4 +1,10 @@
-import { EntityManager } from '@mikro-orm/core';
+import { PaginatedDto } from '@/common/dto/paginated.dto';
+import {
+  getEntityManagerMockConfig,
+  getRepositoryMockConfig,
+} from '@/common/mock';
+import { FilterService } from '@/common/service/filter.service';
+import { EntityManager, QueryOrder } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -17,41 +23,17 @@ describe('OrderService', () => {
   let orderRepo: EntityRepository<Order>;
   let testOrderDto: CreateOrderDto;
   let em: EntityManager;
+  let filterService: FilterService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         OrderService,
-        {
-          provide: EntityManager,
-          useFactory: jest.fn(() => ({
-            flush: jest.fn(),
-            persistAndFlush: jest.fn(),
-            removeAndFlush: jest.fn(),
-            assign: jest.fn(),
-          })),
-        },
-        {
-          provide: getRepositoryToken(Order),
-          useFactory: jest.fn(() => ({
-            findAll: jest.fn(),
-            findOne: jest.fn(),
-          })),
-        },
-        {
-          provide: getRepositoryToken(Destination),
-          useFactory: jest.fn(() => ({
-            findAll: jest.fn(),
-            findOne: jest.fn(),
-          })),
-        },
-        {
-          provide: getRepositoryToken(Warehouse),
-          useFactory: jest.fn(() => ({
-            findAll: jest.fn(),
-            findOne: jest.fn(),
-          })),
-        },
+        FilterService,
+        getEntityManagerMockConfig(),
+        getRepositoryMockConfig(Order),
+        getRepositoryMockConfig(Destination),
+        getRepositoryMockConfig(Warehouse),
       ],
     }).compile();
 
@@ -85,6 +67,8 @@ describe('OrderService', () => {
     );
     orderRepo = module.get<EntityRepository<Order>>(getRepositoryToken(Order));
     em = module.get<EntityManager>(EntityManager);
+
+    filterService = module.get<FilterService>(FilterService);
   });
 
   it('should create an order', async () => {
@@ -208,5 +192,48 @@ describe('OrderService', () => {
       updatedAt: expect.any(Date),
       createdAt: expect.any(Date),
     });
+  });
+
+  it('search', async () => {
+    const query = {
+      page: 2,
+      limit: 10,
+      query: {
+        filter: {
+          name: {
+            $ilike: '%tasty%',
+          },
+        },
+        order: {
+          name: QueryOrder.DESC,
+        },
+      },
+    };
+
+    const entity = new Order('Transfer', '#123121');
+    entity.from = tolgoit;
+    entity.to = zaisan;
+
+    const result = [testOrder, entity];
+    jest.spyOn(filterService, 'search').mockImplementation((_, filterDto) => {
+      expect(filterDto).toStrictEqual(query);
+      const paginatedDto = new PaginatedDto();
+      paginatedDto.result = result;
+      paginatedDto.page = filterDto.page;
+      paginatedDto.limit = filterDto.limit;
+      paginatedDto.total = 100;
+      paginatedDto.totalPage = 10;
+
+      return Promise.resolve(paginatedDto);
+    });
+
+    const paginatedDto = new PaginatedDto();
+    paginatedDto.result = result;
+    paginatedDto.page = query.page;
+    paginatedDto.limit = query.limit;
+    paginatedDto.total = 100;
+    paginatedDto.totalPage = 10;
+
+    expect(await service.search(query)).toStrictEqual(paginatedDto);
   });
 });

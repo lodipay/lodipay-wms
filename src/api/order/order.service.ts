@@ -1,3 +1,5 @@
+import { FilterDto } from '@/common/dto/filter.dto';
+import { FilterService } from '@/common/service/filter.service';
 import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
@@ -20,6 +22,7 @@ export class OrderService {
     private readonly warehouseRepository: EntityRepository<Warehouse>,
 
     private readonly em: EntityManager,
+    private readonly filterService: FilterService,
   ) {}
 
   async create(createOrderDto: CreateOrderDto) {
@@ -36,6 +39,10 @@ export class OrderService {
 
     await this.em.persistAndFlush(order);
     return order;
+  }
+
+  search(filterDto: FilterDto) {
+    return this.filterService.search<Order>(Order, filterDto);
   }
 
   findAll() {
@@ -76,22 +83,4 @@ export class OrderService {
 
     return 'deleted';
   }
-
-  // private checkWarehouses(dto: CreateOrderDto | UpdateOrderDto) {
-  //   if (dto.fromDestinationId && !dto.toDestinationId) {
-  //     throw new BadRequestException('To warehouse is required');
-  //   }
-
-  //   if (!dto.fromDestinationId && dto.toDestinationId) {
-  //     throw new BadRequestException('From warehouse is required');
-  //   }
-  // }
-
-  // private defineWarehouses(order: Order, dto: CreateOrderDto | UpdateOrderDto) {
-  //   if (dto.fromWarehouseId && dto.toWarehouseId) {
-  //     order.from = this.em.getReference(Warehouse, dto.fromWarehouseId);
-  //     order.to = this.em.getReference(Warehouse, dto.toWarehouseId);
-  //   }
-  //   return order;
-  // }
 }
