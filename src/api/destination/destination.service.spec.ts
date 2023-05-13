@@ -216,6 +216,7 @@ describe('DestinationService', () => {
       ...updatedResult,
       name: createDto.name,
       description: createDto.description,
+      createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
     });
   });
