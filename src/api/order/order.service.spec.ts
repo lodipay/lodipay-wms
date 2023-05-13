@@ -1,5 +1,6 @@
 import { PaginatedDto } from '@/common/dto/paginated.dto';
 import { InvalidArgumentException } from '@/common/exception/invalid.argument.exception';
+import { NotFoundException } from '@/common/exception/not.found.exception';
 import {
   getEntityManagerMockConfig,
   getRepositoryMockConfig,
@@ -8,7 +9,6 @@ import { FilterService } from '@/common/service/filter.service';
 import { EntityManager, QueryOrder } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
-import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { plainToClass } from 'class-transformer';
 import { Destination } from '../../database/entities/destination.entity';
