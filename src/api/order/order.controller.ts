@@ -1,3 +1,6 @@
+import { ApiPaginatedResponse } from '@/common/decorator/api-paginated-response.decorator';
+import { FilterDto } from '@/common/dto/filter.dto';
+import { Order } from '@/database/entities/order.entity';
 import {
   Body,
   Controller,
@@ -6,6 +9,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -22,9 +26,13 @@ export class OrderController {
     return this.orderService.create(createOrderDto);
   }
 
+  /**
+   * SearchApi
+   */
   @Get()
-  findAll() {
-    return this.orderService.findAll();
+  @ApiPaginatedResponse(Order)
+  search(@Query() filterDto: FilterDto) {
+    return this.orderService.search(filterDto);
   }
 
   @Get(':id')

@@ -1,5 +1,8 @@
-import { EntityManager } from '@mikro-orm/core';
-import { getRepositoryToken } from '@mikro-orm/nestjs';
+import {
+  getEntityManagerMockConfig,
+  getRepositoryMockConfig,
+} from '@/common/mock';
+import { FilterService } from '@/common/service/filter.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Destination } from '../../database/entities/destination.entity';
 import { Order } from '../../database/entities/order.entity';
@@ -30,34 +33,11 @@ describe('OrderController', () => {
       controllers: [OrderController],
       providers: [
         OrderService,
-        {
-          provide: EntityManager,
-          useFactory: jest.fn(() => ({
-            flush: jest.fn(),
-            persistAndFlush: jest.fn(),
-          })),
-        },
-        {
-          provide: getRepositoryToken(Order),
-          useFactory: jest.fn(() => ({
-            findAll: jest.fn(),
-            findOne: jest.fn(),
-          })),
-        },
-        {
-          provide: getRepositoryToken(Destination),
-          useFactory: jest.fn(() => ({
-            findAll: jest.fn(),
-            findOne: jest.fn(),
-          })),
-        },
-        {
-          provide: getRepositoryToken(Warehouse),
-          useFactory: jest.fn(() => ({
-            findAll: jest.fn(),
-            findOne: jest.fn(),
-          })),
-        },
+        FilterService,
+        getEntityManagerMockConfig(),
+        getRepositoryMockConfig(Order),
+        getRepositoryMockConfig(Destination),
+        getRepositoryMockConfig(Warehouse),
       ],
     }).compile();
 
@@ -96,16 +76,6 @@ describe('OrderController', () => {
     expect(result.from).toStrictEqual(fromDestination);
     expect(result.to).toBeInstanceOf(Destination);
     expect(result.to).toStrictEqual(toDestination);
-  });
-
-  it('should find all orders', async () => {
-    const result = [order1, order2];
-
-    jest
-      .spyOn(service, 'findAll')
-      .mockImplementation(() => Promise.resolve(result));
-
-    expect(await controller.findAll()).toBe(result);
   });
 
   it('should update an order', async () => {
