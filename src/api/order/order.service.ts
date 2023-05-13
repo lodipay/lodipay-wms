@@ -1,9 +1,10 @@
 import { FilterDto } from '@/common/dto/filter.dto';
 import { InvalidArgumentException } from '@/common/exception/invalid.argument.exception';
+import { NotFoundException } from '@/common/exception/not.found.exception';
 import { FilterService } from '@/common/service/filter.service';
 import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Destination } from '../../database/entities/destination.entity';
 import { Order } from '../../database/entities/order.entity';
 import { Warehouse } from '../../database/entities/warehouse.entity';
