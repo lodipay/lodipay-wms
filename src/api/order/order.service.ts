@@ -1,8 +1,9 @@
 import { FilterDto } from '@/common/dto/filter.dto';
+import { InvalidArgumentException } from '@/common/exception/invalid.argument.exception';
 import { FilterService } from '@/common/service/filter.service';
 import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Destination } from '../../database/entities/destination.entity';
 import { Order } from '../../database/entities/order.entity';
 import { Warehouse } from '../../database/entities/warehouse.entity';
@@ -30,12 +31,32 @@ export class OrderService {
     order.name = createOrderDto.name;
     order.description = createOrderDto.description;
     order.createdBy = createOrderDto.createdBy;
-    order.from = await this.destRepository.findOne({
+
+    if (createOrderDto.toDestinationId === createOrderDto.fromDestinationId) {
+      throw new InvalidArgumentException(
+        'From and to destinations cannot be the same',
+      );
+    }
+
+    const fromDestination = await this.destRepository.findOne({
       id: createOrderDto.fromDestinationId,
     });
-    order.to = await this.destRepository.findOne({
+
+    if (!fromDestination) {
+      throw new InvalidArgumentException('Invalid from destination');
+    }
+
+    order.from = fromDestination;
+
+    const toDestination = await this.destRepository.findOne({
       id: createOrderDto.toDestinationId,
     });
+
+    if (!toDestination) {
+      throw new InvalidArgumentException('Invalid to destination');
+    }
+
+    order.to = toDestination;
 
     await this.em.persistAndFlush(order);
     return order;
@@ -55,15 +76,45 @@ export class OrderService {
 
   async update(id: number, updateOrderDto: UpdateOrderDto) {
     const order = await this.findOne(id);
-    if (updateOrderDto.toDestinationId) {
-      order.to = await this.destRepository.findOne({
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+    if (
+      updateOrderDto.toDestinationId &&
+      updateOrderDto.toDestinationId !== order.to.id
+    ) {
+      if (updateOrderDto.toDestinationId === order.from.id) {
+        throw new InvalidArgumentException(
+          'From and to destinations cannot be the same',
+        );
+      }
+      const toDestination = await this.destRepository.findOne({
         id: updateOrderDto.toDestinationId,
       });
+
+      if (!toDestination) {
+        throw new InvalidArgumentException('Invalid to destination');
+      }
+
+      order.to = toDestination;
     }
-    if (updateOrderDto.fromDestinationId) {
-      order.from = await this.destRepository.findOne({
+    if (
+      updateOrderDto.fromDestinationId &&
+      updateOrderDto.fromDestinationId !== order.from.id
+    ) {
+      if (updateOrderDto.fromDestinationId === order.to.id) {
+        throw new InvalidArgumentException(
+          'From and to destinations cannot be the same',
+        );
+      }
+      const fromDestination = await this.destRepository.findOne({
         id: updateOrderDto.fromDestinationId,
       });
+
+      if (!fromDestination) {
+        throw new InvalidArgumentException('Invalid from destination');
+      }
+      order.from = fromDestination;
     }
     order.createdBy = updateOrderDto.createdBy;
     order.name = updateOrderDto.name;
@@ -77,10 +128,10 @@ export class OrderService {
   async remove(id: number) {
     const order = await this.findOne(id);
 
-    if (order) {
-      await this.em.removeAndFlush(order);
+    if (!order) {
+      throw new NotFoundException('order not found');
     }
 
-    return 'deleted';
+    return this.em.removeAndFlush(order);
   }
 }

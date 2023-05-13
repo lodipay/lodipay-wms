@@ -10,7 +10,7 @@ export class FilterService {
   async search<T>(entityClass: new () => T, filterDto: FilterDto) {
     let limit = filterDto.limit || 20;
     if (limit < 1) {
-      limit = 1;
+      limit = 20;
     }
 
     let page = filterDto.page || 1;

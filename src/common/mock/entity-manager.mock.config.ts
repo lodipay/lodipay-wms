@@ -8,6 +8,7 @@ export function getEntityManagerMockConfig() {
       persistAndFlush: jest.fn(),
       removeAndFlush: jest.fn(),
       assign: jest.fn(),
+      findAndCount: jest.fn(),
     })),
   };
 }
