@@ -5,9 +5,8 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import DatabaseConfig from '../config/DatabaseConfig';
 import MainConfig from '../config/MainConfig';
 import { ApiModule } from './api/api.module';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ResponseTransformInterceptor } from './common/interceptor/response-transform.interceptor';
+import { FilterModule } from './common/module/filter/filter.module';
 
 @Module({
   imports: [
@@ -22,10 +21,10 @@ import { ResponseTransformInterceptor } from './common/interceptor/response-tran
       useClass: DatabaseConfig,
     }),
     ApiModule,
+    FilterModule,
   ],
-  controllers: [AppController],
+  controllers: [],
   providers: [
-    AppService,
     {
       provide: APP_INTERCEPTOR,
       useClass: ResponseTransformInterceptor,

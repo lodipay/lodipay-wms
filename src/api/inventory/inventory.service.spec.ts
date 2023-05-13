@@ -1,4 +1,5 @@
 import { InvalidArgumentException } from '@/common/exception/invalid.argument.exception';
+import { FilterService } from '@/common/module/filter/filter.service';
 import {
   Collection,
   EntityManager,
@@ -14,7 +15,6 @@ import {
   getEntityManagerMockConfig,
   getRepositoryMockConfig,
 } from '../../common/mock';
-import { FilterService } from '../../common/service/filter.service';
 import { Inventory } from '../../database/entities/inventory.entity';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';

@@ -4,11 +4,13 @@ import {
   Filter,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryKey,
   Property,
   Unique,
 } from '@mikro-orm/core';
 import { ApiProperty } from '@nestjs/swagger';
+import { OrderItem } from './order-item.entity';
 
 @Entity()
 @Filter({ name: 'mainFilter', cond: args => args })
@@ -101,6 +103,9 @@ export class Inventory {
 
   @ManyToOne({ entity: () => Inventory })
   parent?: Inventory;
+
+  @OneToOne({ entity: () => OrderItem })
+  orderItem?: OrderItem;
 
   get parentId() {
     return this.parent?.id;

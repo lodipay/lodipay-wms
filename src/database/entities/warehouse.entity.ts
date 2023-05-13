@@ -37,7 +37,7 @@ export class Warehouse extends ParentEntity {
   locations = new Collection<Location>(this);
 
   @OneToOne(() => Destination, destination => destination.warehouse)
-  destination: Destination;
+  destination?: Destination;
 
   constructor(name: string, description: string) {
     super();

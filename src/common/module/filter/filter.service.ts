@@ -1,9 +1,10 @@
 import { EntityManager } from '@mikro-orm/core';
-import { Injectable } from '@nestjs/common';
-import { FilterDto } from '../dto/filter.dto';
-import { PaginatedDto } from '../dto/paginated.dto';
+import { Global, Injectable } from '@nestjs/common';
+import { FilterDto } from '../../dto/filter.dto';
+import { PaginatedDto } from '../../dto/paginated.dto';
 
 @Injectable()
+@Global()
 export class FilterService {
   constructor(private readonly em: EntityManager) {}
 

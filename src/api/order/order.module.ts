@@ -1,4 +1,3 @@
-import { FilterService } from '@/common/service/filter.service';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
 import { Destination } from '../../database/entities/destination.entity';
@@ -10,6 +9,6 @@ import { OrderService } from './order.service';
 @Module({
   imports: [MikroOrmModule.forFeature([Order, Destination, Warehouse])],
   controllers: [OrderController],
-  providers: [OrderService, FilterService],
+  providers: [OrderService],
 })
 export class OrderModule {}
