@@ -94,6 +94,10 @@
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
+    "coveragePathIgnorePatterns" : [
+      "src/database/migrations", 
+      "src/database/seeders" 
+    ],
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
