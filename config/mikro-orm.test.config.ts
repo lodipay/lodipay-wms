@@ -1,7 +1,7 @@
 import { Options } from '@mikro-orm/core';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 
-const mikroOrmConfig: Options = {
+const mikroOrmTestConfig: Options = {
   type: 'postgresql',
   dbName: 'test',
   entities: ['dist/src/database/entities/*.entity.{js,ts}'],
@@ -10,4 +10,4 @@ const mikroOrmConfig: Options = {
   metadataProvider: TsMorphMetadataProvider,
 };
 
-export default mikroOrmConfig;
+export default mikroOrmTestConfig;

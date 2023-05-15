@@ -3,10 +3,12 @@ image: node:latest
 default:
   before_script:
     - npm ci --cache .npm --prefer-offline
+    - npm run build
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - .npm/
+      - dist/
 
 variables:
   NPM_TOKEN: ${CI_JOB_TOKEN}
@@ -33,7 +35,7 @@ test:
   coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
   before_script:
     - npm install
-    - npx mikro-orm cache:generate --ts
+    - npx mikro-orm cache:generate
   script:
     - npm run test:cov
   artifacts:
