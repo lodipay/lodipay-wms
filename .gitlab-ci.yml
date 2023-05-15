@@ -31,6 +31,7 @@ test:
   stage: test
   coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
   before_script:
+    - npm install
     - npx mikro-orm cache:generate
   script:
     - npm run test:cov
