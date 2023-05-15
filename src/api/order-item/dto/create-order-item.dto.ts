@@ -7,7 +7,7 @@ export class CreateOrderItemDto extends OmitType(OrderItem, [
   'createdAt',
   'updatedAt',
   'order',
-  'inventory',
+  'inventories',
 ]) {
   @IsNumber()
   orderId: number;

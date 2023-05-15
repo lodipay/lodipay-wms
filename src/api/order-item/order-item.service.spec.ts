@@ -1,7 +1,12 @@
 import { FilterService } from '@/common/module/filter/filter.service';
-import { EntityManager, EntityRepository, QueryOrder } from '@mikro-orm/core';
+import {
+  Collection,
+  EntityManager,
+  EntityRepository,
+  QueryOrder,
+} from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { plainToClass } from 'class-transformer';
 import { DateTime } from 'luxon';
 import { PaginatedDto } from '../../common/dto/paginated.dto';
@@ -10,6 +15,7 @@ import {
   getEntityManagerMockConfig,
   getRepositoryMockConfig,
 } from '../../common/mock';
+import { getTestingModule } from '../../common/mock/testing.module.mock';
 import { Inventory } from '../../database/entities/inventory.entity';
 import { OrderItem } from '../../database/entities/order-item.entity';
 import { Order } from '../../database/entities/order.entity';
@@ -31,16 +37,14 @@ describe('OrderItemService', () => {
   let inventory2: Inventory;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        OrderItemService,
-        FilterService,
-        getEntityManagerMockConfig(),
-        getRepositoryMockConfig(Order),
-        getRepositoryMockConfig(OrderItem),
-        getRepositoryMockConfig(Inventory),
-      ],
-    }).compile();
+    const module: TestingModule = await getTestingModule([
+      OrderItemService,
+      FilterService,
+      getEntityManagerMockConfig(),
+      getRepositoryMockConfig(Order),
+      getRepositoryMockConfig(OrderItem),
+      getRepositoryMockConfig(Inventory),
+    ]);
 
     service = module.get<OrderItemService>(OrderItemService);
     em = module.get<EntityManager>(EntityManager);
@@ -101,7 +105,7 @@ describe('OrderItemService', () => {
     orderItem = new OrderItem();
     orderItem.description = createDto.description;
     orderItem.inventoryAmount = createDto.inventoryAmount;
-    orderItem.inventory = inventory;
+    orderItem.inventories.add(inventory);
     orderItem.order = order;
   });
 
@@ -136,10 +140,11 @@ describe('OrderItemService', () => {
       });
 
       expect(await service.create(createDto)).toBeInstanceOf(OrderItem);
-      expect(await service.create(createDto)).toMatchObject({
-        ...orderItem,
-        createdAt: expect.any(Date),
-      });
+      const responseData = await service.create(createDto);
+      expect(responseData.createdAt).toEqual(expect.any(Date));
+      expect(responseData.inventories).toBeInstanceOf(Collection);
+      expect(responseData.inventoryAmount).toBe(createDto.inventoryAmount);
+      expect(responseData.description).toBe(createDto.description);
     });
 
     it('should throw an error if order not found', async () => {
@@ -166,6 +171,9 @@ describe('OrderItemService', () => {
 
   describe('orderItem update', () => {
     it('should update an order item without updating order or inventory', async () => {
+      const orderId = 3;
+      orderItem.id = orderId;
+
       jest
         .spyOn(orderItemRepo, 'findOne')
         .mockImplementation((id: number): any => {
@@ -216,15 +224,17 @@ describe('OrderItemService', () => {
         inventoryId: inventory2.id,
       };
 
-      jest.spyOn(orderItemRepo, 'upsert').mockImplementation((entity): any => {
-        expect(entity.id).toBe(orderItem.id);
-        entity.description = updateDto.description;
-        entity.inventoryAmount = updateDto.inventoryAmount;
-        entity.inventory = inventory2;
-        entity.order = order2;
-        entity.updatedAt = new Date();
-        return Promise.resolve(orderItem);
-      });
+      jest
+        .spyOn(orderItemRepo, 'upsert')
+        .mockImplementation((entity: OrderItem): any => {
+          expect(entity.id).toBe(orderItem.id);
+          entity.description = updateDto.description;
+          entity.inventoryAmount = updateDto.inventoryAmount;
+          entity.inventories.add(inventory2);
+          entity.order = order2;
+          entity.updatedAt = new Date();
+          return Promise.resolve(orderItem);
+        });
 
       expect(await service.update(orderItem.id, updateDto)).toEqual(orderItem);
     });
@@ -255,7 +265,7 @@ describe('OrderItemService', () => {
     const orderItem2 = new OrderItem();
     orderItem2.description = 'Lorem ipsum';
     orderItem2.inventoryAmount = 100;
-    orderItem2.inventory = inventory;
+    orderItem2.inventories.add(inventory);
     orderItem2.order = order;
 
     const result = [orderItem, orderItem2];

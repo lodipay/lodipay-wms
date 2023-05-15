@@ -1,5 +1,5 @@
 import { FilterService } from '@/common/module/filter/filter.service';
-import { QueryOrder } from '@mikro-orm/core';
+import { Collection, QueryOrder } from '@mikro-orm/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { plainToClass } from 'class-transformer';
 import { PaginatedDto } from '../../common/dto/paginated.dto';
@@ -73,6 +73,7 @@ describe('OrderItemController', () => {
     expect(await controller.findOne(`${data.id}`)).toEqual({
       ...data,
       createdAt: expect.any(Date),
+      inventories: expect.any(Collection),
     });
   });
 

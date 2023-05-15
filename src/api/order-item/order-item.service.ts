@@ -43,7 +43,7 @@ export class OrderItemService {
 
     const orderItem = new OrderItem();
     orderItem.inventoryAmount = createOrderDto.inventoryAmount;
-    orderItem.inventory = inventory;
+    orderItem.inventories.add(inventory);
     orderItem.description = createOrderDto.description;
     order.orderItems.add(orderItem);
 
@@ -67,22 +67,32 @@ export class OrderItemService {
   async update(id: number, updateOrderItemDto: UpdateOrderItemDto) {
     const orderItem = await this.findOne(id);
 
-    if (
-      updateOrderItemDto.inventoryId &&
-      updateOrderItemDto.inventoryId !== orderItem.inventory.id
-    ) {
-      orderItem.inventory = await this.inventoryRepo.findOne(
+    let inventory;
+    if (updateOrderItemDto.inventoryId) {
+      inventory = await this.inventoryRepo.findOne(
         updateOrderItemDto.inventoryId,
       );
+
+      if (!inventory) {
+        throw new InvalidArgumentException('Inventory not found');
+      }
+    }
+
+    if (inventory && !orderItem.inventories.contains(inventory)) {
+      orderItem.inventories.add(inventory);
     }
 
     if (
       updateOrderItemDto.orderId &&
       updateOrderItemDto.orderId !== orderItem.order.id
     ) {
-      orderItem.order = await this.orderRepo.findOne(
-        updateOrderItemDto.orderId,
-      );
+      const order = await this.orderRepo.findOne(updateOrderItemDto.orderId);
+
+      if (!order) {
+        throw new InvalidArgumentException('Order not found');
+      }
+
+      orderItem.order = order;
     }
 
     orderItem.description = orderItem.description;

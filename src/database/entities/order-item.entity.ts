@@ -1,4 +1,10 @@
-import { Entity, ManyToOne, OneToOne, Property } from '@mikro-orm/core';
+import {
+  Collection,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  Property,
+} from '@mikro-orm/core';
 import { Inventory } from './inventory.entity';
 import { Order } from './order.entity';
 import { ParentEntity } from './parent.entity';
@@ -14,9 +20,10 @@ export class OrderItem extends ParentEntity {
   @ManyToOne({ entity: () => Order })
   order!: Order;
 
-  @OneToOne(() => Inventory, inventory => inventory.orderItem, {
-    owner: true,
-    onUpdateIntegrity: 'set null',
+  @OneToMany({
+    entity: () => Inventory,
+    mappedBy: 'orderItem',
+    orphanRemoval: false,
   })
-  inventory!: Inventory;
+  inventories = new Collection<Inventory>(this);
 }

@@ -14,6 +14,7 @@ const mikroOrmConfig: Options = {
   dbName: process.env.WHS_DB,
   entities: ['dist/src/**/*.entity.{js,ts}'],
   entitiesTs: ['src/**/*.entity.ts'],
+  connect: process.env.ENVIRONMENT !== 'test',
   metadataProvider: TsMorphMetadataProvider,
   migrations: {
     tableName: 'mikro_orm_migrations',

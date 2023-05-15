@@ -4,7 +4,6 @@ import {
   Filter,
   ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryKey,
   Property,
   Unique,
@@ -104,7 +103,7 @@ export class Inventory {
   @ManyToOne({ entity: () => Inventory })
   parent?: Inventory;
 
-  @OneToOne({ entity: () => OrderItem })
+  @ManyToOne({ entity: () => OrderItem })
   orderItem?: OrderItem;
 
   get parentId() {
