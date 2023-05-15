@@ -4,7 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 import { ConfigService } from '@nestjs/config';
-import { CONFIG_NAME_MAIN, MainConfig } from '../config/MainConfig';
+import { CONFIG_NAME_MAIN, MainConfig } from '../config/main.config';
 import { FilterDto } from './common/dto/filter.dto';
 import { GenericResponseDto } from './common/dto/generic-response.dto';
 import { PaginatedDto } from './common/dto/paginated.dto';

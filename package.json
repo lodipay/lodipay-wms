@@ -121,7 +121,7 @@
   "mikro-orm": {
     "useTsNode": true,
     "configPaths": [
-      "./config/microOrmConfig.ts"
+      "./config/mikro-orm.config.ts"
     ]
   },
   "_moduleAliases": {

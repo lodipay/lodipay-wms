@@ -3,7 +3,7 @@ import {
   MikroOrmOptionsFactory,
 } from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
-import mikroOrmConfig from './microOrmConfig';
+import mikroOrmConfig from './mikro-orm.config';
 
 export const DB_CONNECTION = 'default';
 
