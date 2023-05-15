@@ -11,7 +11,7 @@ export const getTestingModule = (providers: any[]): Promise<TestingModule> => {
         autoLoadEntities: false,
         connect: false,
         dbName: 'test',
-        entities: ['dist/src/database/entities/*.entity.{js,ts}'],
+        // entities: ['dist/src/database/entities/*.entity.{js,ts}'],
         entitiesTs: ['src/database/entities/*.entity.ts'],
         metadataProvider: TsMorphMetadataProvider,
       }),
