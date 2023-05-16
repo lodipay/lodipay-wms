@@ -1,6 +1,6 @@
 {
   "name": "whs",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "Lodipay WHS",
   "author": "",
   "private": true,
@@ -94,9 +94,9 @@
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
-    "coveragePathIgnorePatterns" : [
-      "src/database/migrations", 
-      "src/database/seeders" 
+    "coveragePathIgnorePatterns": [
+      "src/database/migrations",
+      "src/database/seeders"
     ],
     "collectCoverageFrom": [
       "**/*.(t|j)s"
