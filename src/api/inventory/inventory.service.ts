@@ -1,9 +1,9 @@
 import { InvalidArgumentException } from '@/common/exception/invalid.argument.exception';
+import { FilterService } from '@/common/module/filter/filter.service';
 import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
 import { FilterDto } from '../../common/dto/filter.dto';
-import { FilterService } from '../../common/service/filter.service';
 import { Inventory } from '../../database/entities/inventory.entity';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';

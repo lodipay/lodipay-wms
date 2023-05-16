@@ -1,7 +1,7 @@
 import { Inventory } from '@/database/entities/inventory.entity';
 import { EntityManager } from '@mikro-orm/core';
 import { Test, TestingModule } from '@nestjs/testing';
-import { getEntityManagerMockConfig } from '../mock';
+import { getEntityManagerMockConfig } from '../../mock';
 import { FilterService } from './filter.service';
 
 describe('FilterService', () => {

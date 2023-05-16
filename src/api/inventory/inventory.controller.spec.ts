@@ -1,3 +1,4 @@
+import { FilterService } from '@/common/module/filter/filter.service';
 import { QueryOrder } from '@mikro-orm/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { plainToClass } from 'class-transformer';
@@ -7,7 +8,6 @@ import {
   getEntityManagerMockConfig,
   getRepositoryMockConfig,
 } from '../../common/mock';
-import { FilterService } from '../../common/service/filter.service';
 import { Inventory } from '../../database/entities/inventory.entity';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';

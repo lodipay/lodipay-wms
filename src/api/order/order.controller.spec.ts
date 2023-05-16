@@ -2,8 +2,11 @@ import {
   getEntityManagerMockConfig,
   getRepositoryMockConfig,
 } from '@/common/mock';
-import { FilterService } from '@/common/service/filter.service';
+import { FilterService } from '@/common/module/filter/filter.service';
+import { QueryOrder } from '@mikro-orm/core';
 import { Test, TestingModule } from '@nestjs/testing';
+import { plainToClass } from 'class-transformer';
+import { PaginatedDto } from '../../common/dto/paginated.dto';
 import { Destination } from '../../database/entities/destination.entity';
 import { Order } from '../../database/entities/order.entity';
 import { Warehouse } from '../../database/entities/warehouse.entity';
@@ -100,5 +103,80 @@ describe('OrderController', () => {
     expect(await controller.update('1', { name: 'order10' })).toStrictEqual(
       result,
     );
+  });
+
+  it('should find order by id', async () => {
+    order1.id = 1;
+    jest.spyOn(service, 'findOne').mockImplementation(id => {
+      expect(id).toBe(order1.id);
+      return Promise.resolve(order1);
+    });
+
+    expect(await controller.findOne(`${order1.id}`)).toEqual({
+      ...order1,
+      createdAt: expect.any(Date),
+    });
+  });
+
+  it('should search', async () => {
+    const query = {
+      page: 2,
+      limit: 10,
+      query: {
+        filter: {
+          description: {
+            $ilike: '%tasty%',
+          },
+        },
+        order: {
+          id: QueryOrder.ASC,
+        },
+      },
+    };
+
+    const result = [
+      {
+        id: 1,
+        name: 'order1',
+        description: 'Lorem ipsum dolor sit amet tasty',
+        from: new Destination('Tolgoit', 'Tolgoit description'),
+        to: new Destination('Zaisan', 'Zaisan description'),
+      },
+      {
+        id: 2,
+        name: 'order2',
+        description: 'Lorem ipsum dolor sit amet',
+        from: new Destination('Tolgoit', 'Tolgoit description'),
+        to: new Destination('Zaisan', 'Zaisan description'),
+      },
+    ].map(data => plainToClass(Order, data));
+
+    jest.spyOn(service, 'search').mockImplementation(filterDto => {
+      expect(filterDto).toStrictEqual(query);
+      const paginatedDto = new PaginatedDto();
+      paginatedDto.result = result;
+      paginatedDto.page = filterDto.page;
+      paginatedDto.limit = filterDto.limit;
+      paginatedDto.total = 100;
+      paginatedDto.totalPage = 10;
+
+      return Promise.resolve(paginatedDto);
+    });
+
+    const paginatedDto = new PaginatedDto();
+    paginatedDto.result = result;
+    paginatedDto.page = query.page;
+    paginatedDto.limit = query.limit;
+    paginatedDto.total = 100;
+    paginatedDto.totalPage = 10;
+
+    expect(await controller.search(query)).toStrictEqual(paginatedDto);
+  });
+
+  it('remove', async () => {
+    jest.spyOn(service, 'remove').mockImplementation(() => {
+      return Promise.resolve();
+    });
+    expect(await controller.remove('1')).toBe(undefined);
   });
 });

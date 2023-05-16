@@ -5,7 +5,7 @@ import {
   getEntityManagerMockConfig,
   getRepositoryMockConfig,
 } from '@/common/mock';
-import { FilterService } from '@/common/service/filter.service';
+import { FilterService } from '@/common/module/filter/filter.service';
 import { EntityManager, QueryOrder } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
@@ -287,6 +287,7 @@ describe('OrderService', () => {
         to: expect.any(Destination),
         updatedAt: expect.any(Date),
         createdAt: expect.any(Date),
+        orderItems: expect.anything(),
       });
     });
 

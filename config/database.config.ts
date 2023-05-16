@@ -1,6 +1,9 @@
-import { MikroOrmModuleOptions, MikroOrmOptionsFactory } from '@mikro-orm/nestjs';
+import {
+  MikroOrmModuleOptions,
+  MikroOrmOptionsFactory,
+} from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
-import mikroOrmConfig from './microOrmConfig';
+import mikroOrmConfig from './mikro-orm.config';
 
 export const DB_CONNECTION = 'default';
 
@@ -11,7 +14,7 @@ export default class DatabaseConfig implements MikroOrmOptionsFactory {
   createMikroOrmOptions(): MikroOrmModuleOptions {
     return {
       name: DB_CONNECTION,
-      debug: process.env.ENVIRONMENT !== process.env.ENVIRONMENT_PROD,
+      debug: process.env.ENVIRONMENT === process.env.ENVIRONMENT_DEV,
       autoLoadEntities: false,
       ...mikroConfig,
     };
