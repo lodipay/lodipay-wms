@@ -19,16 +19,22 @@ stages:
   - release
 
 lint:commit:
+  tags:
+    - lodi
   stage: lint
   script:
     - echo "${CI_COMMIT_MESSAGE}" | npx commitlint
 
 lint:code:
+  tags:
+    - lodi
   stage: lint
   script:
     - npm run lint
 
 test:
+  tags:
+    - lodi
   stage: test
   coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
   before_script:
@@ -46,6 +52,8 @@ test:
         path: coverage/cobertura-coverage.xml
 
 release:
+  tags:
+    - lodi
   stage: release
   before_script:
     - cp .gitlab/npmrc .npmrc
