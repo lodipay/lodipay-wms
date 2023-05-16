@@ -24,8 +24,6 @@ lint:commit:
     - echo "${CI_COMMIT_MESSAGE}" | npx commitlint
 
 lint:code:
-  tags:
-    - lodi
   stage: lint
   script:
     - npm run lint
