@@ -22,7 +22,7 @@ export class Order extends ParentEntity {
   @Property({ nullable: true })
   createdBy?: string;
 
-  @Enum(() => OrderStatus)
+  @Enum({ name: 'p_status', columnType: 'enum', items: () => OrderStatus })
   status = OrderStatus.NEW;
 
   @ManyToOne({ entity: () => Destination })
