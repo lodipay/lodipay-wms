@@ -32,11 +32,11 @@ describe('LockService', () => {
   it('create', async () => {
     const dto = {
       reason: 'E-commerce',
-      from: yesterday,
-      to: tomorrow,
+      activeFrom: yesterday,
+      activeTo: tomorrow,
     };
 
-    const result = new Lock(dto.reason, dto.from, dto.to);
+    const result = new Lock(dto.reason, dto.activeFrom, dto.activeTo);
 
     jest.spyOn(em, 'persistAndFlush').mockImplementation((obj: Lock) => {
       result.id = obj.id = 1;
@@ -78,12 +78,16 @@ describe('LockService', () => {
     const result = {
       id: 1,
       reason: 'Delivery to warehouse 3',
-      from: yesterday,
-      to: tomorrow,
+      activeFrom: yesterday,
+      activeTo: tomorrow,
     };
 
     jest.spyOn(service, 'findOne').mockImplementation(() => {
-      const warehouse = new Lock(result.reason, result.from, result.to);
+      const warehouse = new Lock(
+        result.reason,
+        result.activeFrom,
+        result.activeTo,
+      );
       warehouse.id = result.id;
 
       return Promise.resolve(warehouse);
@@ -92,24 +96,24 @@ describe('LockService', () => {
     jest.spyOn(em, 'assign').mockImplementation((obj1: Lock, obj2: Lock) => {
       const mergedObj = Object.assign({}, obj1, obj2);
       obj1.reason = mergedObj.reason;
-      obj1.from = mergedObj.from;
-      obj1.to = mergedObj.to;
+      obj1.activeFrom = mergedObj.activeFrom;
+      obj1.activeTo = mergedObj.activeTo;
 
       return obj1;
     });
 
     const updatedResult = new Lock(
       'Delivery to warehouse 1',
-      result.from,
-      result.to,
+      result.activeFrom,
+      result.activeTo,
     );
     updatedResult.id = result.id;
 
     expect(
       await service.update(1, {
         reason: updatedResult.reason,
-        from: updatedResult.from,
-        to: updatedResult.to,
+        activeFrom: updatedResult.activeFrom,
+        activeTo: updatedResult.activeTo,
       }),
     ).toStrictEqual(updatedResult);
   });
