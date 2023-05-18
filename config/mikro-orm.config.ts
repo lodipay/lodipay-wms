@@ -2,6 +2,7 @@ import { Options } from '@mikro-orm/core';
 import { TSMigrationGenerator } from '@mikro-orm/migrations';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import * as dotenv from 'dotenv';
+import { CustomNamingStrategy } from './naming.strategy';
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ const mikroOrmConfig: Options = {
     emit: 'ts', // seeder generation mode
     fileName: (className: string) => className, // seeder file naming convention
   },
+  namingStrategy: CustomNamingStrategy,
 };
 
 export default mikroOrmConfig;
