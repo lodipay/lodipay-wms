@@ -6,7 +6,7 @@ import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
 import { Destination } from '../../database/entities/destination.entity';
-import { Order } from '../../database/entities/order.entity';
+import { Order, OrderStatus } from '../../database/entities/order.entity';
 import { Warehouse } from '../../database/entities/warehouse.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
@@ -32,6 +32,7 @@ export class OrderService {
     order.name = createOrderDto.name;
     order.description = createOrderDto.description;
     order.createdBy = createOrderDto.createdBy;
+    order.status = OrderStatus.NEW;
 
     if (createOrderDto.toDestinationId === createOrderDto.fromDestinationId) {
       throw new InvalidArgumentException(
@@ -117,9 +118,11 @@ export class OrderService {
       }
       order.from = fromDestination;
     }
-    order.createdBy = updateOrderDto.createdBy;
-    order.name = updateOrderDto.name;
-    order.description = updateOrderDto.description;
+
+    order.createdBy = updateOrderDto.createdBy || order.createdBy;
+    order.name = updateOrderDto.name || order.createdBy;
+    order.description = updateOrderDto.description || order.createdBy;
+    order.status = updateOrderDto.status || order.status;
 
     this.em.persistAndFlush(order);
 

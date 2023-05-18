@@ -1,6 +1,7 @@
 import {
   Collection,
   Entity,
+  Enum,
   ManyToOne,
   OneToMany,
   Property,
@@ -8,6 +9,16 @@ import {
 import { Destination } from './destination.entity';
 import { OrderItem } from './order-item.entity';
 import { ParentEntity } from './parent.entity';
+
+export enum OrderStatus {
+  NEW = 'NEW',
+  READY = 'READY',
+  DELIVERING = 'DELIVERING',
+  DELIVERED = 'DELIVERED',
+  DONE = 'DONE',
+  CANCELED = 'CANCELED',
+  RETURNED = 'RETURNED',
+}
 
 @Entity()
 export class Order extends ParentEntity {
@@ -19,6 +30,9 @@ export class Order extends ParentEntity {
 
   @Property({ nullable: true })
   createdBy?: string;
+
+  @Enum(() => OrderStatus)
+  status = OrderStatus.NEW;
 
   @ManyToOne({ entity: () => Destination })
   from: Destination;
