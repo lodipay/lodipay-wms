@@ -2,10 +2,10 @@ import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
 
 @Entity()
 export class Lock {
-  constructor(reason?: string, from?: Date, to?: Date) {
+  constructor(reason?: string, activeFrom?: Date, activeTo?: Date) {
     this.reason = reason;
-    this.from = from;
-    this.to = to;
+    this.activeFrom = activeFrom;
+    this.activeTo = activeTo;
   }
 
   @PrimaryKey()
@@ -15,8 +15,8 @@ export class Lock {
   reason: string;
 
   @Property({ nullable: true })
-  from?: Date;
+  activeFrom?: Date;
 
   @Property({ nullable: true })
-  to?: Date;
+  activeTo?: Date;
 }

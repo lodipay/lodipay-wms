@@ -1,5 +1,6 @@
 import { Factory, Faker } from '@mikro-orm/seeder';
-import { Order, OrderStatus } from '../../entities/order.entity';
+import { OrderStatus } from '../../../common/enum/order-status.enum';
+import { Order } from '../../entities/order.entity';
 
 export class OrderFactory extends Factory<Order> {
   model = Order;

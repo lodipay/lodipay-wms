@@ -16,17 +16,17 @@ participant "Event bus" as eb
 !$inventoryStatusOrdered = "ORDERED"
 !$inventoryStatusWrong = "WRONG"
 
-alt Get order list
-    staff -> whs ++: Get order list page
-    note right
-        ?page={page_number}
+staff -> whs ++: Get order list page
+note right
+    ?page={page_number}
 
-        wh_id={id}
-    end note
-    whs -> db ++: Get orders
-    db --> whs --: Return orders
-    whs --> staff --: Orders list page
-else 
+    wh_id={id}
+end note
+whs -> db ++: Get orders
+db --> whs --: Return orders
+whs --> staff --: Orders list page
+
+alt 
     staff -> whs ++: Search order by filter
     note right
         status=$orderStatusReady

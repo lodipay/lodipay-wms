@@ -6,19 +6,10 @@ import {
   OneToMany,
   Property,
 } from '@mikro-orm/core';
+import { OrderStatus } from '../../common/enum/order-status.enum';
 import { Destination } from './destination.entity';
 import { OrderItem } from './order-item.entity';
 import { ParentEntity } from './parent.entity';
-
-export enum OrderStatus {
-  NEW = 'NEW',
-  READY = 'READY',
-  DELIVERING = 'DELIVERING',
-  DELIVERED = 'DELIVERED',
-  DONE = 'DONE',
-  CANCELED = 'CANCELED',
-  RETURNED = 'RETURNED',
-}
 
 @Entity()
 export class Order extends ParentEntity {
