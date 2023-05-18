@@ -1,4 +1,4 @@
-### Inventory receive sequence diagram 
+### Inventory receive sequence diagram
 
 ```plantuml
 
@@ -17,10 +17,10 @@ participant "Event bus" as eb
 !$inventoryStatusWrong = "WRONG"
 
 staff -> whs ++: Get order list page
-note right 
+note right
     status=$statusPending, wh_id={id}, page={page_number}
 end note
-whs -> db ++: Get orders 
+whs -> db ++: Get orders
 db --> whs --: Return orders
 whs --> staff --: Orders list page
 
@@ -28,11 +28,11 @@ whs --> staff --: Orders list page
 
 staff -> whs ++: Search order by filter
 note right
-    status=$statusPending | $statusReceived 
+    status=$statusPending | $statusReceived
     inventory_status=$inventoryStatusOrdered | $inventoryStatusExtra | $inventoryStatusDamaged | $inventoryStatusWrong
 end note
 whs -> db : Get orders by filter
-db --> whs: Return filter result 
+db --> whs: Return filter result
 whs --> staff --: Orders list by query page
 
 
