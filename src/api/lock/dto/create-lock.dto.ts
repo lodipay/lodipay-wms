@@ -5,8 +5,8 @@ export class CreateLockDto {
   reason: string;
 
   @IsDate()
-  from?: Date;
+  activeFrom?: Date;
 
   @IsDate()
-  to?: Date;
+  activeTo?: Date;
 }

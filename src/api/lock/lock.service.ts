@@ -14,7 +14,7 @@ export class LockService {
   ) {}
 
   async create(dto: CreateLockDto): Promise<Lock> {
-    const lock = new Lock(dto.reason, dto.from, dto.to);
+    const lock = new Lock(dto.reason, dto.activeFrom, dto.activeTo);
 
     await this.em.persistAndFlush(lock);
 

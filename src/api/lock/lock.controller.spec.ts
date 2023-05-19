@@ -38,13 +38,13 @@ describe('LockController', () => {
   it('create', async () => {
     const data = {
       reason: 'E-commerce',
-      from: new Date(Date.now() - 1000 * 60 * 60 * 24),
-      to: new Date(Date.now()),
+      activeFrom: new Date(Date.now() - 1000 * 60 * 60 * 24),
+      activeTo: new Date(Date.now()),
     };
     jest
       .spyOn(lockService, 'create')
       .mockImplementation((dto: CreateLockDto) => {
-        const lock = new Lock(dto.reason, dto.from, dto.to);
+        const lock = new Lock(dto.reason, dto.activeFrom, dto.activeTo);
         lock.id = 1;
 
         return Promise.resolve(lock);

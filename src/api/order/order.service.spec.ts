@@ -9,8 +9,10 @@ import { FilterService } from '@/common/module/filter/filter.service';
 import { EntityManager, QueryOrder } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { plainToClass } from 'class-transformer';
+import { OrderStatus } from '../../common/enum/order-status.enum';
+import { getTestingModule } from '../../common/mock/testing.module.mock';
 import { Destination } from '../../database/entities/destination.entity';
 import { Order } from '../../database/entities/order.entity';
 import { Warehouse } from '../../database/entities/warehouse.entity';
@@ -30,16 +32,14 @@ describe('OrderService', () => {
   let filterService: FilterService;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        OrderService,
-        FilterService,
-        getEntityManagerMockConfig(),
-        getRepositoryMockConfig(Order),
-        getRepositoryMockConfig(Destination),
-        getRepositoryMockConfig(Warehouse),
-      ],
-    }).compile();
+    const module: TestingModule = await getTestingModule([
+      OrderService,
+      FilterService,
+      getEntityManagerMockConfig(),
+      getRepositoryMockConfig(Order),
+      getRepositoryMockConfig(Destination),
+      getRepositoryMockConfig(Warehouse),
+    ]);
 
     service = module.get<OrderService>(OrderService);
 
@@ -112,18 +112,27 @@ describe('OrderService', () => {
           return Promise.resolve(tolgoit);
         });
 
-      jest.spyOn(em, 'persistAndFlush').mockImplementation((obj: Order) => {
-        obj.id = 1;
+      const result = {
+        name: createDto.name,
+        description: createDto.description,
+        createdBy: createDto.createdBy,
+        status: undefined,
+        from: zaisan,
+        to: tolgoit,
+        createdAt: undefined,
+      };
 
+      jest.spyOn(em, 'persistAndFlush').mockImplementation((obj: Order) => {
+        obj.id = result['id'] = 1;
+        obj.createdAt = new Date();
+        obj.status = OrderStatus.NEW;
         return Promise.resolve();
       });
 
       expect(await service.create(createDto)).toBeInstanceOf(Order);
       expect(await service.create(createDto)).toMatchObject({
-        id: 1,
-        name: createDto.name,
-        description: createDto.description,
-        createdBy: createDto.createdBy,
+        ...result,
+        status: OrderStatus.NEW,
         from: expect.any(Destination),
         to: expect.any(Destination),
         createdAt: expect.any(Date),
@@ -241,6 +250,7 @@ describe('OrderService', () => {
       order.name = testOrder.name;
       order.description = testOrder.description;
       order.createdBy = testOrder.createdBy;
+      order.status = OrderStatus.NEW;
       order.createdAt = new Date();
       order.updatedAt = new Date();
       order.from = tolgoit;
@@ -263,10 +273,14 @@ describe('OrderService', () => {
         testOrderDto.name,
         testOrderDto.description,
       );
+
+      testOrder.status = OrderStatus.DELIVERED;
+
       updatedResult.id = 1;
       updatedResult.name = testOrder.name;
       updatedResult.description = testOrder.description;
       updatedResult.createdBy = testOrder.createdBy;
+      updatedResult.status = testOrder.status;
       updatedResult.updatedAt = new Date();
       updatedResult.createdAt = new Date();
 
@@ -277,6 +291,7 @@ describe('OrderService', () => {
           createdBy: order.createdBy,
           fromDestinationId: zaisan.id,
           toDestinationId: guchinhoyr.id,
+          status: testOrder.status,
         }),
       ).toEqual({
         id: 1,
@@ -288,6 +303,7 @@ describe('OrderService', () => {
         updatedAt: expect.any(Date),
         createdAt: expect.any(Date),
         orderItems: expect.anything(),
+        status: testOrder.status,
       });
     });
 

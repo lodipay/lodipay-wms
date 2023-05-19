@@ -8,7 +8,7 @@ participant "WHS" as whs
 participant "Database" as db
 participant "Event bus" as eb
 
-!$statusPending = "PENDING"
+!$orderStatusReady = "READY"
 !$statusReceived = "RECEIVED"
 !$inventoryStatusOrdered = "ORDERED"
 !$inventoryStatusExtra = "EXTRA"
@@ -18,28 +18,29 @@ participant "Event bus" as eb
 
 staff -> whs ++: Get order list page
 note right
-    status=$statusPending, wh_id={id}, page={page_number}
+    ?page={page_number}
+
+    wh_id={id}
 end note
 whs -> db ++: Get orders
 db --> whs --: Return orders
 whs --> staff --: Orders list page
 
+alt 
+    staff -> whs ++: Search order by filter
+    note right
+        status=$orderStatusReady
+    end note
+    whs -> db : Get orders by filter
+    db --> whs: Return filter result
+    whs --> staff --: Orders list by query page
+end
 
-
-staff -> whs ++: Search order by filter
-note right
-    status=$statusPending | $statusReceived
-    inventory_status=$inventoryStatusOrdered | $inventoryStatusExtra | $inventoryStatusDamaged | $inventoryStatusWrong
-end note
-whs -> db : Get orders by filter
-db --> whs: Return filter result
-whs --> staff --: Orders list by query page
-
-
+|||
 
 staff -> staff ++--: Select order
 
-
+|||
 
 staff -> whs ++: Get selected order information
 note right
@@ -49,18 +50,21 @@ whs -> db ++: Get selected order by ID
 db --> whs --: Return order information & inventory list
 whs --> staff --: Selected order page && inventory list
 
-
-staff -> staff ++--: Fill required inventory information
+staff -> staff ++--: Fill required inventories information
 
 staff -> whs++: Save the inventory information
 note right
     order_id={order_id}
+    warehouse_id={warehouse_id}
     inventory_id={inventory_id}
     quantity={items_quantity}
     exp_date={expire_date}
     inventory_status=$inventoryStatusOrdered | $inventoryStatusExtra | $inventoryStatusDamaged | $inventoryStatusWrong
-    notes={notes}
+    description={description}
 end note
+
+|||
+
 whs -> db ++: Save inventory information
 db --> whs --: Return saved inventories
 whs ->> eb: Received inventories information

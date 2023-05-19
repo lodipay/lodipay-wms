@@ -1,10 +1,12 @@
 import {
   Collection,
   Entity,
+  Enum,
   ManyToOne,
   OneToMany,
   Property,
 } from '@mikro-orm/core';
+import { OrderStatus } from '../../common/enum/order-status.enum';
 import { Destination } from './destination.entity';
 import { OrderItem } from './order-item.entity';
 import { ParentEntity } from './parent.entity';
@@ -19,6 +21,9 @@ export class Order extends ParentEntity {
 
   @Property({ nullable: true })
   createdBy?: string;
+
+  @Enum(() => OrderStatus)
+  status = OrderStatus.NEW;
 
   @ManyToOne({ entity: () => Destination })
   from: Destination;
