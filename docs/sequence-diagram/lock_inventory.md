@@ -11,7 +11,7 @@ participant "InventoryService" as inventoryService
 participant "InventoryLockRepo" as inventoryLockRepo
 
 group Create lock inventory
-    controller -> service: Lock inventory
+    controller -> service ++: Lock inventory
     note right
         lockId: number
         whId: number
@@ -25,6 +25,9 @@ group Create lock inventory
         lockService --> service: undefined
         service --> service: InvalidRequestException\n('Lock not found')
     end
+
+    lockService --> service: Return lock result
+
     |||
     |||
 
@@ -34,6 +37,9 @@ group Create lock inventory
         warehouseService --> service: undefined
         service --> service: InvalidRequestException\n('WH not found')
     end
+
+    warehouseService --> service: Return warehouse result
+
     |||
     |||
 
@@ -44,15 +50,21 @@ group Create lock inventory
         service --> service: InvalidRequestException\n('Inventory not found')
     end
 
+    inventoryService --> service: Return inventory result
+
     |||
     |||
 
     ' service -> inventoryLockRepo: inventoryLockRepo.findOne({ whId: whId, inventoryId: inventoryId })
     ' inventoryLockRepo --> service: InventoryLock
 
+    service -> inventoryLockRepo: Get previous locked inventories by warehouse and inventory \n to check if inventory has enough quantity \n inventoryLockRepo.find({ whId: whId, inventoryId: inventoryId })
+
+    inventoryLockRepo --> service: InventoryLocks 
+
     service -> service: Check lock able inventory quantity
 
-    alt inventory.quantity - inventoryLockQuantity < 0
+    alt inventory.quantity - inventoryLockQuantity < 0 || Summary of InventoryLocks.quantity - inventoryLockQuantity < 0
         service --> service: inventoryLockQuantity InvalidRequestException\n('Not enough inventory in the warehouse')
     end
 
@@ -67,7 +79,7 @@ group Create lock inventory
 
     inventoryLockRepo --> service: Return locked inventory result
 
-    service --> controller: Return locked inventory result
+    service --> controller --: Return locked inventory result
 
     |||
     |||
