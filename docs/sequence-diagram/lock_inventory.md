@@ -4,71 +4,66 @@
 @startuml
 
 participant "Controller" as controller
-participant "InventoryLockService" as service
 participant "LockService" as lockService
+participant "LockRepo" as lockRepo
+participant "LockOwnerRepo" as lockOwnerRepo
 participant "WarehouseService" as warehouseService
 participant "InventoryService" as inventoryService
 participant "InventoryLockRepo" as inventoryLockRepo
 
 group Create lock inventory
-    controller -> service ++: Lock inventory
-    note right
-        lockId: number
-        whId: number
-        inventoryId: number
-        inventoryLockQuantity: number
-    end note
+    controller -> lockService ++: Lock inventory
 
-    service -> lockService: Get lock by id \n lockService.findOne({ id: lockId })
+    lockService -> lockRepo: Get lock by id \n lockService.findOne({ id: lockId })
     
+    lockRepo --> lockService: Return lock result
+
     alt lock not found
-        lockService --> service: undefined
-        service --> service: InvalidRequestException\n('Lock not found')
+        lockService --> controller: <InvalidRequestException> \n ('Lock not found')
     end
 
-    lockService --> service: Return lock result
-
     |||
     |||
 
-    service -> warehouseService: Get warehouse by id \n warehouseRepo.findOne({ id: whId })
+    lockService -> warehouseService: Get warehouse by id \n warehouseRepo.findOne({ id: whId })
+
+    warehouseService --> lockService: Return warehouse result
 
     alt warehouse not found
-        warehouseService --> service: undefined
-        service --> service: InvalidRequestException\n('WH not found')
+        lockService --> controller: <InvalidRequestException> \n ('WH not found')
     end
 
-    warehouseService --> service: Return warehouse result
 
     |||
     |||
 
-    service -> inventoryService: Get inventory by id \n inventoryService.findOne({ id: inventoryId, whId: whId })
+    lockService -> inventoryService: Get inventory by id \n inventoryService.findOne({ id: inventoryId, whId: whId })
+
+    inventoryService --> lockService: Return inventory result
 
     alt
-        inventoryService --> service: undefined
-        service --> service: InvalidRequestException\n('Inventory not found')
+        lockService --> controller: <InvalidRequestException> \n('Inventory not found')
     end
 
-    inventoryService --> service: Return inventory result
 
     |||
     |||
 
-    ' service -> inventoryLockRepo: inventoryLockRepo.findOne({ whId: whId, inventoryId: inventoryId })
-    ' inventoryLockRepo --> service: InventoryLock
+    ' lockService -> inventoryLockRepo: inventoryLockRepo.findOne({ whId: whId, inventoryId: inventoryId })
+    ' inventoryLockRepo --> lockService: InventoryLock
 
-    service -> inventoryLockRepo: Get previous locked inventories by warehouse and inventory \n to check if inventory has enough quantity \n inventoryLockRepo.find({ whId: whId, inventoryId: inventoryId })
+    ' inventoryLockRepo --> lockService: InventoryLocks 
 
-    inventoryLockRepo --> service: InventoryLocks 
+    lockService -> lockService ++: Get available inventory quantity
+    lockService -> inventoryLockRepo: Get previous locks \n inventoryLockRepo.find({ whId: whId, inventoryId: inventoryId })
+    inventoryLockRepo --> lockService: Return previous inventory locks
+    lockService --> lockService --: Available inventory quantity
 
-    service -> service: Check lock able inventory quantity
-
-    alt inventory.quantity - inventoryLockQuantity < 0 || Summary of InventoryLocks.quantity - inventoryLockQuantity < 0
-        service --> service: inventoryLockQuantity InvalidRequestException\n('Not enough inventory in the warehouse')
+    alt inventoryLockQuantity > available inventory quantity
+        lockService --> controller: <InvalidRequestException> \n('Not enough inventory in the warehouse')
     end
 
-    service -> inventoryLockRepo: Lock inventory
+    lockService -> inventoryLockRepo: Create lock inventory
 
     note right
         lockId: number
@@ -77,9 +72,9 @@ group Create lock inventory
         inventoryLockQuantity: number
     end note
 
-    inventoryLockRepo --> service: Return locked inventory result
+    inventoryLockRepo --> lockService: Return locked inventory result
 
-    service --> controller --: Return locked inventory result
+    lockService --> controller --: Return locked inventory result
 
     |||
     |||
@@ -89,24 +84,23 @@ end
 |||
 
 group Unlock inventory
-    controller -> service: Unlock inventory
+    controller -> lockService: Unlock inventory
 
     note right
         inventoryLockId: number
     end note
 
-    service -> lockService: Get lock by id \n lockService.findOne({ id: inventoryLockId })
+    lockService -> lockService: Get lock by id \n lockService.findOne({ id: inventoryLockId })
 
     alt lock not found
-        lockService --> service: undefined
-        service --> service: InvalidRequestException\n('Inventory lock not found')
+        lockService --> controller: <InvalidRequestException> \n('Inventory lock not found')
     end
 
-    service --> lockService: Delete inventory with { id: inventoryLockId }
+    lockService --> lockService: Delete inventory with { id: inventoryLockId }
 
-    lockService --> service: Return deleted inventory lock response
+    lockService --> lockService: Return deleted inventory lock response
 
-    service --> controller: Return deleted inventory lock response
+    lockService --> controller: Return deleted inventory lock response
 end
 
 @enduml
