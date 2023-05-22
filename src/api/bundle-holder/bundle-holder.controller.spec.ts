@@ -21,13 +21,13 @@ describe('BundleHolderController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [BundleHolderController],
       providers: [
         BundleHolderService,
         FilterService,
         getRepositoryMockConfig(BundleHolder),
         getEntityManagerMockConfig(),
       ],
+      controllers: [BundleHolderController],
     }).compile();
 
     controller = module.get<BundleHolderController>(BundleHolderController);

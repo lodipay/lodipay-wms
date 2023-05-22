@@ -1,7 +1,15 @@
-import { EntityManager } from '@mikro-orm/core';
-import { getRepositoryToken } from '@mikro-orm/nestjs';
+import { QueryOrder } from '@mikro-orm/core';
 import { Test, TestingModule } from '@nestjs/testing';
+import { plainToClass } from 'class-transformer';
+import { PaginatedDto } from '../../common/dto/paginated.dto';
+import {
+  getEntityManagerMockConfig,
+  getRepositoryMockConfig,
+} from '../../common/mock';
+import { FilterService } from '../../common/module/filter/filter.service';
+import { BundleHolder } from '../../database/entities/bundle-holder.entity';
 import { Bundle } from '../../database/entities/bundle.entity';
+import { BundleHolderService } from '../bundle-holder/bundle-holder.service';
 import { BundleController } from './bundle.controller';
 import { BundleService } from './bundle.service';
 import { CreateBundleDto } from './dto/create-bundle.dto';
@@ -17,19 +25,11 @@ describe('BundleController', () => {
       controllers: [BundleController],
       providers: [
         BundleService,
-        {
-          provide: EntityManager,
-          useFactory: jest.fn(() => ({
-            flush: jest.fn(),
-          })),
-        },
-        {
-          provide: getRepositoryToken(Bundle),
-          useFactory: jest.fn(() => ({
-            findAll: jest.fn(),
-            findOne: jest.fn(),
-          })),
-        },
+        FilterService,
+        BundleHolderService,
+        getRepositoryMockConfig(Bundle),
+        getRepositoryMockConfig(BundleHolder),
+        getEntityManagerMockConfig(),
       ],
     }).compile();
 
@@ -42,46 +42,81 @@ describe('BundleController', () => {
       description: 'E-commerce',
       activeFrom: new Date(Date.now() - 1000 * 60 * 60 * 24),
       activeTo: new Date(Date.now()),
+      bundleHolderId: 1,
     };
+    const bundleHolder = new BundleHolder();
+    bundleHolder.name = 'E-commerce';
+    bundleHolder.description = 'E-commerce description';
     jest
       .spyOn(bundleService, 'create')
       .mockImplementation((dto: CreateBundleDto) => {
-        const bundle = new Bundle({
-          description: dto.description,
-          activeFrom: dto.activeFrom,
-          activeTo: dto.activeTo,
-        });
+        const bundle = new Bundle();
+        bundle.description = dto.description;
+        bundle.activeFrom = dto.activeFrom;
+        bundle.activeTo = dto.activeTo;
+        bundle.bundleHolder = bundleHolder;
         bundle.id = 1;
+        bundle.createdAt = new Date();
 
         return Promise.resolve(bundle);
       });
 
+    delete data.bundleHolderId;
     const result = await controller.create(data);
     expect(result).toBeInstanceOf(Bundle);
-    expect(result).toEqual({ id: 1, ...data, createdAt: expect.any(Date) });
+    expect(result).toEqual({
+      id: 1,
+      ...data,
+      createdAt: expect.any(Date),
+      bundleHolder: expect.any(BundleHolder),
+    });
   });
 
-  it('findAll', async () => {
+  it('search', async () => {
+    const query = {
+      page: 2,
+      limit: 10,
+      query: {
+        filter: {
+          name: {
+            $ilike: '%holder%',
+          },
+        },
+        order: {
+          id: QueryOrder.ASC,
+        },
+      },
+    };
+
     const result = [
-      new Bundle({
-        description: 'E-commerce',
-        activeFrom: yesterday,
-        activeTo: tomorrow,
-      }),
-      new Bundle({
-        description: 'Vendor',
-        activeFrom: yesterday,
-        activeTo: tomorrow,
-      }),
+      plainToClass(Bundle, { id: 1, description: 'E-commerce 1' }),
+      plainToClass(Bundle, { id: 2, description: 'E-commerce 2' }),
     ];
-    jest
-      .spyOn(bundleService, 'findAll')
-      .mockImplementation(() => Promise.resolve(result));
-    expect(await controller.findAll()).toBe(result);
+
+    jest.spyOn(bundleService, 'search').mockImplementation(filterDto => {
+      expect(filterDto).toStrictEqual(query);
+      const paginatedDto = new PaginatedDto();
+      paginatedDto.result = result;
+      paginatedDto.page = filterDto.page;
+      paginatedDto.limit = filterDto.limit;
+      paginatedDto.total = 100;
+      paginatedDto.totalPage = 10;
+
+      return Promise.resolve(paginatedDto);
+    });
+
+    const paginatedDto = new PaginatedDto();
+    paginatedDto.result = result;
+    paginatedDto.page = query.page;
+    paginatedDto.limit = query.limit;
+    paginatedDto.total = 100;
+    paginatedDto.totalPage = 10;
+
+    expect(await controller.search(query)).toStrictEqual(paginatedDto);
   });
 
   it('findOne', async () => {
-    const result = new Bundle({
+    const result = plainToClass(Bundle, {
       description: 'E-commerce',
       activeFrom: yesterday,
       activeTo: tomorrow,
@@ -94,7 +129,7 @@ describe('BundleController', () => {
   });
 
   it('update', async () => {
-    const demoBundle = new Bundle({
+    const demoBundle = plainToClass(Bundle, {
       description: 'E-commerce',
       activeFrom: yesterday,
       activeTo: tomorrow,
@@ -108,7 +143,7 @@ describe('BundleController', () => {
     expect(
       await controller.update(
         '1',
-        new Bundle({
+        plainToClass(Bundle, {
           description: 'E-commerce',
         }),
       ),

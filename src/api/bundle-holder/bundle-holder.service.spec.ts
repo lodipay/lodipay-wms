@@ -1,7 +1,13 @@
-import { Collection, EntityManager, EntityRepository } from '@mikro-orm/core';
+import {
+  Collection,
+  EntityManager,
+  EntityRepository,
+  QueryOrder,
+} from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { TestingModule } from '@nestjs/testing';
 import { plainToClass } from 'class-transformer';
+import { PaginatedDto } from '../../common/dto/paginated.dto';
 import { InvalidArgumentException } from '../../common/exception/invalid.argument.exception';
 import {
   getEntityManagerMockConfig,
@@ -17,25 +23,26 @@ describe('BundleHolderService', () => {
   let service: BundleHolderService;
   let bundleHolderRepo: EntityRepository<BundleHolder>;
   let bundleHolder1: BundleHolder;
+  let bundleHolder2: BundleHolder;
+  let filterService: FilterService;
   let em: EntityManager;
 
   beforeEach(async () => {
-    const module: TestingModule = await getTestingModule(
-      [
+    const module: TestingModule = await getTestingModule({
+      providers: [
         BundleHolderService,
         FilterService,
         getEntityManagerMockConfig(),
         getRepositoryMockConfig(BundleHolder),
       ],
-      [],
-    );
+    });
 
     service = module.get<BundleHolderService>(BundleHolderService);
+    filterService = module.get<FilterService>(FilterService);
     bundleHolderRepo = module.get<EntityRepository<BundleHolder>>(
       getRepositoryToken(BundleHolder),
     );
     em = module.get<EntityManager>(EntityManager);
-    filterService = module.get<FilterService>(FilterService);
 
     bundleHolder1 = plainToClass(BundleHolder, {
       name: 'Bundle holder 1',
@@ -153,6 +160,46 @@ describe('BundleHolderService', () => {
         }),
       ).toEqual(bundleHolder1);
     });
+  });
+
+  it('search', async () => {
+    const query = {
+      page: 2,
+      limit: 10,
+      query: {
+        filter: {
+          name: {
+            $ilike: '%holder%',
+          },
+        },
+        order: {
+          name: QueryOrder.DESC,
+        },
+      },
+    };
+
+    const result = [bundleHolder1, bundleHolder2];
+
+    jest.spyOn(filterService, 'search').mockImplementation((_, filterDto) => {
+      expect(filterDto).toStrictEqual(query);
+      const paginatedDto = new PaginatedDto();
+      paginatedDto.result = result;
+      paginatedDto.page = filterDto.page;
+      paginatedDto.limit = filterDto.limit;
+      paginatedDto.total = 100;
+      paginatedDto.totalPage = 10;
+
+      return Promise.resolve(paginatedDto);
+    });
+
+    const paginatedDto = new PaginatedDto();
+    paginatedDto.result = result;
+    paginatedDto.page = query.page;
+    paginatedDto.limit = query.limit;
+    paginatedDto.total = 100;
+    paginatedDto.totalPage = 10;
+
+    expect(await service.search(query)).toStrictEqual(paginatedDto);
   });
 
   it('should remove', async () => {

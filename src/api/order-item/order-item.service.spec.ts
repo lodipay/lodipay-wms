@@ -37,14 +37,16 @@ describe('OrderItemService', () => {
   let inventory2: Inventory;
 
   beforeEach(async () => {
-    const module: TestingModule = await getTestingModule([
-      OrderItemService,
-      FilterService,
-      getEntityManagerMockConfig(),
-      getRepositoryMockConfig(Order),
-      getRepositoryMockConfig(OrderItem),
-      getRepositoryMockConfig(Inventory),
-    ]);
+    const module: TestingModule = await getTestingModule({
+      providers: [
+        OrderItemService,
+        FilterService,
+        getEntityManagerMockConfig(),
+        getRepositoryMockConfig(Order),
+        getRepositoryMockConfig(OrderItem),
+        getRepositoryMockConfig(Inventory),
+      ],
+    });
 
     service = module.get<OrderItemService>(OrderItemService);
     em = module.get<EntityManager>(EntityManager);

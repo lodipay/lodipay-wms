@@ -30,10 +30,10 @@ export class BundleService {
     bundle.bundleHolder = bundleHolder;
     delete dto.bundleHolderId;
 
-    this.em.assign(bundle, dto);
-    await this.em.persistAndFlush(bundle);
+    const newBundle = this.em.assign(bundle, dto);
+    await this.em.persistAndFlush(newBundle);
 
-    return bundle;
+    return newBundle;
   }
 
   search(filterDto: FilterDto) {

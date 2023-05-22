@@ -32,14 +32,16 @@ describe('OrderService', () => {
   let filterService: FilterService;
 
   beforeEach(async () => {
-    const module: TestingModule = await getTestingModule([
-      OrderService,
-      FilterService,
-      getEntityManagerMockConfig(),
-      getRepositoryMockConfig(Order),
-      getRepositoryMockConfig(Destination),
-      getRepositoryMockConfig(Warehouse),
-    ]);
+    const module: TestingModule = await getTestingModule({
+      providers: [
+        OrderService,
+        FilterService,
+        getEntityManagerMockConfig(),
+        getRepositoryMockConfig(Order),
+        getRepositoryMockConfig(Destination),
+        getRepositoryMockConfig(Warehouse),
+      ],
+    });
 
     service = module.get<OrderService>(OrderService);
 
