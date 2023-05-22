@@ -43,7 +43,6 @@ async function bootstrap() {
     .setTitle('Lodi WHS')
     .setDescription('Lodi warehouse system')
     .setVersion('1.0')
-    .addTag('cats')
     .build();
   const document = SwaggerModule.createDocument(app, config, {
     extraModels: [GenericResponseDto, PaginatedDto, FilterDto, QueryDto],

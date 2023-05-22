@@ -5,40 +5,46 @@ import {
   getEntityManagerMockConfig,
   getRepositoryMockConfig,
 } from '../../common/mock';
-import { Lock } from '../../database/entities/lock.entity';
-import { LockService } from './lock.service';
+import { Bundle } from '../../database/entities/bundle.entity';
+import { BundleService } from './bundle.service';
 
-describe('LockService', () => {
-  let service: LockService;
+describe('BundleService', () => {
+  let service: BundleService;
   let em: EntityManager;
-  let repository: EntityRepository<Lock>;
+  let repository: EntityRepository<Bundle>;
   const yesterday = new Date(Date.now() - 1000 * 60 * 60 * 24);
   const tomorrow = new Date(Date.now() + 1000 * 60 * 60 * 24);
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        LockService,
+        BundleService,
         getEntityManagerMockConfig(),
-        getRepositoryMockConfig(Lock),
+        getRepositoryMockConfig(Bundle),
       ],
     }).compile();
 
-    service = module.get<LockService>(LockService);
+    service = module.get<BundleService>(BundleService);
     em = module.get<EntityManager>(EntityManager);
-    repository = module.get<EntityRepository<Lock>>(getRepositoryToken(Lock));
+    repository = module.get<EntityRepository<Bundle>>(
+      getRepositoryToken(Bundle),
+    );
   });
 
   it('create', async () => {
     const dto = {
-      reason: 'E-commerce',
+      description: 'E-commerce',
       activeFrom: yesterday,
       activeTo: tomorrow,
     };
 
-    const result = new Lock(dto.reason, dto.activeFrom, dto.activeTo);
+    const result = new Bundle({
+      description: dto.description,
+      activeFrom: dto.activeFrom,
+      activeTo: dto.activeTo,
+    });
 
-    jest.spyOn(em, 'persistAndFlush').mockImplementation((obj: Lock) => {
+    jest.spyOn(em, 'persistAndFlush').mockImplementation((obj: Bundle) => {
       result.id = obj.id = 1;
 
       return Promise.resolve();
@@ -49,8 +55,16 @@ describe('LockService', () => {
 
   it('findAll', async () => {
     const result = [
-      new Lock('E-commerce', yesterday, tomorrow),
-      new Lock('Deliver to warehouse 1', yesterday, tomorrow),
+      new Bundle({
+        description: 'E-commerce',
+        activeFrom: yesterday,
+        activeTo: tomorrow,
+      }),
+      new Bundle({
+        description: 'Deliver to warehouse 1',
+        activeFrom: yesterday,
+        activeTo: tomorrow,
+      }),
     ];
 
     jest.spyOn(repository, 'findAll').mockImplementation((): any => {
@@ -61,7 +75,11 @@ describe('LockService', () => {
   });
 
   it('findOne', async () => {
-    const result = new Lock('Deliver to warehouse 2', yesterday, tomorrow);
+    const result = new Bundle({
+      description: 'Deliver to warehouse 2',
+      activeFrom: yesterday,
+      activeTo: tomorrow,
+    });
     result.id = 1;
 
     jest
@@ -77,41 +95,43 @@ describe('LockService', () => {
   it('update', async () => {
     const result = {
       id: 1,
-      reason: 'Delivery to warehouse 3',
+      description: 'Delivery to warehouse 3',
       activeFrom: yesterday,
       activeTo: tomorrow,
     };
 
     jest.spyOn(service, 'findOne').mockImplementation(() => {
-      const warehouse = new Lock(
-        result.reason,
-        result.activeFrom,
-        result.activeTo,
-      );
+      const warehouse = new Bundle({
+        description: result.description,
+        activeFrom: result.activeFrom,
+        activeTo: result.activeTo,
+      });
       warehouse.id = result.id;
 
       return Promise.resolve(warehouse);
     });
 
-    jest.spyOn(em, 'assign').mockImplementation((obj1: Lock, obj2: Lock) => {
-      const mergedObj = Object.assign({}, obj1, obj2);
-      obj1.reason = mergedObj.reason;
-      obj1.activeFrom = mergedObj.activeFrom;
-      obj1.activeTo = mergedObj.activeTo;
+    jest
+      .spyOn(em, 'assign')
+      .mockImplementation((obj1: Bundle, obj2: Bundle) => {
+        const mergedObj = Object.assign({}, obj1, obj2);
+        obj1.description = mergedObj.description;
+        obj1.activeFrom = mergedObj.activeFrom;
+        obj1.activeTo = mergedObj.activeTo;
 
-      return obj1;
+        return obj1;
+      });
+
+    const updatedResult = new Bundle({
+      description: 'Delivery to warehouse 1',
+      activeFrom: result.activeFrom,
+      activeTo: result.activeTo,
     });
-
-    const updatedResult = new Lock(
-      'Delivery to warehouse 1',
-      result.activeFrom,
-      result.activeTo,
-    );
     updatedResult.id = result.id;
 
     expect(
       await service.update(1, {
-        reason: updatedResult.reason,
+        description: updatedResult.description,
         activeFrom: updatedResult.activeFrom,
         activeTo: updatedResult.activeTo,
       }),
@@ -119,7 +139,9 @@ describe('LockService', () => {
   });
 
   it('remove', async () => {
-    const result = new Lock('Delivery to warehouse 1');
+    const result = new Bundle({
+      description: 'Delivery to warehouse 1',
+    });
     result.id = 1;
 
     jest

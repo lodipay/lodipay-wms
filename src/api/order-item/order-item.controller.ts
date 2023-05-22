@@ -8,6 +8,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { ApiPaginatedResponse } from '../../common/decorator/api-paginated-response.decorator';
 import { FilterDto } from '../../common/dto/filter.dto';
 import { OrderItem } from '../../database/entities/order-item.entity';
@@ -16,6 +17,7 @@ import { UpdateOrderItemDto } from './dto/update-order-item.dto';
 import { OrderItemService } from './order-item.service';
 
 @Controller('order-item')
+@ApiTags('Order Item')
 export class OrderItemController {
   constructor(private readonly orderItemService: OrderItemService) {}
 
