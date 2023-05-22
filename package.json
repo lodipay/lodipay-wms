@@ -23,7 +23,8 @@
     "semantic-release": "semantic-release",
     "migration:up": "npx mikro-orm migration:up",
     "seeder:run": "npx mikro-orm seeder:run",
-    "database:prepare": "npx mikro-orm migration:fresh --seed"
+    "database:prepare": "npm run database:meta-cache:clear && npx mikro-orm migration:fresh --seed",
+    "database:meta-cache:clear": "npx mikro-orm cache:clear"
   },
   "dependencies": {
     "@mikro-orm/cli": "^5.7.4",
