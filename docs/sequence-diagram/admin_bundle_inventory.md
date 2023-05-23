@@ -14,19 +14,14 @@ participant "WHS" as whs
 admin -> adminService ++: Get bunle holder list
 adminService --> admin --: Return bundle holder list
 
-admin -> adminService ++: Get inventory bundle list
-note right
-    page={{ page_number }}
-end note
-adminService -> whs ++: Get inventory bundle list
-whs -->adminService --: Return inventory bundle list
-adminService --> admin: Return inventory bundle list page
+admin -> admin: Select bundle holder
 
 |||
 |||
 
 admin -> adminService: Create/update inventory bundle page
 note right
+    bundleHolderId={{ bundle_holder_id }}
     inventoryBundleId={{ inventory_bundle_id }} // on edit
 end note
 alt Inventory bundle edit
@@ -43,6 +38,7 @@ adminService --> admin : Return bundle (edit/create) page
 
 admin -> adminService: Create/update inventory bundle
 note right
+    bundleHolderId={{ bundle_holder_id }}
     bundleId={{ bundle_id }} // optional
     bundleReason={{ bundle_reason }}
     from={{ from }}
