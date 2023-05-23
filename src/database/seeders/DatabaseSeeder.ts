@@ -1,9 +1,9 @@
 import type { EntityManager } from '@mikro-orm/core';
 import { faker, Seeder } from '@mikro-orm/seeder';
-import { Bundle } from '../entities/bundle.entity';
 import { Destination } from '../entities/destination.entity';
 import { Warehouse } from '../entities/warehouse.entity';
 import { BundleHolderFactory } from './factory/bundle-holder.entity.factory';
+import { BundleFactory } from './factory/bundle.entity.factory';
 import { DestinationFactory } from './factory/destination.entity.factory';
 import { InventoryFactory } from './factory/inventory.entity.factory';
 import { OrderFactory } from './factory/order.entity.factory';
@@ -76,22 +76,32 @@ export class DatabaseSeeder extends Seeder {
   private loadBundlesHolders(em: EntityManager) {
     new BundleHolderFactory(em)
       .each(owner => {
-        const numberOfBundles = faker.datatype.number({
-          min: 1,
-          max: 5,
-        });
-
         owner.name = faker.company.name();
 
-        for (let i = 0; i < numberOfBundles; i++) {
-          owner.bundles.add(
-            em.create(Bundle, {
-              description: faker.commerce.productName(),
-              activeFrom: faker.date.past(),
-              activeTo: faker.date.future(),
-            }),
-          );
-        }
+        owner.bundles.add(
+          new BundleFactory(em)
+            .each(bundle => {
+              bundle.bundleQuantity = faker.datatype.number({
+                min: 10,
+                max: 1000,
+              });
+              bundle.description = faker.commerce.product();
+              bundle.inventories.add(
+                new InventoryFactory(em).make(
+                  faker.datatype.number({
+                    min: 0,
+                    max: 10,
+                  }),
+                ),
+              );
+            })
+            .make(
+              faker.datatype.number({
+                min: 0,
+                max: 10,
+              }),
+            ),
+        );
       })
       .make(10);
   }

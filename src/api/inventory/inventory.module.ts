@@ -8,5 +8,6 @@ import { InventoryService } from './inventory.service';
   controllers: [InventoryController],
   providers: [InventoryService],
   imports: [MikroOrmModule.forFeature([Inventory])],
+  exports: [InventoryService],
 })
 export class InventoryModule {}

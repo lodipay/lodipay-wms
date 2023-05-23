@@ -1,4 +1,4 @@
-import { MikroORM } from '@mikro-orm/postgresql';
+import { MikroORM } from '@mikro-orm/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import mikroOrmTestConfig from '../../../config/mikro-orm.test.config';
 interface NamedArguments {

@@ -5,6 +5,7 @@ import { FilterDto } from '../../common/dto/filter.dto';
 import { FilterService } from '../../common/module/filter/filter.service';
 import { Bundle } from '../../database/entities/bundle.entity';
 import { BundleHolderService } from '../bundle-holder/bundle-holder.service';
+import { InventoryService } from '../inventory/inventory.service';
 import { CreateBundleDto } from './dto/create-bundle.dto';
 import { UpdateBundleDto } from './dto/update-bundle.dto';
 
@@ -18,22 +19,35 @@ export class BundleService {
     @Inject(BundleHolderService)
     private readonly bundleHolderService: BundleHolderService,
 
+    @Inject(InventoryService)
+    private readonly inventoryService: InventoryService,
+
     private readonly filterService: FilterService,
   ) {}
 
   async create(dto: CreateBundleDto): Promise<Bundle> {
-    const bundleHolder = await this.bundleHolderService.findOne(
-      dto.bundleHolderId,
-    );
+    try {
+      const inventory = await this.inventoryService.findOne(dto.inventoryId);
 
-    const bundle = new Bundle();
-    bundle.bundleHolder = bundleHolder;
-    delete dto.bundleHolderId;
+      const bundleHolder = await this.bundleHolderService.findOne(
+        dto.bundleHolderId,
+      );
 
-    const newBundle = this.em.assign(bundle, dto);
-    await this.em.persistAndFlush(newBundle);
+      const bundle = new Bundle();
+      bundle.inventories.add(inventory);
+      bundle.bundleHolder = bundleHolder;
+      bundle.bundleQuantity = dto.inventoryQuantity;
 
-    return newBundle;
+      delete dto.bundleHolderId;
+      delete dto.inventoryId;
+
+      const newBundle = this.em.assign(bundle, dto);
+      await this.em.persistAndFlush(newBundle);
+
+      return newBundle;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   search(filterDto: FilterDto) {

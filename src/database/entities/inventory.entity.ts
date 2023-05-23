@@ -9,6 +9,7 @@ import {
   Unique,
 } from '@mikro-orm/core';
 import { ApiProperty } from '@nestjs/swagger';
+import { Bundle } from './bundle.entity';
 import { OrderItem } from './order-item.entity';
 
 @Entity()
@@ -105,6 +106,11 @@ export class Inventory {
 
   @ManyToOne({ entity: () => OrderItem })
   orderItem?: OrderItem;
+
+  @ManyToOne({
+    entity: () => Bundle,
+  })
+  bundle?: Bundle;
 
   get parentId() {
     return this.parent?.id;

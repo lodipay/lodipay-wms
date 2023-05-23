@@ -1,4 +1,9 @@
-import { EntityManager, EntityRepository, QueryOrder } from '@mikro-orm/core';
+import {
+  Collection,
+  EntityManager,
+  EntityRepository,
+  QueryOrder,
+} from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { TestingModule } from '@nestjs/testing';
 import { plainToClass } from 'class-transformer';
@@ -11,7 +16,9 @@ import { getTestingModule } from '../../common/mock/testing.module.mock';
 import { FilterService } from '../../common/module/filter/filter.service';
 import { BundleHolder } from '../../database/entities/bundle-holder.entity';
 import { Bundle } from '../../database/entities/bundle.entity';
+import { Inventory } from '../../database/entities/inventory.entity';
 import { BundleHolderService } from '../bundle-holder/bundle-holder.service';
+import { InventoryService } from '../inventory/inventory.service';
 import { BundleService } from './bundle.service';
 
 describe('BundleService', () => {
@@ -30,8 +37,10 @@ describe('BundleService', () => {
         getEntityManagerMockConfig(),
         getRepositoryMockConfig(Bundle),
         getRepositoryMockConfig(BundleHolder),
+        getRepositoryMockConfig(Inventory),
         FilterService,
         BundleHolderService,
+        InventoryService,
       ],
     });
     service = module.get<BundleService>(BundleService);
@@ -49,6 +58,8 @@ describe('BundleService', () => {
       activeFrom: yesterday,
       activeTo: tomorrow,
       bundleHolderId: 1,
+      inventoryId: 1,
+      inventoryQuantity: 50,
     };
     const bundleHolder = plainToClass(BundleHolder, {
       id: 1,
@@ -60,11 +71,19 @@ describe('BundleService', () => {
       return Promise.resolve(bundleHolder);
     });
 
+    const inventory = new Inventory();
+    inventory.id = 1;
+    inventory.sku = 'SKU';
+    inventory.name = 'Inventory';
+    inventory.quantity = 50;
+    inventory.batchCode = 'BATCH_CODE';
+
     const result = new Bundle();
     result.description = dto.description;
     result.activeFrom = dto.activeFrom;
     result.activeTo = dto.activeTo;
     result.bundleHolder = bundleHolder;
+    result.inventories.add(inventory);
 
     jest.spyOn(em, 'assign').mockImplementation(() => {
       return result;
@@ -189,10 +208,11 @@ describe('BundleService', () => {
         activeFrom: updatedResult.activeFrom,
         activeTo: updatedResult.activeTo,
       }),
-    ).toEqual({
+    ).toMatchObject({
       ...updatedResult,
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
+      inventories: expect.any(Collection),
     });
   });
 

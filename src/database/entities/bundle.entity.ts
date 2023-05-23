@@ -1,11 +1,14 @@
 import {
+  Collection,
   Entity,
   Filter,
   ManyToOne,
+  OneToMany,
   PrimaryKey,
   Property,
 } from '@mikro-orm/core';
 import { BundleHolder } from './bundle-holder.entity';
+import { Inventory } from './inventory.entity';
 import { ParentEntity } from './parent.entity';
 
 @Entity()
@@ -16,6 +19,9 @@ export class Bundle extends ParentEntity {
 
   @Property()
   description: string;
+
+  @Property()
+  bundleQuantity: number;
 
   @Property({ nullable: true })
   activeFrom?: Date;
@@ -28,4 +34,11 @@ export class Bundle extends ParentEntity {
     onDelete: 'cascade',
   })
   bundleHolder: BundleHolder;
+
+  @OneToMany({
+    entity: () => Inventory,
+    mappedBy: 'bundle',
+    orphanRemoval: false,
+  })
+  inventories = new Collection<Inventory>(this);
 }

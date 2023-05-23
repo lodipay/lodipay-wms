@@ -1,4 +1,4 @@
-import { QueryOrder } from '@mikro-orm/core';
+import { Collection, QueryOrder } from '@mikro-orm/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { plainToClass } from 'class-transformer';
 import { PaginatedDto } from '../../common/dto/paginated.dto';
@@ -9,7 +9,9 @@ import {
 import { FilterService } from '../../common/module/filter/filter.service';
 import { BundleHolder } from '../../database/entities/bundle-holder.entity';
 import { Bundle } from '../../database/entities/bundle.entity';
+import { Inventory } from '../../database/entities/inventory.entity';
 import { BundleHolderService } from '../bundle-holder/bundle-holder.service';
+import { InventoryService } from '../inventory/inventory.service';
 import { BundleController } from './bundle.controller';
 import { BundleService } from './bundle.service';
 import { CreateBundleDto } from './dto/create-bundle.dto';
@@ -27,8 +29,10 @@ describe('BundleController', () => {
         BundleService,
         FilterService,
         BundleHolderService,
+        InventoryService,
         getRepositoryMockConfig(Bundle),
         getRepositoryMockConfig(BundleHolder),
+        getRepositoryMockConfig(Inventory),
         getEntityManagerMockConfig(),
       ],
     }).compile();
@@ -43,10 +47,20 @@ describe('BundleController', () => {
       activeFrom: new Date(Date.now() - 1000 * 60 * 60 * 24),
       activeTo: new Date(Date.now()),
       bundleHolderId: 1,
+      inventoryId: 1,
+      inventoryQuantity: 50,
     };
     const bundleHolder = new BundleHolder();
     bundleHolder.name = 'E-commerce';
     bundleHolder.description = 'E-commerce description';
+
+    const inventory = new Inventory();
+    inventory.id = 1;
+    inventory.sku = 'SKU';
+    inventory.name = 'Inventory';
+    inventory.quantity = 50;
+    inventory.batchCode = 'BATCH_CODE';
+
     jest
       .spyOn(bundleService, 'create')
       .mockImplementation((dto: CreateBundleDto) => {
@@ -64,11 +78,16 @@ describe('BundleController', () => {
     delete data.bundleHolderId;
     const result = await controller.create(data);
     expect(result).toBeInstanceOf(Bundle);
-    expect(result).toEqual({
+
+    delete data.inventoryId;
+    delete data.inventoryQuantity;
+
+    expect(result).toMatchObject({
       id: 1,
       ...data,
       createdAt: expect.any(Date),
       bundleHolder: expect.any(BundleHolder),
+      inventories: expect.any(Collection),
     });
   });
 

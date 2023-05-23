@@ -4,6 +4,12 @@ export class CreateBundleDto {
   @IsNumber()
   bundleHolderId: number;
 
+  @IsNumber()
+  inventoryId: number;
+
+  @IsNumber()
+  inventoryQuantity: number;
+
   @IsString()
   description: string;
 
