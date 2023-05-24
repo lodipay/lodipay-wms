@@ -9,4 +9,6 @@ export class QueryDto {
   order: {
     [key: string]: QueryOrder;
   };
+
+  populate? = [];
 }

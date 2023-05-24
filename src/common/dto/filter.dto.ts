@@ -21,6 +21,7 @@ export class FilterDto {
         order: {
           name: QueryOrder.DESC,
         },
+        populate: [],
       },
     },
   })

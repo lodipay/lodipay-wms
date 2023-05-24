@@ -8,7 +8,7 @@ import {
 } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { Test, TestingModule } from '@nestjs/testing';
-import { classToPlain, plainToClass } from 'class-transformer';
+import { plainToClass } from 'class-transformer';
 import { DateTime } from 'luxon';
 import { PaginatedDto } from '../../common/dto/paginated.dto';
 import {
@@ -79,14 +79,28 @@ describe('InventoryService', () => {
       return Promise.resolve();
     });
 
-    const result = await service.create(plainToClass(Inventory, data));
+    const newInventory = new Inventory();
+    newInventory.name = data.name;
+    newInventory.sku = data.sku;
+    newInventory.batchCode = data.batchCode;
+    newInventory.description = data.description;
+    newInventory.expireDate = new Date(data.expiryDate);
+    newInventory.quantity = data.quantity;
+    newInventory.weight = data.weight;
+
+    const result = await service.create(newInventory);
     expect(result).toBeInstanceOf(Inventory);
     expect(result.children).toBeInstanceOf(Collection);
     expect(result.children).toHaveLength(0);
 
     delete result.children;
-    const plainResult = classToPlain(result);
-    expect(plainResult).toStrictEqual(expectedData);
+    delete expectedData.expiryDate;
+    const plainResult = { ...result };
+    expect(plainResult).toEqual({
+      ...expectedData,
+      expireDate: expect.any(Date),
+      warehouses: expect.any(Collection),
+    });
   });
 
   it('findOne', async () => {

@@ -9,6 +9,7 @@ import {
 import { Destination } from './destination.entity';
 import { Location } from './location.entity';
 import { ParentEntity } from './parent.entity';
+import { WarehouseInventory } from './warehouse-inventory.entity';
 
 @Entity()
 export class Warehouse extends ParentEntity {
@@ -38,6 +39,12 @@ export class Warehouse extends ParentEntity {
 
   @OneToOne(() => Destination, destination => destination.warehouse)
   destination?: Destination;
+
+  @OneToMany({
+    entity: () => WarehouseInventory,
+    mappedBy: 'warehouse',
+  })
+  inventories = new Collection<WarehouseInventory>(this);
 
   constructor(name: string, description: string) {
     super();

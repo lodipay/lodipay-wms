@@ -23,12 +23,14 @@ export class FilterService {
 
     const [result, count] = await this.em.findAndCount(
       entityClass,
-      {},
+      filterDto?.query?.filter,
       {
         limit,
         offset,
-        filters: { mainFilter: filterDto?.query?.filter || {} },
+        // filters: { mainFilter: filterDto?.query?.filter || {} },
         orderBy: filterDto?.query?.order || {},
+        populate: filterDto?.query?.populate || [],
+        // populate: ['inventory'],
       },
     );
 
