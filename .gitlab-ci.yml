@@ -10,7 +10,6 @@ cache:
 variables:
   NPM_TOKEN: ${CI_JOB_TOKEN}
   GITLAB_TOKEN: ${NPM_ACCESS_TOKEN}
-  MIKRO_ORM_CLI: ${MIKRO_ORM_CLI}
 
 stages:
   - lint
@@ -31,7 +30,7 @@ test:
   stage: test
   coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
   script:
-    - npx mikro-orm cache:generate --ts
+    - MIKRO_ORM_CLI=./config/mikro-orm.test.config.ts npx mikro-orm cache:generate --ts
     - npm run test:cov
   artifacts:
     when: always
