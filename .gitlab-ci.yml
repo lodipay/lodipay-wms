@@ -30,9 +30,8 @@ lint:code:
 test:
   stage: test
   coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
-  before_script:
-    - npx mikro-orm cache:generate --ts
   script:
+    - npx mikro-orm cache:generate --ts
     - npm run test:cov
   artifacts:
     when: always
