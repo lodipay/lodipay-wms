@@ -1,12 +1,11 @@
 image: node:latest
 
-default:
-  before_script:
-    - npm ci --cache .npm --prefer-offline
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - .npm/
+before_script:
+  - npm ci --cache .npm --prefer-offline
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .npm/
 
 variables:
   NPM_TOKEN: ${CI_JOB_TOKEN}
@@ -32,7 +31,6 @@ test:
   stage: test
   coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
   before_script:
-    - npm install
     - MIKRO_ORM_CLI='./config/mikro-orm.test.config.ts' npx mikro-orm cache:generate --ts
   script:
     - npm run test:cov
@@ -50,7 +48,6 @@ release:
   before_script:
     - cp .gitlab/npmrc .npmrc
   script:
-    - npm install -g semantic-release @semantic-release/gitlab @semantic-release/git @semantic-release/npm
     - npm run semantic-release
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
