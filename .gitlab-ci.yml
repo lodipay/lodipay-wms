@@ -31,7 +31,7 @@ test:
   stage: test
   coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
   before_script:
-    - MIKRO_ORM_CLI='./config/mikro-orm.test.config.ts' npx mikro-orm cache:generate --ts
+    - npx mikro-orm cache:generate --ts
   script:
     - npm run test:cov
   artifacts:
