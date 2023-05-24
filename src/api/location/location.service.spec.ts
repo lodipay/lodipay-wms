@@ -121,6 +121,7 @@ describe('LocationService', () => {
             'location-1 updated description',
         );
         updatedResult.id = result.id;
+        updatedResult.warehouse.createdAt = result.warehouse.createdAt;
         expect(
             await service.update(result.id, {
                 code: updatedResult.code,
