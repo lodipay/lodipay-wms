@@ -6,8 +6,8 @@ import { DestinationController } from './destination.controller';
 import { DestinationService } from './destination.service';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([Destination, Warehouse])],
-  controllers: [DestinationController],
-  providers: [DestinationService],
+    imports: [MikroOrmModule.forFeature([Destination, Warehouse])],
+    controllers: [DestinationController],
+    providers: [DestinationService],
 })
 export class DestinationModule {}

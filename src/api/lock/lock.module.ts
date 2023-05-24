@@ -5,8 +5,8 @@ import { LockController } from './lock.controller';
 import { LockService } from './lock.service';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([Lock])],
-  controllers: [LockController],
-  providers: [LockService],
+    imports: [MikroOrmModule.forFeature([Lock])],
+    controllers: [LockController],
+    providers: [LockService],
 })
 export class LockModule {}

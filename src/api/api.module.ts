@@ -8,14 +8,14 @@ import { OrderModule } from './order/order.module';
 import { WarehouseModule } from './warehouse/warehouse.module';
 
 @Module({
-  imports: [
-    WarehouseModule,
-    LocationModule,
-    LockModule,
-    OrderModule,
-    DestinationModule,
-    InventoryModule,
-    OrderItemModule,
-  ],
+    imports: [
+        WarehouseModule,
+        LocationModule,
+        LockModule,
+        OrderModule,
+        DestinationModule,
+        InventoryModule,
+        OrderItemModule,
+    ],
 })
 export class ApiModule {}

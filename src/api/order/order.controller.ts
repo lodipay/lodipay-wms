@@ -2,14 +2,14 @@ import { ApiPaginatedResponse } from '@/common/decorator/api-paginated-response.
 import { FilterDto } from '@/common/dto/filter.dto';
 import { Order } from '@/database/entities/order.entity';
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -19,34 +19,34 @@ import { OrderService } from './order.service';
 @Controller('order')
 @ApiTags('Order')
 export class OrderController {
-  constructor(private readonly orderService: OrderService) {}
+    constructor(private readonly orderService: OrderService) {}
 
-  @Post()
-  create(@Body() createOrderDto: CreateOrderDto) {
-    return this.orderService.create(createOrderDto);
-  }
+    @Post()
+    create(@Body() createOrderDto: CreateOrderDto) {
+        return this.orderService.create(createOrderDto);
+    }
 
-  /**
-   * SearchApi
-   */
-  @Get()
-  @ApiPaginatedResponse(Order)
-  search(@Query() filterDto: FilterDto) {
-    return this.orderService.search(filterDto);
-  }
+    /**
+     * SearchApi
+     */
+    @Get()
+    @ApiPaginatedResponse(Order)
+    search(@Query() filterDto: FilterDto) {
+        return this.orderService.search(filterDto);
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.orderService.findOne(+id);
-  }
+    @Get(':id')
+    findOne(@Param('id') id: string) {
+        return this.orderService.findOne(+id);
+    }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.orderService.update(+id, updateOrderDto);
-  }
+    @Patch(':id')
+    update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
+        return this.orderService.update(+id, updateOrderDto);
+    }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.orderService.remove(+id);
-  }
+    @Delete(':id')
+    remove(@Param('id') id: string) {
+        return this.orderService.remove(+id);
+    }
 }
