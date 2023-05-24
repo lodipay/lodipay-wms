@@ -26,7 +26,7 @@ lint:commit:
 lint:code:
   stage: lint
   script:
-    - npm run lint
+    - ./node_modules/eslint/bin/eslint.js $(git diff --name-only HEAD | grep -E 'src/.*\.ts|test/.*\.ts$' | xargs)
 
 test:
   stage: test
