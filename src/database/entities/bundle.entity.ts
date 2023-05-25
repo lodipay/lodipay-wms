@@ -29,16 +29,12 @@ export class Bundle extends ParentEntity {
     @Property({ nullable: true })
     activeTo?: Date;
 
-    @ManyToOne(() => BundleHolder, {
-        onUpdateIntegrity: 'set null',
-        onDelete: 'cascade',
-    })
+    @ManyToOne(() => BundleHolder)
     bundleHolder: BundleHolder;
 
     @OneToMany({
         entity: () => Inventory,
         mappedBy: 'bundle',
-        orphanRemoval: false,
     })
     inventories = new Collection<Inventory>(this);
 }

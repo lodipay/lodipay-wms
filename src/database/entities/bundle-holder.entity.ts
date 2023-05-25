@@ -20,7 +20,6 @@ export class BundleHolder extends ParentEntity {
     @OneToMany({
         entity: () => Bundle,
         mappedBy: 'bundleHolder',
-        orphanRemoval: true,
     })
     bundles = new Collection<Bundle>(this);
 }

@@ -23,9 +23,9 @@ export class Destination extends ParentEntity {
     })
     warehouse?: Warehouse;
 
-    @OneToMany(() => Order, order => order.from, { orphanRemoval: false })
+    @OneToMany(() => Order, order => order.from)
     from?: Order;
 
-    @OneToMany(() => Order, order => order.to, { orphanRemoval: false })
+    @OneToMany(() => Order, order => order.to)
     to?: Order;
 }

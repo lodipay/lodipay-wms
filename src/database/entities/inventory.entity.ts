@@ -11,6 +11,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Bundle } from './bundle.entity';
 import { OrderItem } from './order-item.entity';
+import { WarehouseInventory } from './warehouse-inventory.entity';
 
 @Entity()
 @Filter({ name: 'mainFilter', cond: args => args })
@@ -111,6 +112,12 @@ export class Inventory {
         entity: () => Bundle,
     })
     bundle?: Bundle;
+
+    @OneToMany({
+        entity: () => WarehouseInventory,
+        mappedBy: 'inventory',
+    })
+    warehouses = new Collection<WarehouseInventory>(this);
 
     get parentId() {
         return this.parent?.id;

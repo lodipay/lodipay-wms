@@ -51,4 +51,6 @@ export class QueryableDto {
 
     @ApiProperty({ nullable: true })
     $contained?: string;
+
+    [key: string]: any;
 }
