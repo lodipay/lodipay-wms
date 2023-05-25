@@ -9,26 +9,26 @@ import { ResponseTransformInterceptor } from './common/interceptor/response-tran
 import { FilterModule } from './common/module/filter/filter.module';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      load: [MainConfig],
-      envFilePath: ['.env'],
-      isGlobal: true,
-    }),
-    MikroOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useClass: DatabaseConfig,
-    }),
-    ApiModule,
-    FilterModule,
-  ],
-  controllers: [],
-  providers: [
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: ResponseTransformInterceptor,
-    },
-  ],
+    imports: [
+        ConfigModule.forRoot({
+            load: [MainConfig],
+            envFilePath: ['.env'],
+            isGlobal: true,
+        }),
+        MikroOrmModule.forRootAsync({
+            imports: [ConfigModule],
+            inject: [ConfigService],
+            useClass: DatabaseConfig,
+        }),
+        ApiModule,
+        FilterModule,
+    ],
+    controllers: [],
+    providers: [
+        {
+            provide: APP_INTERCEPTOR,
+            useClass: ResponseTransformInterceptor,
+        },
+    ],
 })
 export class AppModule {}

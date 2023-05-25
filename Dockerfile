@@ -7,11 +7,15 @@ FROM node:20-alpine as development
 # Optionally authenticate NPM registry
 # RUN npm set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
 
+# persistent / runtime deps
+
 WORKDIR /app
 
 # Copy configuration files
-RUN apk add --no-cache bash
+RUN apk add --no-cache bash git
 RUN apk add busybox-extras
+
+RUN git config --global --add safe.directory '*'
 
 COPY . .
 RUN cp .env.example .env

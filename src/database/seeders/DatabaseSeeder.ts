@@ -19,33 +19,33 @@ export class DatabaseSeeder extends Seeder {
     this.loadBundlesHolders(em);
   }
 
-  private loadWarehouses(em: EntityManager) {
-    for (let i = 0; i < 4; i++) {
-      this.warehouses.set(
-        `${i + 1}`,
-        em.create(Warehouse, {
-          name: `Warehouse ${i + 1}`,
-          description: `Warehouse ${i + 1} description`,
-        }),
-      );
+    private loadWarehouses(em: EntityManager) {
+        for (let i = 0; i < 4; i++) {
+            this.warehouses.set(
+                `${i + 1}`,
+                em.create(Warehouse, {
+                    name: `Warehouse ${i + 1}`,
+                    description: `Warehouse ${i + 1} description`,
+                }),
+            );
+        }
     }
-  }
 
-  private loadDestination(em: EntityManager) {
-    let i = 1;
-    new DestinationFactory(em)
-      .each(destination => {
-        destination.warehouse = this.warehouses.get(`${i++}`);
-      })
-      .make(4);
-  }
+    private loadDestination(em: EntityManager) {
+        let i = 1;
+        new DestinationFactory(em)
+            .each(destination => {
+                destination.warehouse = this.warehouses.get(`${i++}`);
+            })
+            .make(4);
+    }
 
-  private async loadExtraDestinations(em: EntityManager) {
-    new DestinationFactory(em).make(2);
-  }
+    private async loadExtraDestinations(em: EntityManager) {
+        new DestinationFactory(em).make(2);
+    }
 
-  private async loadOrders(em: EntityManager) {
-    const destinations = await em.find(Destination, {});
+    private async loadOrders(em: EntityManager) {
+        const destinations = await em.find(Destination, {});
 
     new OrderFactory(em)
       .each(order => {
@@ -69,9 +69,9 @@ export class DatabaseSeeder extends Seeder {
       .make(100);
   }
 
-  private loadInventories(em: EntityManager) {
-    new InventoryFactory(em).make(100);
-  }
+    private loadInventories(em: EntityManager) {
+        new InventoryFactory(em).make(100);
+    }
 
   private loadBundlesHolders(em: EntityManager) {
     new BundleHolderFactory(em)

@@ -3,15 +3,15 @@ import { IsNumber } from 'class-validator';
 import { OrderItem } from '../../../database/entities/order-item.entity';
 
 export class CreateOrderItemDto extends OmitType(OrderItem, [
-  'id',
-  'createdAt',
-  'updatedAt',
-  'order',
-  'inventories',
+    'id',
+    'createdAt',
+    'updatedAt',
+    'order',
+    'inventories',
 ]) {
-  @IsNumber()
-  orderId: number;
+    @IsNumber()
+    orderId: number;
 
-  @IsNumber()
-  inventoryId: number;
+    @IsNumber()
+    inventoryId: number;
 }

@@ -14,129 +14,131 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 
 @Injectable()
 export class OrderService {
-  constructor(
-    @InjectRepository(Order)
-    private readonly orderRepository: EntityRepository<Order>,
+    constructor(
+        @InjectRepository(Order)
+        private readonly orderRepository: EntityRepository<Order>,
 
-    @InjectRepository(Destination)
-    private readonly destRepository: EntityRepository<Destination>,
+        @InjectRepository(Destination)
+        private readonly destRepository: EntityRepository<Destination>,
 
-    @InjectRepository(Warehouse)
-    private readonly warehouseRepository: EntityRepository<Warehouse>,
+        @InjectRepository(Warehouse)
+        private readonly warehouseRepository: EntityRepository<Warehouse>,
 
-    private readonly em: EntityManager,
-    private readonly filterService: FilterService,
-  ) {}
+        private readonly em: EntityManager,
+        private readonly filterService: FilterService,
+    ) {}
 
-  async create(createOrderDto: CreateOrderDto) {
-    const order = new Order();
-    order.name = createOrderDto.name;
-    order.description = createOrderDto.description;
-    order.createdBy = createOrderDto.createdBy;
-    order.status = OrderStatus.NEW;
+    async create(createOrderDto: CreateOrderDto) {
+        const order = new Order();
+        order.name = createOrderDto.name;
+        order.description = createOrderDto.description;
+        order.createdBy = createOrderDto.createdBy;
+        order.status = OrderStatus.NEW;
 
-    if (createOrderDto.toDestinationId === createOrderDto.fromDestinationId) {
-      throw new InvalidArgumentException(
-        'From and to destinations cannot be the same',
-      );
+        if (
+            createOrderDto.toDestinationId === createOrderDto.fromDestinationId
+        ) {
+            throw new InvalidArgumentException(
+                'From and to destinations cannot be the same',
+            );
+        }
+
+        const fromDestination = await this.destRepository.findOne({
+            id: createOrderDto.fromDestinationId,
+        });
+
+        if (!fromDestination) {
+            throw new InvalidArgumentException('Invalid from destination');
+        }
+
+        order.from = fromDestination;
+
+        const toDestination = await this.destRepository.findOne({
+            id: createOrderDto.toDestinationId,
+        });
+
+        if (!toDestination) {
+            throw new InvalidArgumentException('Invalid to destination');
+        }
+
+        order.to = toDestination;
+
+        await this.em.persistAndFlush(order);
+        return order;
     }
 
-    const fromDestination = await this.destRepository.findOne({
-      id: createOrderDto.fromDestinationId,
-    });
-
-    if (!fromDestination) {
-      throw new InvalidArgumentException('Invalid from destination');
+    search(filterDto: FilterDto) {
+        return this.filterService.search<Order>(Order, filterDto);
     }
 
-    order.from = fromDestination;
-
-    const toDestination = await this.destRepository.findOne({
-      id: createOrderDto.toDestinationId,
-    });
-
-    if (!toDestination) {
-      throw new InvalidArgumentException('Invalid to destination');
+    findAll() {
+        return this.orderRepository.findAll();
     }
 
-    order.to = toDestination;
-
-    await this.em.persistAndFlush(order);
-    return order;
-  }
-
-  search(filterDto: FilterDto) {
-    return this.filterService.search<Order>(Order, filterDto);
-  }
-
-  findAll() {
-    return this.orderRepository.findAll();
-  }
-
-  findOne(id: number) {
-    return this.orderRepository.findOne(id);
-  }
-
-  async update(id: number, updateOrderDto: UpdateOrderDto) {
-    const order = await this.findOne(id);
-    if (!order) {
-      throw new NotFoundException('Order not found');
-    }
-    if (
-      updateOrderDto.toDestinationId &&
-      updateOrderDto.toDestinationId !== order.to.id
-    ) {
-      if (updateOrderDto.toDestinationId === order.from.id) {
-        throw new InvalidArgumentException(
-          'From and to destinations cannot be the same',
-        );
-      }
-      const toDestination = await this.destRepository.findOne({
-        id: updateOrderDto.toDestinationId,
-      });
-
-      if (!toDestination) {
-        throw new InvalidArgumentException('Invalid to destination');
-      }
-
-      order.to = toDestination;
-    }
-    if (
-      updateOrderDto.fromDestinationId &&
-      updateOrderDto.fromDestinationId !== order.from.id
-    ) {
-      if (updateOrderDto.fromDestinationId === order.to.id) {
-        throw new InvalidArgumentException(
-          'From and to destinations cannot be the same',
-        );
-      }
-      const fromDestination = await this.destRepository.findOne({
-        id: updateOrderDto.fromDestinationId,
-      });
-
-      if (!fromDestination) {
-        throw new InvalidArgumentException('Invalid from destination');
-      }
-      order.from = fromDestination;
+    findOne(id: number) {
+        return this.orderRepository.findOne(id);
     }
 
-    order.createdBy = updateOrderDto.createdBy || order.createdBy;
-    order.name = updateOrderDto.name || order.createdBy;
-    order.description = updateOrderDto.description || order.createdBy;
-    order.status = updateOrderDto.status || order.status;
+    async update(id: number, updateOrderDto: UpdateOrderDto) {
+        const order = await this.findOne(id);
+        if (!order) {
+            throw new NotFoundException('Order not found');
+        }
+        if (
+            updateOrderDto.toDestinationId &&
+            updateOrderDto.toDestinationId !== order.to.id
+        ) {
+            if (updateOrderDto.toDestinationId === order.from.id) {
+                throw new InvalidArgumentException(
+                    'From and to destinations cannot be the same',
+                );
+            }
+            const toDestination = await this.destRepository.findOne({
+                id: updateOrderDto.toDestinationId,
+            });
 
-    this.em.persistAndFlush(order);
+            if (!toDestination) {
+                throw new InvalidArgumentException('Invalid to destination');
+            }
 
-    return order;
-  }
+            order.to = toDestination;
+        }
+        if (
+            updateOrderDto.fromDestinationId &&
+            updateOrderDto.fromDestinationId !== order.from.id
+        ) {
+            if (updateOrderDto.fromDestinationId === order.to.id) {
+                throw new InvalidArgumentException(
+                    'From and to destinations cannot be the same',
+                );
+            }
+            const fromDestination = await this.destRepository.findOne({
+                id: updateOrderDto.fromDestinationId,
+            });
 
-  async remove(id: number) {
-    const order = await this.findOne(id);
+            if (!fromDestination) {
+                throw new InvalidArgumentException('Invalid from destination');
+            }
+            order.from = fromDestination;
+        }
 
-    if (!order) {
-      throw new NotFoundException('order not found');
+        order.createdBy = updateOrderDto.createdBy || order.createdBy;
+        order.name = updateOrderDto.name || order.createdBy;
+        order.description = updateOrderDto.description || order.createdBy;
+        order.status = updateOrderDto.status || order.status;
+
+        this.em.persistAndFlush(order);
+
+        return order;
     }
 
-    return this.em.removeAndFlush(order);
-  }
+    async remove(id: number) {
+        const order = await this.findOne(id);
+
+        if (!order) {
+            throw new NotFoundException('order not found');
+        }
+
+        return this.em.removeAndFlush(order);
+    }
 }

@@ -3,24 +3,24 @@ import { ApiOkResponse, getSchemaPath } from '@nestjs/swagger';
 import { PaginatedDto } from '../dto/paginated.dto';
 
 export const ApiPaginatedResponse = <TModel extends Type<any>>(
-  model: TModel,
+    model: TModel,
 ) => {
-  return applyDecorators(
-    ApiOkResponse({
-      schema: {
-        title: `PaginatedResponseOf${model.name}`,
-        allOf: [
-          { $ref: getSchemaPath(PaginatedDto) },
-          {
-            properties: {
-              result: {
-                type: 'array',
-                items: { $ref: getSchemaPath(model) },
-              },
+    return applyDecorators(
+        ApiOkResponse({
+            schema: {
+                title: `PaginatedResponseOf${model.name}`,
+                allOf: [
+                    { $ref: getSchemaPath(PaginatedDto) },
+                    {
+                        properties: {
+                            result: {
+                                type: 'array',
+                                items: { $ref: getSchemaPath(model) },
+                            },
+                        },
+                    },
+                ],
             },
-          },
-        ],
-      },
-    }),
-  );
+        }),
+    );
 };
