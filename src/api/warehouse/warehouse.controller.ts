@@ -68,8 +68,8 @@ export class WarehouseController {
 
   @Get(':id/inventories')
   @ApiPaginatedResponse(WarehouseInventory)
-  async getInventories(@Param('id') id: string, @Query() filterDto: FilterDto) {
-    return this.warehouseService.getInventories(+id, filterDto);
+  async getInventories(@Query() filterDto: FilterDto) {
+    return this.warehouseService.getInventories(filterDto);
   }
 
   @Patch(':warehouseId/inventories/:inventoryId')

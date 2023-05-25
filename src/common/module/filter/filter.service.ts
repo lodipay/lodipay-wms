@@ -27,10 +27,8 @@ export class FilterService {
       {
         limit,
         offset,
-        // filters: { mainFilter: filterDto?.query?.filter || {} },
         orderBy: filterDto?.query?.order || {},
         populate: filterDto?.query?.populate || [],
-        // populate: ['inventory'],
       },
     );
 

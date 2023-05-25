@@ -1,5 +1,5 @@
+import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
 import { Inject, Injectable } from '@nestjs/common';
 import { FilterDto } from '../../common/dto/filter.dto';
 import { InvalidArgumentException } from '../../common/exception/invalid.argument.exception';
@@ -97,7 +97,7 @@ export class WarehouseService {
     return whInventory;
   }
 
-  async getInventories(id: number, filterDto: FilterDto) {
+  async getInventories(filterDto: FilterDto) {
     return await this.filterService.search<WarehouseInventory>(
       WarehouseInventory,
       filterDto,
