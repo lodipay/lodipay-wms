@@ -32,14 +32,16 @@ describe('OrderService', () => {
     let filterService: FilterService;
 
     beforeEach(async () => {
-        const module: TestingModule = await getTestingModule([
-            OrderService,
-            FilterService,
-            getEntityManagerMockConfig(),
-            getRepositoryMockConfig(Order),
-            getRepositoryMockConfig(Destination),
-            getRepositoryMockConfig(Warehouse),
-        ]);
+        const module: TestingModule = await getTestingModule({
+            providers: [
+                OrderService,
+                FilterService,
+                getEntityManagerMockConfig(),
+                getRepositoryMockConfig(Order),
+                getRepositoryMockConfig(Destination),
+                getRepositoryMockConfig(Warehouse),
+            ],
+        });
 
         service = module.get<OrderService>(OrderService);
 
@@ -47,6 +49,18 @@ describe('OrderService', () => {
             id: 1,
             name: 'Tolgoit',
             description: 'Tolgoit description',
+        });
+
+        zaisan = plainToClass(Destination, {
+            id: 2,
+            name: 'Zaisan',
+            description: 'Zaisan description',
+        });
+
+        guchinhoyr = plainToClass(Destination, {
+            id: 3,
+            name: 'Guchin hoyr',
+            description: 'Guchin hoyr description',
         });
 
         zaisan = plainToClass(Destination, {

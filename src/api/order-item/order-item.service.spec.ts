@@ -37,14 +37,16 @@ describe('OrderItemService', () => {
     let inventory2: Inventory;
 
     beforeEach(async () => {
-        const module: TestingModule = await getTestingModule([
-            OrderItemService,
-            FilterService,
-            getEntityManagerMockConfig(),
-            getRepositoryMockConfig(Order),
-            getRepositoryMockConfig(OrderItem),
-            getRepositoryMockConfig(Inventory),
-        ]);
+        const module: TestingModule = await getTestingModule({
+            providers: [
+                OrderItemService,
+                FilterService,
+                getEntityManagerMockConfig(),
+                getRepositoryMockConfig(Order),
+                getRepositoryMockConfig(OrderItem),
+                getRepositoryMockConfig(Inventory),
+            ],
+        });
 
         service = module.get<OrderItemService>(OrderItemService);
         em = module.get<EntityManager>(EntityManager);
@@ -71,6 +73,25 @@ describe('OrderItemService', () => {
             name: 'Order 1',
             description: 'Order 1 description',
             createdBy: 'Admin 1',
+        });
+
+        order2 = plainToClass(Order, {
+            id: 15,
+            name: 'Order 2',
+            description: 'Order 2 description',
+            createdBy: 'Admin 2',
+        });
+
+        inventory = plainToClass(Inventory, {
+            id: 5,
+            sku: 'SKU123123',
+            name: 'Female Shirt',
+            description:
+                'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+            quantity: 10,
+            expiryDate: DateTime.now().plus({ year: 1 }).toISO(),
+            batchCode: 'BATCH123',
+            weight: 10,
         });
 
         order2 = plainToClass(Order, {

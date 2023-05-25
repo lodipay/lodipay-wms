@@ -1,7 +1,9 @@
 import type { EntityManager } from '@mikro-orm/core';
-import { Seeder } from '@mikro-orm/seeder';
+import { faker, Seeder } from '@mikro-orm/seeder';
 import { Destination } from '../entities/destination.entity';
 import { Warehouse } from '../entities/warehouse.entity';
+import { BundleHolderFactory } from './factory/bundle-holder.entity.factory';
+import { BundleFactory } from './factory/bundle.entity.factory';
 import { DestinationFactory } from './factory/destination.entity.factory';
 import { InventoryFactory } from './factory/inventory.entity.factory';
 import { OrderFactory } from './factory/order.entity.factory';
@@ -14,6 +16,7 @@ export class DatabaseSeeder extends Seeder {
         this.loadExtraDestinations(em);
         await this.loadOrders(em);
         this.loadInventories(em);
+        this.loadBundlesHolders(em);
     }
 
     private loadWarehouses(em: EntityManager) {
@@ -46,19 +49,19 @@ export class DatabaseSeeder extends Seeder {
 
         new OrderFactory(em)
             .each(order => {
-                const toDestinationIndex = this.generateRandomBetween(
-                    destinations.length - 1,
-                    0,
-                );
-                let fromDestinationIndex = this.generateRandomBetween(
-                    destinations.length - 1,
-                    0,
-                );
+                const toDestinationIndex = faker.datatype.number({
+                    min: 0,
+                    max: destinations.length - 1,
+                });
+                let fromDestinationIndex = faker.datatype.number({
+                    min: 0,
+                    max: destinations.length - 1,
+                });
                 while (toDestinationIndex === fromDestinationIndex) {
-                    fromDestinationIndex = this.generateRandomBetween(
-                        destinations.length - 1,
-                        0,
-                    );
+                    fromDestinationIndex = faker.datatype.number({
+                        min: 0,
+                        max: destinations.length - 1,
+                    });
                 }
                 order.from = destinations[toDestinationIndex];
                 order.to = destinations[fromDestinationIndex];
@@ -68,6 +71,39 @@ export class DatabaseSeeder extends Seeder {
 
     private loadInventories(em: EntityManager) {
         new InventoryFactory(em).make(100);
+    }
+
+    private loadBundlesHolders(em: EntityManager) {
+        new BundleHolderFactory(em)
+            .each(owner => {
+                owner.name = faker.company.name();
+
+                owner.bundles.add(
+                    new BundleFactory(em)
+                        .each(bundle => {
+                            bundle.bundleQuantity = faker.datatype.number({
+                                min: 10,
+                                max: 1000,
+                            });
+                            bundle.description = faker.commerce.product();
+                            bundle.inventories.add(
+                                new InventoryFactory(em).make(
+                                    faker.datatype.number({
+                                        min: 0,
+                                        max: 10,
+                                    }),
+                                ),
+                            );
+                        })
+                        .make(
+                            faker.datatype.number({
+                                min: 0,
+                                max: 10,
+                            }),
+                        ),
+                );
+            })
+            .make(10);
     }
 
     private generateRandomBetween(max: number, min = 1) {
