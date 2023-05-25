@@ -1,10 +1,10 @@
 import {
-  Collection,
-  Entity,
-  OneToMany,
-  OneToOne,
-  Property,
-  Unique,
+    Collection,
+    Entity,
+    OneToMany,
+    OneToOne,
+    Property,
+    Unique,
 } from '@mikro-orm/core';
 import { Destination } from './destination.entity';
 import { Location } from './location.entity';
@@ -13,32 +13,32 @@ import { WarehouseInventory } from './warehouse-inventory.entity';
 
 @Entity()
 export class Warehouse extends ParentEntity {
-  /**
-   * Warehouse name
-   *
-   * @example 'WH1'
-   */
-  @Property()
-  @Unique()
-  name: string;
+    /**
+     * Warehouse name
+     *
+     * @example 'WH1'
+     */
+    @Property()
+    @Unique()
+    name: string;
 
-  /**
-   * Warehouse description
-   *
-   * @example 'warehouse 1'
-   */
-  @Property()
-  description: string;
+    /**
+     * Warehouse description
+     *
+     * @example 'warehouse 1'
+     */
+    @Property()
+    description: string;
 
-  @OneToMany({
-    entity: () => Location,
-    mappedBy: 'warehouse',
-    orphanRemoval: true,
-  })
-  locations = new Collection<Location>(this);
+    @OneToMany({
+        entity: () => Location,
+        mappedBy: 'warehouse',
+        orphanRemoval: true,
+    })
+    locations = new Collection<Location>(this);
 
-  @OneToOne(() => Destination, destination => destination.warehouse)
-  destination?: Destination;
+    @OneToOne(() => Destination, destination => destination.warehouse)
+    destination?: Destination;
 
   @OneToMany({
     entity: () => WarehouseInventory,

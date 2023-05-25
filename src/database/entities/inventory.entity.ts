@@ -1,12 +1,12 @@
 import {
-  Collection,
-  Entity,
-  Filter,
-  ManyToOne,
-  OneToMany,
-  PrimaryKey,
-  Property,
-  Unique,
+    Collection,
+    Entity,
+    Filter,
+    ManyToOne,
+    OneToMany,
+    PrimaryKey,
+    Property,
+    Unique,
 } from '@mikro-orm/core';
 import { ApiProperty } from '@nestjs/swagger';
 import { Bundle } from './bundle.entity';

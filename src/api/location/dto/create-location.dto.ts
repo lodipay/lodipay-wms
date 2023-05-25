@@ -1,12 +1,12 @@
 import { IsNumber, IsString } from 'class-validator';
 
 export class CreateLocationDto {
-  @IsString()
-  code: string;
+    @IsString()
+    code: string;
 
-  @IsNumber()
-  warehouseId: number;
+    @IsNumber()
+    warehouseId: number;
 
-  @IsString()
-  description?: string;
+    @IsString()
+    description?: string;
 }

@@ -9,8 +9,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PaginatedDto } from '../../common/dto/paginated.dto';
 import { InvalidArgumentException } from '../../common/exception/invalid.argument.exception';
 import {
-  getEntityManagerMockConfig,
-  getRepositoryMockConfig,
+    getEntityManagerMockConfig,
+    getRepositoryMockConfig,
 } from '../../common/mock';
 import { FilterService } from '../../common/module/filter/filter.service';
 import { Inventory } from '../../database/entities/inventory.entity';
@@ -96,53 +96,88 @@ describe('WarehouseService', () => {
       return Promise.resolve();
     });
 
-    expect(await service.create(dto)).toBeInstanceOf(Warehouse);
-    expect(result.id).toBe(1);
-    expect(result.name).toBe(dto.name);
-    expect(result.description).toBe(dto.description);
-    expect(result.locations).toBeInstanceOf(Collection);
-    expect(result.createdAt).toBeInstanceOf(Date);
-  });
+    it('create', async () => {
+        const dto = new CreateWarehouseDto('WH1', 'WH1 description');
 
-  it('findAll', async () => {
-    const result = [
-      new Warehouse('WH1', 'WH1 description'),
-      new Warehouse('WH2', 'WH2 description'),
-    ];
+        const result = new Warehouse(dto.name, dto.description);
 
-    jest.spyOn(whRepository, 'findAll').mockImplementation((): any => {
-      return Promise.resolve(result);
+        jest.spyOn(em, 'persistAndFlush').mockImplementation(
+            (obj: Warehouse) => {
+                result.id = obj.id = 1;
+
+                return Promise.resolve();
+            },
+        );
+
+        expect(await service.create(dto)).toBeInstanceOf(Warehouse);
+        expect(result.id).toBe(1);
+        expect(result.name).toBe(dto.name);
+        expect(result.description).toBe(dto.description);
+        expect(result.locations).toBeInstanceOf(Collection);
+        expect(result.createdAt).toBeInstanceOf(Date);
     });
 
-    expect(await service.findAll()).toStrictEqual(result);
-  });
+    it('findAll', async () => {
+        const result = [
+            new Warehouse('WH1', 'WH1 description'),
+            new Warehouse('WH2', 'WH2 description'),
+        ];
 
-  it('findOne', async () => {
-    const result = new Warehouse('WH1', 'WH1 description');
-    result.id = 3;
+        jest.spyOn(whRepository, 'findAll').mockImplementation((): any => {
+            return Promise.resolve(result);
+        });
 
-    jest
-      .spyOn(whRepository, 'findOne')
-      .mockImplementation((options: any): any => {
-        expect(options.id).toBe(result.id);
-        return Promise.resolve(result);
-      });
+        expect(await service.findAll()).toStrictEqual(result);
+    });
 
-    expect(await service.findOne(3)).toStrictEqual(result);
-  });
+    it('findOne', async () => {
+        const result = new Warehouse('WH1', 'WH1 description');
+        result.id = 3;
 
-  it('update', async () => {
-    const result = {
-      id: 3,
-      name: 'WH1',
-      description: 'WH1 description',
-    };
+        jest.spyOn(whRepository, 'findOne').mockImplementation(
+            (options: any): any => {
+                expect(options.id).toBe(result.id);
+                return Promise.resolve(result);
+            },
+        );
 
-    const warehouse = new Warehouse(result.name, result.description);
-    warehouse.id = result.id;
+        expect(await service.findOne(3)).toStrictEqual(result);
+    });
 
-    jest.spyOn(service, 'findOne').mockImplementation(() => {
-      return Promise.resolve(warehouse);
+    it('update', async () => {
+        const result = {
+            id: 3,
+            name: 'WH1',
+            description: 'WH1 description',
+        };
+
+        const warehouse = new Warehouse(result.name, result.description);
+        warehouse.id = result.id;
+
+        jest.spyOn(service, 'findOne').mockImplementation(() => {
+            return Promise.resolve(warehouse);
+        });
+
+        jest.spyOn(em, 'assign').mockImplementation(
+            (obj1: Warehouse, obj2: Warehouse) => {
+                const mergedObj = Object.assign({}, obj1, obj2);
+                obj1.id = mergedObj.id;
+                obj1.name = mergedObj.name;
+                obj1.description = mergedObj.description;
+
+                return obj1;
+            },
+        );
+
+        const updatedResult = new Warehouse('WH-updated', result.description);
+        updatedResult.id = warehouse.id;
+        updatedResult.createdAt = warehouse.createdAt;
+
+        expect(
+            await service.update(3, {
+                name: updatedResult.name,
+            }),
+        ).toStrictEqual(updatedResult);
     });
 
     jest

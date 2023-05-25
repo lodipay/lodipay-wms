@@ -6,8 +6,8 @@ import { LocationController } from './location.controller';
 import { LocationService } from './location.service';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([Location, Warehouse])],
-  controllers: [LocationController],
-  providers: [LocationService],
+    imports: [MikroOrmModule.forFeature([Location, Warehouse])],
+    controllers: [LocationController],
+    providers: [LocationService],
 })
 export class LocationModule {}

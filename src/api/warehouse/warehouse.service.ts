@@ -14,9 +14,9 @@ import { UpdateWarehouseDto } from './dto/update-warehouse.dto';
 
 @Injectable()
 export class WarehouseService {
-  constructor(
-    @InjectRepository(Warehouse)
-    private readonly warehouseRepository: EntityRepository<Warehouse>,
+    constructor(
+        @InjectRepository(Warehouse)
+        private readonly warehouseRepository: EntityRepository<Warehouse>,
 
     @InjectRepository(WarehouseInventory)
     private readonly whInventoryRepo: EntityRepository<WarehouseInventory>,
@@ -29,38 +29,41 @@ export class WarehouseService {
     private readonly filterService: FilterService,
   ) {}
 
-  async create(dto: CreateWarehouseDto): Promise<Warehouse> {
-    const warehouse = new Warehouse(dto.name, dto.description);
-    await this.em.persistAndFlush(warehouse);
+    async create(dto: CreateWarehouseDto): Promise<Warehouse> {
+        const warehouse = new Warehouse(dto.name, dto.description);
+        await this.em.persistAndFlush(warehouse);
 
-    return warehouse;
-  }
+        return warehouse;
+    }
 
-  findAll(): Promise<Warehouse[]> {
-    return this.warehouseRepository.findAll();
-  }
+    findAll(): Promise<Warehouse[]> {
+        return this.warehouseRepository.findAll();
+    }
 
-  findOne(id: number): Promise<Warehouse> {
-    return this.warehouseRepository.findOne({ id });
-  }
+    findOne(id: number): Promise<Warehouse> {
+        return this.warehouseRepository.findOne({ id });
+    }
 
-  async update(
-    id: number,
-    updateWarehouseDto: UpdateWarehouseDto,
-  ): Promise<Warehouse> {
-    const warehouse = await this.findOne(id);
-    this.em.assign(warehouse, updateWarehouseDto, { mergeObjects: true });
+    async update(
+        id: number,
+        updateWarehouseDto: UpdateWarehouseDto,
+    ): Promise<Warehouse> {
+        const warehouse = await this.findOne(id);
+        this.em.assign(warehouse, updateWarehouseDto, { mergeObjects: true });
 
-    await this.em.persistAndFlush(warehouse);
+        await this.em.persistAndFlush(warehouse);
 
-    return warehouse;
-  }
+        return warehouse;
+    }
 
-  async remove(id: number) {
-    const warehouse = await this.findOne(id);
+    async remove(id: number) {
+        const warehouse = await this.findOne(id);
 
-    if (warehouse) {
-      await this.em.removeAndFlush(warehouse);
+        if (warehouse) {
+            await this.em.removeAndFlush(warehouse);
+        }
+
+        return 'success';
     }
 
     return 'success';

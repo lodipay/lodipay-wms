@@ -7,8 +7,8 @@ import { OrderItemController } from './order-item.controller';
 import { OrderItemService } from './order-item.service';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([Order, OrderItem, Inventory])],
-  controllers: [OrderItemController],
-  providers: [OrderItemService],
+    imports: [MikroOrmModule.forFeature([Order, OrderItem, Inventory])],
+    controllers: [OrderItemController],
+    providers: [OrderItemService],
 })
 export class OrderItemModule {}

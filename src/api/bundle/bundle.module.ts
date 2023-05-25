@@ -7,12 +7,12 @@ import { BundleController } from './bundle.controller';
 import { BundleService } from './bundle.service';
 
 @Module({
-  imports: [
-    MikroOrmModule.forFeature([Bundle]),
-    BundleHolderModule,
-    InventoryModule,
-  ],
-  controllers: [BundleController],
-  providers: [BundleService],
+    imports: [
+        MikroOrmModule.forFeature([Bundle]),
+        BundleHolderModule,
+        InventoryModule,
+    ],
+    controllers: [BundleController],
+    providers: [BundleService],
 })
 export class BundleModule {}

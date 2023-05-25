@@ -1,21 +1,21 @@
 import { IsDate, IsNumber, IsString } from 'class-validator';
 
 export class CreateBundleDto {
-  @IsNumber()
-  bundleHolderId: number;
+    @IsNumber()
+    bundleHolderId: number;
 
-  @IsNumber()
-  inventoryId: number;
+    @IsNumber()
+    inventoryId: number;
 
-  @IsNumber()
-  inventoryQuantity: number;
+    @IsNumber()
+    inventoryQuantity: number;
 
-  @IsString()
-  description: string;
+    @IsString()
+    description: string;
 
-  @IsDate()
-  activeFrom?: Date;
+    @IsDate()
+    activeFrom?: Date;
 
-  @IsDate()
-  activeTo?: Date;
+    @IsDate()
+    activeTo?: Date;
 }

@@ -5,9 +5,9 @@ import { InventoryController } from './inventory.controller';
 import { InventoryService } from './inventory.service';
 
 @Module({
-  controllers: [InventoryController],
-  providers: [InventoryService],
-  imports: [MikroOrmModule.forFeature([Inventory])],
-  exports: [InventoryService],
+    controllers: [InventoryController],
+    providers: [InventoryService],
+    imports: [MikroOrmModule.forFeature([Inventory])],
+    exports: [InventoryService],
 })
 export class InventoryModule {}

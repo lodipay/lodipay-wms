@@ -9,15 +9,15 @@ import { OrderModule } from './order/order.module';
 import { WarehouseModule } from './warehouse/warehouse.module';
 
 @Module({
-  imports: [
-    WarehouseModule,
-    LocationModule,
-    BundleModule,
-    OrderModule,
-    DestinationModule,
-    InventoryModule,
-    OrderItemModule,
-    BundleHolderModule,
-  ],
+    imports: [
+        WarehouseModule,
+        LocationModule,
+        BundleModule,
+        OrderModule,
+        DestinationModule,
+        InventoryModule,
+        OrderItemModule,
+        BundleHolderModule,
+    ],
 })
 export class ApiModule {}

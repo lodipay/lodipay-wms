@@ -5,12 +5,14 @@ import { BaseException } from '../exception/base.exception';
 
 @Catch(BaseException)
 export class BaseExceptionFilter implements ExceptionFilter {
-  catch(exception: BaseException, host: ArgumentsHost) {
-    const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
+    catch(exception: BaseException, host: ArgumentsHost) {
+        const ctx = host.switchToHttp();
+        const response = ctx.getResponse<Response>();
 
-    response
-      .status(200)
-      .json(new GenericResponseDto(null, exception.code, exception.message));
-  }
+        response
+            .status(200)
+            .json(
+                new GenericResponseDto(null, exception.code, exception.message),
+            );
+    }
 }

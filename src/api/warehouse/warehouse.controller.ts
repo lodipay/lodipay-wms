@@ -24,33 +24,33 @@ import { WarehouseService } from './warehouse.service';
 @Controller('warehouses')
 @ApiTags('Warehouse')
 export class WarehouseController {
-  constructor(private readonly warehouseService: WarehouseService) {}
+    constructor(private readonly warehouseService: WarehouseService) {}
 
-  @Post()
-  @ApiGenericResponse(Warehouse)
-  create(@Body() dto: CreateWarehouseDto) {
-    return this.warehouseService.create(dto);
-  }
+    @Post()
+    @ApiGenericResponse(Warehouse)
+    create(@Body() dto: CreateWarehouseDto) {
+        return this.warehouseService.create(dto);
+    }
 
-  @Get()
-  @ApiGenericListResponse(Warehouse)
-  findAll() {
-    return this.warehouseService.findAll();
-  }
+    @Get()
+    @ApiGenericListResponse(Warehouse)
+    findAll() {
+        return this.warehouseService.findAll();
+    }
 
-  @Get(':id')
-  @ApiGenericResponse(Warehouse)
-  findOne(@Param('id') id: string) {
-    return this.warehouseService.findOne(parseInt(id));
-  }
+    @Get(':id')
+    @ApiGenericResponse(Warehouse)
+    findOne(@Param('id') id: string) {
+        return this.warehouseService.findOne(parseInt(id));
+    }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateWarehouseDto: UpdateWarehouseDto,
-  ) {
-    return this.warehouseService.update(+id, updateWarehouseDto);
-  }
+    @Patch(':id')
+    update(
+        @Param('id') id: string,
+        @Body() updateWarehouseDto: UpdateWarehouseDto,
+    ) {
+        return this.warehouseService.update(+id, updateWarehouseDto);
+    }
 
   @Delete(':id')
   @ApiGenericResponse('string')

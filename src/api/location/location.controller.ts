@@ -1,11 +1,11 @@
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiGenericListResponse } from '../../common/decorator/api-generic-list-response.decorator';
@@ -18,37 +18,37 @@ import { LocationService } from './location.service';
 @Controller('location')
 @ApiTags('Location')
 export class LocationController {
-  constructor(private readonly locationService: LocationService) {}
+    constructor(private readonly locationService: LocationService) {}
 
-  @Post()
-  @ApiGenericResponse(Location)
-  create(@Body() createLocationDto: CreateLocationDto) {
-    return this.locationService.create(createLocationDto);
-  }
+    @Post()
+    @ApiGenericResponse(Location)
+    create(@Body() createLocationDto: CreateLocationDto) {
+        return this.locationService.create(createLocationDto);
+    }
 
-  @Get()
-  @ApiGenericListResponse(Location)
-  findAll() {
-    return this.locationService.findAll();
-  }
+    @Get()
+    @ApiGenericListResponse(Location)
+    findAll() {
+        return this.locationService.findAll();
+    }
 
-  @Get(':id')
-  @ApiGenericResponse(Location)
-  findOne(@Param('id') id: string) {
-    return this.locationService.findOne(+id);
-  }
+    @Get(':id')
+    @ApiGenericResponse(Location)
+    findOne(@Param('id') id: string) {
+        return this.locationService.findOne(+id);
+    }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateLocationDto: UpdateLocationDto,
-  ) {
-    return this.locationService.update(+id, updateLocationDto);
-  }
+    @Patch(':id')
+    update(
+        @Param('id') id: string,
+        @Body() updateLocationDto: UpdateLocationDto,
+    ) {
+        return this.locationService.update(+id, updateLocationDto);
+    }
 
-  @Delete(':id')
-  @ApiGenericResponse('string')
-  remove(@Param('id') id: string) {
-    return this.locationService.remove(+id);
-  }
+    @Delete(':id')
+    @ApiGenericResponse('string')
+    remove(@Param('id') id: string) {
+        return this.locationService.remove(+id);
+    }
 }

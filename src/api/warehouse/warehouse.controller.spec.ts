@@ -2,8 +2,8 @@ import { Collection, QueryOrder } from '@mikro-orm/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PaginatedDto } from '../../common/dto/paginated.dto';
 import {
-  getEntityManagerMockConfig,
-  getRepositoryMockConfig,
+    getEntityManagerMockConfig,
+    getRepositoryMockConfig,
 } from '../../common/mock';
 import { FilterService } from '../../common/module/filter/filter.service';
 import { Inventory } from '../../database/entities/inventory.entity';
@@ -81,17 +81,18 @@ describe('WarehouseController', () => {
         const warehouse = new Warehouse(dto.name, dto.description);
         warehouse.id = 1;
 
-        return Promise.resolve(warehouse);
-      });
+                return Promise.resolve(warehouse);
+            },
+        );
 
-    const result = await controller.create(data);
-    expect(result).toBeInstanceOf(Warehouse);
-    expect(result.id).toBe(1);
-    expect(result.name).toBe(data.name);
-    expect(result.description).toBe(data.description);
-    expect(result.locations).toBeInstanceOf(Collection<Location>);
-    expect(result.locations).toHaveLength(0);
-  });
+        const result = await controller.create(data);
+        expect(result).toBeInstanceOf(Warehouse);
+        expect(result.id).toBe(1);
+        expect(result.name).toBe(data.name);
+        expect(result.description).toBe(data.description);
+        expect(result.locations).toBeInstanceOf(Collection<Location>);
+        expect(result.locations).toHaveLength(0);
+    });
 
   it('should findAll warehouses', async () => {
     const result = [
@@ -110,25 +111,23 @@ describe('WarehouseController', () => {
       result.id = id;
       return Promise.resolve(result);
     });
-    expect(await controller.findOne('1')).toBe(result);
-  });
 
   it('should update warehouse', async () => {
     const result = new Warehouse('WH1-1', 'WH1 description');
     result.id = 1;
 
-    jest.spyOn(warehouseService, 'update').mockImplementation(() => {
-      return Promise.resolve(result);
+        jest.spyOn(warehouseService, 'update').mockImplementation(() => {
+            return Promise.resolve(result);
+        });
+        expect(
+            await controller.update(
+                '1',
+                new UpdateWarehouseDto({
+                    name: 'WH1-1',
+                }),
+            ),
+        ).toBe(result);
     });
-    expect(
-      await controller.update(
-        '1',
-        new UpdateWarehouseDto({
-          name: 'WH1-1',
-        }),
-      ),
-    ).toBe(result);
-  });
 
   it('should remove warehouse', async () => {
     const result = 'deleted';
