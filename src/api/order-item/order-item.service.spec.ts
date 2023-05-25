@@ -23,74 +23,76 @@ import { CreateOrderItemDto } from './dto/create-order-item.dto';
 import { OrderItemService } from './order-item.service';
 
 describe('OrderItemService', () => {
-  let service: OrderItemService;
-  let orderRepo: EntityRepository<Order>;
-  let orderItemRepo: EntityRepository<OrderItem>;
-  let inventoryRepo: EntityRepository<Inventory>;
-  let em: EntityManager;
-  let filterService: FilterService;
-  let createDto: CreateOrderItemDto;
-  let order: Order;
-  let order2: Order;
-  let orderItem: OrderItem;
-  let inventory: Inventory;
-  let inventory2: Inventory;
+    let service: OrderItemService;
+    let orderRepo: EntityRepository<Order>;
+    let orderItemRepo: EntityRepository<OrderItem>;
+    let inventoryRepo: EntityRepository<Inventory>;
+    let em: EntityManager;
+    let filterService: FilterService;
+    let createDto: CreateOrderItemDto;
+    let order: Order;
+    let order2: Order;
+    let orderItem: OrderItem;
+    let inventory: Inventory;
+    let inventory2: Inventory;
 
-  beforeEach(async () => {
-    const module: TestingModule = await getTestingModule({
-      providers: [
-        OrderItemService,
-        FilterService,
-        getEntityManagerMockConfig(),
-        getRepositoryMockConfig(Order),
-        getRepositoryMockConfig(OrderItem),
-        getRepositoryMockConfig(Inventory),
-      ],
-    });
+    beforeEach(async () => {
+        const module: TestingModule = await getTestingModule({
+            providers: [
+                OrderItemService,
+                FilterService,
+                getEntityManagerMockConfig(),
+                getRepositoryMockConfig(Order),
+                getRepositoryMockConfig(OrderItem),
+                getRepositoryMockConfig(Inventory),
+            ],
+        });
 
-    service = module.get<OrderItemService>(OrderItemService);
-    em = module.get<EntityManager>(EntityManager);
-    orderRepo = module.get<EntityRepository<Order>>(getRepositoryToken(Order));
-    orderItemRepo = module.get<EntityRepository<OrderItem>>(
-      getRepositoryToken(OrderItem),
-    );
-    inventoryRepo = module.get<EntityRepository<Inventory>>(
-      getRepositoryToken(Inventory),
-    );
-    filterService = module.get<FilterService>(FilterService);
+        service = module.get<OrderItemService>(OrderItemService);
+        em = module.get<EntityManager>(EntityManager);
+        orderRepo = module.get<EntityRepository<Order>>(
+            getRepositoryToken(Order),
+        );
+        orderItemRepo = module.get<EntityRepository<OrderItem>>(
+            getRepositoryToken(OrderItem),
+        );
+        inventoryRepo = module.get<EntityRepository<Inventory>>(
+            getRepositoryToken(Inventory),
+        );
+        filterService = module.get<FilterService>(FilterService);
 
-    createDto = {
-      orderId: 3,
-      inventoryId: 5,
-      description: 'Lorem ipsum',
-      inventoryAmount: 100,
-    };
+        createDto = {
+            orderId: 3,
+            inventoryId: 5,
+            description: 'Lorem ipsum',
+            inventoryAmount: 100,
+        };
 
-    order = plainToClass(Order, {
-      id: 3,
-      name: 'Order 1',
-      description: 'Order 1 description',
-      createdBy: 'Admin 1',
-    });
+        order = plainToClass(Order, {
+            id: 3,
+            name: 'Order 1',
+            description: 'Order 1 description',
+            createdBy: 'Admin 1',
+        });
 
-    order2 = plainToClass(Order, {
-      id: 15,
-      name: 'Order 2',
-      description: 'Order 2 description',
-      createdBy: 'Admin 2',
-    });
+        order2 = plainToClass(Order, {
+            id: 15,
+            name: 'Order 2',
+            description: 'Order 2 description',
+            createdBy: 'Admin 2',
+        });
 
-    inventory = plainToClass(Inventory, {
-      id: 5,
-      sku: 'SKU123123',
-      name: 'Female Shirt',
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-      quantity: 10,
-      expiryDate: DateTime.now().plus({ year: 1 }).toISO(),
-      batchCode: 'BATCH123',
-      weight: 10,
-    });
+        inventory = plainToClass(Inventory, {
+            id: 5,
+            sku: 'SKU123123',
+            name: 'Female Shirt',
+            description:
+                'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+            quantity: 10,
+            expiryDate: DateTime.now().plus({ year: 1 }).toISO(),
+            batchCode: 'BATCH123',
+            weight: 10,
+        });
 
         order2 = plainToClass(Order, {
             id: 15,

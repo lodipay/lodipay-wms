@@ -10,48 +10,48 @@ import { UpdateBundleHolderDto } from './dto/update-bundle-holder.dto';
 
 @Injectable()
 export class BundleHolderService {
-  constructor(
-    @InjectRepository(BundleHolder)
-    private readonly bundleHolderRepo: EntityRepository<BundleHolder>,
+    constructor(
+        @InjectRepository(BundleHolder)
+        private readonly bundleHolderRepo: EntityRepository<BundleHolder>,
 
-    private readonly em: EntityManager,
-    private readonly filterService: FilterService,
-  ) {}
+        private readonly em: EntityManager,
+        private readonly filterService: FilterService,
+    ) {}
 
-  async create({ name, description }: CreateBundleHolderDto) {
-    const bundleHolder = new BundleHolder();
-    bundleHolder.name = name;
-    bundleHolder.description = description;
-    await this.em.persistAndFlush(bundleHolder);
-    return bundleHolder;
-  }
-
-  search(filterDto: FilterDto) {
-    return this.filterService.search<BundleHolder>(BundleHolder, filterDto);
-  }
-
-  async findOne(id: number) {
-    const bundleHolder = await this.bundleHolderRepo.findOne(id);
-
-    if (!bundleHolder) {
-      throw new InvalidArgumentException('Invalid bundle holder');
+    async create({ name, description }: CreateBundleHolderDto) {
+        const bundleHolder = new BundleHolder();
+        bundleHolder.name = name;
+        bundleHolder.description = description;
+        await this.em.persistAndFlush(bundleHolder);
+        return bundleHolder;
     }
-    return bundleHolder;
-  }
 
-  async update(id: number, dto: UpdateBundleHolderDto) {
-    const bundleHolder = await this.findOne(id);
-    bundleHolder.name = dto.name || bundleHolder.name;
-    bundleHolder.name = dto.description || bundleHolder.description;
-    await this.em.persistAndFlush(bundleHolder);
+    search(filterDto: FilterDto) {
+        return this.filterService.search<BundleHolder>(BundleHolder, filterDto);
+    }
 
-    return bundleHolder;
-  }
+    async findOne(id: number) {
+        const bundleHolder = await this.bundleHolderRepo.findOne(id);
 
-  async remove(id: number) {
-    const bundleHolder = await this.findOne(id);
+        if (!bundleHolder) {
+            throw new InvalidArgumentException('Invalid bundle holder');
+        }
+        return bundleHolder;
+    }
 
-    await this.em.removeAndFlush(bundleHolder);
-    return 'success';
-  }
+    async update(id: number, dto: UpdateBundleHolderDto) {
+        const bundleHolder = await this.findOne(id);
+        bundleHolder.name = dto.name || bundleHolder.name;
+        bundleHolder.name = dto.description || bundleHolder.description;
+        await this.em.persistAndFlush(bundleHolder);
+
+        return bundleHolder;
+    }
+
+    async remove(id: number) {
+        const bundleHolder = await this.findOne(id);
+
+        await this.em.removeAndFlush(bundleHolder);
+        return 'success';
+    }
 }

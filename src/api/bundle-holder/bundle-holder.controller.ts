@@ -1,12 +1,12 @@
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiPaginatedResponse } from '../../common/decorator/api-paginated-response.decorator';
@@ -19,34 +19,34 @@ import { UpdateBundleHolderDto } from './dto/update-bundle-holder.dto';
 @Controller('bundle-holder')
 @ApiTags('Bundle Holder')
 export class BundleHolderController {
-  constructor(private readonly bundleHolderService: BundleHolderService) {}
+    constructor(private readonly bundleHolderService: BundleHolderService) {}
 
-  @Post()
-  create(@Body() createBundleHolderDto: CreateBundleHolderDto) {
-    return this.bundleHolderService.create(createBundleHolderDto);
-  }
+    @Post()
+    create(@Body() createBundleHolderDto: CreateBundleHolderDto) {
+        return this.bundleHolderService.create(createBundleHolderDto);
+    }
 
-  @Get()
-  @ApiPaginatedResponse(BundleHolder)
-  search(@Query() filterDto: FilterDto) {
-    return this.bundleHolderService.search(filterDto);
-  }
+    @Get()
+    @ApiPaginatedResponse(BundleHolder)
+    search(@Query() filterDto: FilterDto) {
+        return this.bundleHolderService.search(filterDto);
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.bundleHolderService.findOne(+id);
-  }
+    @Get(':id')
+    findOne(@Param('id') id: string) {
+        return this.bundleHolderService.findOne(+id);
+    }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateBundleHolderDto: UpdateBundleHolderDto,
-  ) {
-    return this.bundleHolderService.update(+id, updateBundleHolderDto);
-  }
+    @Patch(':id')
+    update(
+        @Param('id') id: string,
+        @Body() updateBundleHolderDto: UpdateBundleHolderDto,
+    ) {
+        return this.bundleHolderService.update(+id, updateBundleHolderDto);
+    }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.bundleHolderService.remove(+id);
-  }
+    @Delete(':id')
+    remove(@Param('id') id: string) {
+        return this.bundleHolderService.remove(+id);
+    }
 }

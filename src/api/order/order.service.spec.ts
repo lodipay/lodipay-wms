@@ -20,48 +20,48 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderService } from './order.service';
 
 describe('OrderService', () => {
-  let service: OrderService;
-  let testOrder: Order;
-  let tolgoit: Destination;
-  let zaisan: Destination;
-  let guchinhoyr: Destination;
-  let destRepo: EntityRepository<Destination>;
-  let orderRepo: EntityRepository<Order>;
-  let testOrderDto: CreateOrderDto;
-  let em: EntityManager;
-  let filterService: FilterService;
+    let service: OrderService;
+    let testOrder: Order;
+    let tolgoit: Destination;
+    let zaisan: Destination;
+    let guchinhoyr: Destination;
+    let destRepo: EntityRepository<Destination>;
+    let orderRepo: EntityRepository<Order>;
+    let testOrderDto: CreateOrderDto;
+    let em: EntityManager;
+    let filterService: FilterService;
 
-  beforeEach(async () => {
-    const module: TestingModule = await getTestingModule({
-      providers: [
-        OrderService,
-        FilterService,
-        getEntityManagerMockConfig(),
-        getRepositoryMockConfig(Order),
-        getRepositoryMockConfig(Destination),
-        getRepositoryMockConfig(Warehouse),
-      ],
-    });
+    beforeEach(async () => {
+        const module: TestingModule = await getTestingModule({
+            providers: [
+                OrderService,
+                FilterService,
+                getEntityManagerMockConfig(),
+                getRepositoryMockConfig(Order),
+                getRepositoryMockConfig(Destination),
+                getRepositoryMockConfig(Warehouse),
+            ],
+        });
 
-    service = module.get<OrderService>(OrderService);
+        service = module.get<OrderService>(OrderService);
 
-    tolgoit = plainToClass(Destination, {
-      id: 1,
-      name: 'Tolgoit',
-      description: 'Tolgoit description',
-    });
+        tolgoit = plainToClass(Destination, {
+            id: 1,
+            name: 'Tolgoit',
+            description: 'Tolgoit description',
+        });
 
-    zaisan = plainToClass(Destination, {
-      id: 2,
-      name: 'Zaisan',
-      description: 'Zaisan description',
-    });
+        zaisan = plainToClass(Destination, {
+            id: 2,
+            name: 'Zaisan',
+            description: 'Zaisan description',
+        });
 
-    guchinhoyr = plainToClass(Destination, {
-      id: 3,
-      name: 'Guchin hoyr',
-      description: 'Guchin hoyr description',
-    });
+        guchinhoyr = plainToClass(Destination, {
+            id: 3,
+            name: 'Guchin hoyr',
+            description: 'Guchin hoyr description',
+        });
 
         zaisan = plainToClass(Destination, {
             id: 2,
