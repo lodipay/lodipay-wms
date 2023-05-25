@@ -18,16 +18,16 @@ export class WarehouseService {
         @InjectRepository(Warehouse)
         private readonly warehouseRepository: EntityRepository<Warehouse>,
 
-    @InjectRepository(WarehouseInventory)
-    private readonly whInventoryRepo: EntityRepository<WarehouseInventory>,
+        @InjectRepository(WarehouseInventory)
+        private readonly whInventoryRepo: EntityRepository<WarehouseInventory>,
 
-    private readonly em: EntityManager,
+        private readonly em: EntityManager,
 
-    @Inject(InventoryService)
-    private readonly inventoryService: InventoryService,
+        @Inject(InventoryService)
+        private readonly inventoryService: InventoryService,
 
-    private readonly filterService: FilterService,
-  ) {}
+        private readonly filterService: FilterService,
+    ) {}
 
     async create(dto: CreateWarehouseDto): Promise<Warehouse> {
         const warehouse = new Warehouse(dto.name, dto.description);
@@ -66,87 +66,84 @@ export class WarehouseService {
         return 'success';
     }
 
-    return 'success';
-  }
+    async assignInventory(
+        id: number,
+        assignWhInventoryDto: AssignWarehouseInventoryDto,
+    ) {
+        const inventory = await this.inventoryService.findOne(
+            assignWhInventoryDto.inventoryId,
+        );
 
-  async assignInventory(
-    id: number,
-    assignWhInventoryDto: AssignWarehouseInventoryDto,
-  ) {
-    const inventory = await this.inventoryService.findOne(
-      assignWhInventoryDto.inventoryId,
-    );
+        const warehouseWithSameInventory = await this.whInventoryRepo.findOne({
+            warehouse: {
+                id,
+            },
+            inventory: {
+                id: assignWhInventoryDto.inventoryId,
+            },
+        });
 
-    const warehouseWithSameInventory = await this.whInventoryRepo.findOne({
-      warehouse: {
-        id,
-      },
-      inventory: {
-        id: assignWhInventoryDto.inventoryId,
-      },
-    });
+        if (warehouseWithSameInventory) {
+            throw new InvalidArgumentException(
+                'Same inventory already assigned in warehouse',
+            );
+        }
 
-    if (warehouseWithSameInventory) {
-      throw new InvalidArgumentException(
-        'Same inventory already assigned in warehouse',
-      );
+        const whInventory = new WarehouseInventory();
+        whInventory.inventory = inventory;
+        whInventory.warehouse = await this.findOne(id);
+        whInventory.quantity = assignWhInventoryDto.quantity;
+        await this.em.persistAndFlush(whInventory);
+        return whInventory;
     }
 
-    const whInventory = new WarehouseInventory();
-    whInventory.inventory = inventory;
-    whInventory.warehouse = await this.findOne(id);
-    whInventory.quantity = assignWhInventoryDto.quantity;
-    await this.em.persistAndFlush(whInventory);
-    return whInventory;
-  }
-
-  async getInventories(filterDto: FilterDto) {
-    return await this.filterService.search<WarehouseInventory>(
-      WarehouseInventory,
-      filterDto,
-    );
-  }
-
-  async getInventory(id: number, inventoryId: number) {
-    return await this.whInventoryRepo.findOne({
-      id,
-      inventory: { id: inventoryId },
-    });
-  }
-
-  async updateInventory(
-    warehouseId: number,
-    inventoryId: number,
-    updateWarehouseInventoryDto: UpdateWarehouseInventoryDto,
-  ) {
-    const whInventory = await this.whInventoryRepo.findOne({
-      warehouse: {
-        id: warehouseId,
-      },
-      inventory: {
-        id: inventoryId,
-      },
-    });
-
-    whInventory.quantity = updateWarehouseInventoryDto.quantity;
-    await this.em.persistAndFlush(whInventory);
-    return whInventory;
-  }
-
-  async removeInventory(warehouseId: number, inventoryId: number) {
-    const whInventory = await this.whInventoryRepo.findOne({
-      warehouse: {
-        id: warehouseId,
-      },
-      inventory: {
-        id: inventoryId,
-      },
-    });
-
-    if (!whInventory) {
-      throw new InvalidArgumentException('Warehouse inventory not found');
+    async getInventories(filterDto: FilterDto) {
+        return await this.filterService.search<WarehouseInventory>(
+            WarehouseInventory,
+            filterDto,
+        );
     }
 
-    await this.em.removeAndFlush(whInventory);
-  }
+    async getInventory(id: number, inventoryId: number) {
+        return await this.whInventoryRepo.findOne({
+            id,
+            inventory: { id: inventoryId },
+        });
+    }
+
+    async updateInventory(
+        warehouseId: number,
+        inventoryId: number,
+        updateWarehouseInventoryDto: UpdateWarehouseInventoryDto,
+    ) {
+        const whInventory = await this.whInventoryRepo.findOne({
+            warehouse: {
+                id: warehouseId,
+            },
+            inventory: {
+                id: inventoryId,
+            },
+        });
+
+        whInventory.quantity = updateWarehouseInventoryDto.quantity;
+        await this.em.persistAndFlush(whInventory);
+        return whInventory;
+    }
+
+    async removeInventory(warehouseId: number, inventoryId: number) {
+        const whInventory = await this.whInventoryRepo.findOne({
+            warehouse: {
+                id: warehouseId,
+            },
+            inventory: {
+                id: inventoryId,
+            },
+        });
+
+        if (!whInventory) {
+            throw new InvalidArgumentException('Warehouse inventory not found');
+        }
+
+        await this.em.removeAndFlush(whInventory);
+    }
 }

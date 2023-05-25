@@ -5,12 +5,12 @@ import { Warehouse } from './warehouse.entity';
 
 @Entity({ tableName: 't_warehouse_inventory' })
 export class WarehouseInventory extends ParentEntity {
-  @ManyToOne({ entity: () => Warehouse })
-  warehouse: Warehouse;
+    @ManyToOne({ entity: () => Warehouse })
+    warehouse: Warehouse;
 
-  @ManyToOne({ entity: () => Inventory })
-  inventory: Inventory;
+    @ManyToOne({ entity: () => Inventory })
+    inventory: Inventory;
 
-  @Property()
-  quantity: number;
+    @Property()
+    quantity: number;
 }

@@ -44,74 +44,17 @@ describe('InventoryService', () => {
         );
     });
 
-    const newInventory = new Inventory();
-    newInventory.name = data.name;
-    newInventory.sku = data.sku;
-    newInventory.batchCode = data.batchCode;
-    newInventory.description = data.description;
-    newInventory.expireDate = new Date(data.expiryDate);
-    newInventory.quantity = data.quantity;
-    newInventory.weight = data.weight;
-
-    const result = await service.create(newInventory);
-    expect(result).toBeInstanceOf(Inventory);
-    expect(result.children).toBeInstanceOf(Collection);
-    expect(result.children).toHaveLength(0);
-
-    delete result.children;
-    delete expectedData.expiryDate;
-    const plainResult = { ...result };
-    expect(plainResult).toEqual({
-      ...expectedData,
-      expireDate: expect.any(Date),
-      warehouses: expect.any(Collection),
-    });
-  });
-
-  it('findOne', async () => {
-    const data = {
-      id: 3,
-      sku: 'SKU123123',
-      name: 'Female Shirt',
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-      quantity: 10,
-      expiryDate: DateTime.now().plus({ year: 1 }).toISO(),
-      batchCode: 'BATCH123',
-      weight: 10,
-    };
-
-    const entity = plainToClass(Inventory, data);
-
-    jest
-      .spyOn(repository, 'findOne')
-      .mockImplementation((options: any): any => {
-        expect(options.id).toBe(entity.id);
-        return Promise.resolve(entity);
-      });
-
-    expect(await service.findOne(3)).toStrictEqual(entity);
-  });
-
-  it('update', async () => {
-    const data = {
-      id: 3,
-      sku: 'SKU123123',
-      name: 'Female Shirt',
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-      quantity: 10,
-      expiryDate: DateTime.now().plus({ year: 1 }).toISO(),
-      batchCode: 'BATCH123',
-      weight: 10,
-    };
-
-    const entity = plainToClass(Inventory, data);
-
-    jest.spyOn(service, 'findOne').mockImplementation(id => {
-      expect(id).toBe(entity.id);
-      return Promise.resolve(entity);
-    });
+    it('create', async () => {
+        const data = {
+            sku: 'SKU123123',
+            name: 'Female Shirt',
+            description:
+                'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+            quantity: 10,
+            expiryDate: DateTime.now().plus({ year: 1 }).toISO(),
+            batchCode: 'BATCH123',
+            weight: 10,
+        };
 
         const expectedData = {
             id: 2,
@@ -138,14 +81,28 @@ describe('InventoryService', () => {
             },
         );
 
-        const result = await service.create(plainToClass(Inventory, data));
+        const newInventory = new Inventory();
+        newInventory.name = data.name;
+        newInventory.sku = data.sku;
+        newInventory.batchCode = data.batchCode;
+        newInventory.description = data.description;
+        newInventory.expireDate = new Date(data.expiryDate);
+        newInventory.quantity = data.quantity;
+        newInventory.weight = data.weight;
+
+        const result = await service.create(newInventory);
         expect(result).toBeInstanceOf(Inventory);
         expect(result.children).toBeInstanceOf(Collection);
         expect(result.children).toHaveLength(0);
 
         delete result.children;
-        const plainResult = classToPlain(result);
-        expect(plainResult).toStrictEqual(expectedData);
+        delete expectedData.expiryDate;
+        const plainResult = { ...result };
+        expect(plainResult).toEqual({
+            ...expectedData,
+            expireDate: expect.any(Date),
+            warehouses: expect.any(Collection),
+        });
     });
 
     it('findOne', async () => {

@@ -6,9 +6,9 @@ export class QueryDto {
         [key: string]: QueryableDto;
     };
 
-  order: {
-    [key: string]: QueryOrder;
-  };
+    order: {
+        [key: string]: QueryOrder;
+    };
 
-  populate? = [];
+    populate? = [];
 }

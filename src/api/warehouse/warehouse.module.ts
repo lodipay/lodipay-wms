@@ -7,11 +7,11 @@ import { WarehouseController } from './warehouse.controller';
 import { WarehouseService } from './warehouse.service';
 
 @Module({
-  imports: [
-    MikroOrmModule.forFeature([Warehouse, WarehouseInventory]),
-    InventoryModule,
-  ],
-  controllers: [WarehouseController],
-  providers: [WarehouseService],
+    imports: [
+        MikroOrmModule.forFeature([Warehouse, WarehouseInventory]),
+        InventoryModule,
+    ],
+    controllers: [WarehouseController],
+    providers: [WarehouseService],
 })
 export class WarehouseModule {}

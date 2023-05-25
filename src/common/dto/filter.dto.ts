@@ -21,14 +21,9 @@ export class FilterDto {
                 order: {
                     name: QueryOrder.DESC,
                 },
+                populate: [],
             },
         },
-        order: {
-          name: QueryOrder.DESC,
-        },
-        populate: [],
-      },
-    },
-  })
-  query?: QueryDto;
+    })
+    query?: QueryDto;
 }

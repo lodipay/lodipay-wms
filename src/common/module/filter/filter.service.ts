@@ -21,16 +21,16 @@ export class FilterService {
 
         const offset = limit * (page - 1);
 
-    const [result, count] = await this.em.findAndCount(
-      entityClass,
-      filterDto?.query?.filter,
-      {
-        limit,
-        offset,
-        orderBy: filterDto?.query?.order || {},
-        populate: filterDto?.query?.populate || [],
-      },
-    );
+        const [result, count] = await this.em.findAndCount(
+            entityClass,
+            filterDto?.query?.filter,
+            {
+                limit,
+                offset,
+                orderBy: filterDto?.query?.order || {},
+                populate: filterDto?.query?.populate || [],
+            },
+        );
 
         const paginatedDto = new PaginatedDto();
         paginatedDto.limit = +limit;

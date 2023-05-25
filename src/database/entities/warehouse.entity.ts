@@ -40,15 +40,15 @@ export class Warehouse extends ParentEntity {
     @OneToOne(() => Destination, destination => destination.warehouse)
     destination?: Destination;
 
-  @OneToMany({
-    entity: () => WarehouseInventory,
-    mappedBy: 'warehouse',
-  })
-  inventories = new Collection<WarehouseInventory>(this);
+    @OneToMany({
+        entity: () => WarehouseInventory,
+        mappedBy: 'warehouse',
+    })
+    inventories = new Collection<WarehouseInventory>(this);
 
-  constructor(name: string, description: string) {
-    super();
-    this.name = name;
-    this.description = description;
-  }
+    constructor(name: string, description: string) {
+        super();
+        this.name = name;
+        this.description = description;
+    }
 }
