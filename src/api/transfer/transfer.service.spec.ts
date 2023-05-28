@@ -11,39 +11,39 @@ import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import { TestingModule } from '@nestjs/testing';
 import { plainToClass } from 'class-transformer';
-import { OrderStatus } from '../../common/enum/order-status.enum';
+import { TransferStatus } from '../../common/enum/transfer-status.enum';
 import { getTestingModule } from '../../common/mock/testing.module.mock';
 import { Destination } from '../../database/entities/destination.entity';
-import { Order } from '../../database/entities/order.entity';
+import { Transfer } from '../../database/entities/transfer.entity';
 import { Warehouse } from '../../database/entities/warehouse.entity';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { OrderService } from './order.service';
+import { CreateTransferDto } from './dto/create-transfer.dto';
+import { TransferService } from './transfer.service';
 
-describe('OrderService', () => {
-    let service: OrderService;
-    let testOrder: Order;
+describe('TransferService', () => {
+    let service: TransferService;
+    let testTransfer: Transfer;
     let tolgoit: Destination;
     let zaisan: Destination;
     let guchinhoyr: Destination;
     let destRepo: EntityRepository<Destination>;
-    let orderRepo: EntityRepository<Order>;
-    let testOrderDto: CreateOrderDto;
+    let transferRepo: EntityRepository<Transfer>;
+    let testTransferDto: CreateTransferDto;
     let em: EntityManager;
     let filterService: FilterService;
 
     beforeEach(async () => {
         const module: TestingModule = await getTestingModule({
             providers: [
-                OrderService,
+                TransferService,
                 FilterService,
                 getEntityManagerMockConfig(),
-                getRepositoryMockConfig(Order),
+                getRepositoryMockConfig(Transfer),
                 getRepositoryMockConfig(Destination),
                 getRepositoryMockConfig(Warehouse),
             ],
         });
 
-        service = module.get<OrderService>(OrderService);
+        service = module.get<TransferService>(TransferService);
 
         tolgoit = plainToClass(Destination, {
             id: 1,
@@ -75,32 +75,32 @@ describe('OrderService', () => {
             description: 'Guchin hoyr description',
         });
 
-        const testOrderData = {
-            name: 'test ecommerce order',
-            description: 'test ecommerce order description',
+        const testTransferData = {
+            name: 'test ecommerce transfer',
+            description: 'test ecommerce transfer description',
             fromDestinationId: zaisan.id,
             toDestinationId: tolgoit.id,
             createdBy: 'user1',
         };
-        testOrder = new Order(
-            testOrderData.name,
-            testOrderData.description,
-            testOrderData.createdBy,
+        testTransfer = new Transfer(
+            testTransferData.name,
+            testTransferData.description,
+            testTransferData.createdBy,
         );
 
-        testOrderDto = new CreateOrderDto(
-            testOrderData.name,
-            testOrderData.description,
-            testOrderData.fromDestinationId,
-            testOrderData.toDestinationId,
-            testOrderData.createdBy,
+        testTransferDto = new CreateTransferDto(
+            testTransferData.name,
+            testTransferData.description,
+            testTransferData.fromDestinationId,
+            testTransferData.toDestinationId,
+            testTransferData.createdBy,
         );
 
         destRepo = module.get<EntityRepository<Destination>>(
             getRepositoryToken(Destination),
         );
-        orderRepo = module.get<EntityRepository<Order>>(
-            getRepositoryToken(Order),
+        transferRepo = module.get<EntityRepository<Transfer>>(
+            getRepositoryToken(Transfer),
         );
         em = module.get<EntityManager>(EntityManager);
 
@@ -108,13 +108,13 @@ describe('OrderService', () => {
     });
 
     describe('create', () => {
-        it('should create an order', async () => {
-            const createDto = new CreateOrderDto(
-                testOrderDto.name,
-                testOrderDto.description,
-                testOrderDto.fromDestinationId,
-                testOrderDto.toDestinationId,
-                testOrderDto.description,
+        it('should create an transfer', async () => {
+            const createDto = new CreateTransferDto(
+                testTransferDto.name,
+                testTransferDto.description,
+                testTransferDto.fromDestinationId,
+                testTransferDto.toDestinationId,
+                testTransferDto.description,
             );
 
             jest.spyOn(destRepo, 'findOne')
@@ -138,18 +138,18 @@ describe('OrderService', () => {
             };
 
             jest.spyOn(em, 'persistAndFlush').mockImplementation(
-                (obj: Order) => {
+                (obj: Transfer) => {
                     obj.id = result['id'] = 1;
                     obj.createdAt = new Date();
-                    obj.status = OrderStatus.NEW;
+                    obj.status = TransferStatus.NEW;
                     return Promise.resolve();
                 },
             );
 
-            expect(await service.create(createDto)).toBeInstanceOf(Order);
+            expect(await service.create(createDto)).toBeInstanceOf(Transfer);
             expect(await service.create(createDto)).toMatchObject({
                 ...result,
-                status: OrderStatus.NEW,
+                status: TransferStatus.NEW,
                 from: expect.any(Destination),
                 to: expect.any(Destination),
                 createdAt: expect.any(Date),
@@ -157,12 +157,12 @@ describe('OrderService', () => {
         });
 
         it('should throw error when to and from destinations are same', () => {
-            const createDto = new CreateOrderDto(
-                testOrderDto.name,
-                testOrderDto.description,
+            const createDto = new CreateTransferDto(
+                testTransferDto.name,
+                testTransferDto.description,
                 zaisan.id,
                 zaisan.id,
-                testOrderDto.description,
+                testTransferDto.description,
             );
 
             const exception = expect(service.create(createDto)).rejects;
@@ -173,12 +173,12 @@ describe('OrderService', () => {
         });
 
         it('should throw error when from destination is null', () => {
-            const createDto = new CreateOrderDto(
-                testOrderDto.name,
-                testOrderDto.description,
+            const createDto = new CreateTransferDto(
+                testTransferDto.name,
+                testTransferDto.description,
                 null,
                 zaisan.id,
-                testOrderDto.description,
+                testTransferDto.description,
             );
 
             const exception = expect(service.create(createDto)).rejects;
@@ -187,12 +187,12 @@ describe('OrderService', () => {
         });
 
         it('should throw error when to destination is null', async () => {
-            const createDto = new CreateOrderDto(
-                testOrderDto.name,
-                testOrderDto.description,
+            const createDto = new CreateTransferDto(
+                testTransferDto.name,
+                testTransferDto.description,
                 zaisan.id,
                 null,
-                testOrderDto.description,
+                testTransferDto.description,
             );
 
             jest.spyOn(destRepo, 'findOne').mockImplementationOnce(
@@ -208,50 +208,50 @@ describe('OrderService', () => {
         });
     });
 
-    it('should find all orders', async () => {
+    it('should find all transfers', async () => {
         const result = [];
 
         for (let i = 0; i < 2; i++) {
-            const order = new Order();
-            order.id = i;
-            order.name = testOrder.name;
-            order.description = testOrder.description;
-            order.createdBy = testOrder.createdBy;
-            order.createdAt = new Date();
-            order.updatedAt = new Date();
-            order.from = tolgoit;
-            order.to = zaisan;
-            result.push(order);
+            const transfer = new Transfer();
+            transfer.id = i;
+            transfer.name = testTransfer.name;
+            transfer.description = testTransfer.description;
+            transfer.createdBy = testTransfer.createdBy;
+            transfer.createdAt = new Date();
+            transfer.updatedAt = new Date();
+            transfer.from = tolgoit;
+            transfer.to = zaisan;
+            result.push(transfer);
         }
 
-        jest.spyOn(orderRepo, 'findAll').mockImplementation(() => {
+        jest.spyOn(transferRepo, 'findAll').mockImplementation(() => {
             return Promise.resolve(result);
         });
 
         expect(await service.findAll()).toStrictEqual(result);
     });
 
-    it('should find an order', async () => {
-        const order = new Order();
-        order.id = 1;
-        order.name = testOrder.name;
-        order.description = testOrder.description;
-        order.createdBy = testOrder.createdBy;
-        order.createdAt = new Date();
-        order.updatedAt = new Date();
-        order.from = tolgoit;
-        order.to = zaisan;
+    it('should find an transfer', async () => {
+        const transfer = new Transfer();
+        transfer.id = 1;
+        transfer.name = testTransfer.name;
+        transfer.description = testTransfer.description;
+        transfer.createdBy = testTransfer.createdBy;
+        transfer.createdAt = new Date();
+        transfer.updatedAt = new Date();
+        transfer.from = tolgoit;
+        transfer.to = zaisan;
 
-        jest.spyOn(orderRepo, 'findOne').mockImplementation((): any => {
-            return Promise.resolve(order);
+        jest.spyOn(transferRepo, 'findOne').mockImplementation((): any => {
+            return Promise.resolve(transfer);
         });
 
-        expect(await service.findOne(1)).toBe(order);
+        expect(await service.findOne(1)).toBe(transfer);
     });
 
     describe('update', () => {
-        it('should throw error when order not found', async () => {
-            jest.spyOn(orderRepo, 'findOne').mockImplementation(id => {
+        it('should throw error when transfer not found', async () => {
+            jest.spyOn(transferRepo, 'findOne').mockImplementation(id => {
                 expect(id).toBe(123);
                 return Promise.resolve(null);
             });
@@ -263,20 +263,20 @@ describe('OrderService', () => {
                 }),
             ).rejects.toThrow(NotFoundException);
         });
-        it('should update an order', async () => {
-            const order = new Order();
-            order.id = 1;
-            order.name = testOrder.name;
-            order.description = testOrder.description;
-            order.createdBy = testOrder.createdBy;
-            order.status = OrderStatus.NEW;
-            order.createdAt = new Date();
-            order.updatedAt = new Date();
-            order.from = tolgoit;
-            order.to = zaisan;
+        it('should update an transfer', async () => {
+            const transfer = new Transfer();
+            transfer.id = 1;
+            transfer.name = testTransfer.name;
+            transfer.description = testTransfer.description;
+            transfer.createdBy = testTransfer.createdBy;
+            transfer.status = TransferStatus.NEW;
+            transfer.createdAt = new Date();
+            transfer.updatedAt = new Date();
+            transfer.from = tolgoit;
+            transfer.to = zaisan;
 
-            jest.spyOn(orderRepo, 'findOne').mockImplementation((): any => {
-                return Promise.resolve(order);
+            jest.spyOn(transferRepo, 'findOne').mockImplementation((): any => {
+                return Promise.resolve(transfer);
             });
 
             jest.spyOn(destRepo, 'findOne')
@@ -287,64 +287,64 @@ describe('OrderService', () => {
                     return Promise.resolve(zaisan);
                 });
 
-            const updatedResult = new Order(
-                testOrderDto.name,
-                testOrderDto.description,
+            const updatedResult = new Transfer(
+                testTransferDto.name,
+                testTransferDto.description,
             );
 
-            testOrder.status = OrderStatus.DELIVERED;
+            testTransfer.status = TransferStatus.DELIVERED;
 
             updatedResult.id = 1;
-            updatedResult.name = testOrder.name;
-            updatedResult.description = testOrder.description;
-            updatedResult.createdBy = testOrder.createdBy;
-            updatedResult.status = testOrder.status;
+            updatedResult.name = testTransfer.name;
+            updatedResult.description = testTransfer.description;
+            updatedResult.createdBy = testTransfer.createdBy;
+            updatedResult.status = testTransfer.status;
             updatedResult.updatedAt = new Date();
             updatedResult.createdAt = new Date();
 
             expect(
-                await service.update(order.id, {
-                    name: order.name,
-                    description: order.description,
-                    createdBy: order.createdBy,
+                await service.update(transfer.id, {
+                    name: transfer.name,
+                    description: transfer.description,
+                    createdBy: transfer.createdBy,
                     fromDestinationId: zaisan.id,
                     toDestinationId: guchinhoyr.id,
-                    status: testOrder.status,
+                    status: testTransfer.status,
                 }),
             ).toEqual({
                 id: 1,
-                name: order.name,
-                description: order.description,
-                createdBy: order.createdBy,
+                name: transfer.name,
+                description: transfer.description,
+                createdBy: transfer.createdBy,
                 from: expect.any(Destination),
                 to: expect.any(Destination),
                 updatedAt: expect.any(Date),
                 createdAt: expect.any(Date),
-                orderItems: expect.anything(),
-                status: testOrder.status,
+                transferItems: expect.anything(),
+                status: testTransfer.status,
             });
         });
 
         it('should throw error when the given toDestination is the same as the from destination', async () => {
-            const order = new Order();
-            order.id = 1;
-            order.name = testOrder.name;
-            order.description = testOrder.description;
-            order.createdBy = testOrder.createdBy;
-            order.createdAt = new Date();
-            order.updatedAt = new Date();
-            order.from = zaisan;
-            order.to = tolgoit;
+            const transfer = new Transfer();
+            transfer.id = 1;
+            transfer.name = testTransfer.name;
+            transfer.description = testTransfer.description;
+            transfer.createdBy = testTransfer.createdBy;
+            transfer.createdAt = new Date();
+            transfer.updatedAt = new Date();
+            transfer.from = zaisan;
+            transfer.to = tolgoit;
 
-            jest.spyOn(orderRepo, 'findOne').mockImplementation((): any => {
-                return Promise.resolve(order);
+            jest.spyOn(transferRepo, 'findOne').mockImplementation((): any => {
+                return Promise.resolve(transfer);
             });
 
             const exceptionExpect = await expect(
-                service.update(order.id, {
-                    name: order.name,
-                    description: order.description,
-                    createdBy: order.createdBy,
+                service.update(transfer.id, {
+                    name: transfer.name,
+                    description: transfer.description,
+                    createdBy: transfer.createdBy,
                     toDestinationId: zaisan.id,
                 }),
             ).rejects;
@@ -356,18 +356,18 @@ describe('OrderService', () => {
         });
 
         it('should throw error when the given toDestination is not found', async () => {
-            const order = new Order();
-            order.id = 1;
-            order.name = testOrder.name;
-            order.description = testOrder.description;
-            order.createdBy = testOrder.createdBy;
-            order.createdAt = new Date();
-            order.updatedAt = new Date();
-            order.from = zaisan;
-            order.to = tolgoit;
+            const transfer = new Transfer();
+            transfer.id = 1;
+            transfer.name = testTransfer.name;
+            transfer.description = testTransfer.description;
+            transfer.createdBy = testTransfer.createdBy;
+            transfer.createdAt = new Date();
+            transfer.updatedAt = new Date();
+            transfer.from = zaisan;
+            transfer.to = tolgoit;
 
-            jest.spyOn(orderRepo, 'findOne').mockImplementation((): any => {
-                return Promise.resolve(order);
+            jest.spyOn(transferRepo, 'findOne').mockImplementation((): any => {
+                return Promise.resolve(transfer);
             });
 
             jest.spyOn(destRepo, 'findOne').mockImplementationOnce(
@@ -378,10 +378,10 @@ describe('OrderService', () => {
             );
 
             const exceptionExpect = await expect(
-                service.update(order.id, {
-                    name: order.name,
-                    description: order.description,
-                    createdBy: order.createdBy,
+                service.update(transfer.id, {
+                    name: transfer.name,
+                    description: transfer.description,
+                    createdBy: transfer.createdBy,
                     toDestinationId: 123,
                 }),
             ).rejects;
@@ -391,18 +391,18 @@ describe('OrderService', () => {
         });
 
         it('should throw error when the given toDestination is not found', async () => {
-            const order = new Order();
-            order.id = 1;
-            order.name = testOrder.name;
-            order.description = testOrder.description;
-            order.createdBy = testOrder.createdBy;
-            order.createdAt = new Date();
-            order.updatedAt = new Date();
-            order.from = zaisan;
-            order.to = tolgoit;
+            const transfer = new Transfer();
+            transfer.id = 1;
+            transfer.name = testTransfer.name;
+            transfer.description = testTransfer.description;
+            transfer.createdBy = testTransfer.createdBy;
+            transfer.createdAt = new Date();
+            transfer.updatedAt = new Date();
+            transfer.from = zaisan;
+            transfer.to = tolgoit;
 
-            jest.spyOn(orderRepo, 'findOne').mockImplementation((): any => {
-                return Promise.resolve(order);
+            jest.spyOn(transferRepo, 'findOne').mockImplementation((): any => {
+                return Promise.resolve(transfer);
             });
 
             jest.spyOn(destRepo, 'findOne').mockImplementationOnce(
@@ -413,10 +413,10 @@ describe('OrderService', () => {
             );
 
             const exceptionExpect = await expect(
-                service.update(order.id, {
-                    name: order.name,
-                    description: order.description,
-                    createdBy: order.createdBy,
+                service.update(transfer.id, {
+                    name: transfer.name,
+                    description: transfer.description,
+                    createdBy: transfer.createdBy,
                     toDestinationId: 123,
                 }),
             ).rejects;
@@ -426,18 +426,18 @@ describe('OrderService', () => {
         });
 
         it('should throw error when the given fromDestination is same as the to destination', async () => {
-            const order = new Order();
-            order.id = 1;
-            order.name = testOrder.name;
-            order.description = testOrder.description;
-            order.createdBy = testOrder.createdBy;
-            order.createdAt = new Date();
-            order.updatedAt = new Date();
-            order.from = zaisan;
-            order.to = tolgoit;
+            const transfer = new Transfer();
+            transfer.id = 1;
+            transfer.name = testTransfer.name;
+            transfer.description = testTransfer.description;
+            transfer.createdBy = testTransfer.createdBy;
+            transfer.createdAt = new Date();
+            transfer.updatedAt = new Date();
+            transfer.from = zaisan;
+            transfer.to = tolgoit;
 
-            jest.spyOn(orderRepo, 'findOne').mockImplementation((): any => {
-                return Promise.resolve(order);
+            jest.spyOn(transferRepo, 'findOne').mockImplementation((): any => {
+                return Promise.resolve(transfer);
             });
 
             jest.spyOn(destRepo, 'findOne').mockImplementationOnce(
@@ -448,10 +448,10 @@ describe('OrderService', () => {
             );
 
             const exceptionExpect = await expect(
-                service.update(order.id, {
-                    name: order.name,
-                    description: order.description,
-                    createdBy: order.createdBy,
+                service.update(transfer.id, {
+                    name: transfer.name,
+                    description: transfer.description,
+                    createdBy: transfer.createdBy,
                     fromDestinationId: tolgoit.id,
                 }),
             ).rejects;
@@ -463,18 +463,18 @@ describe('OrderService', () => {
         });
 
         it('should throw error when the given fromDestination is not found', async () => {
-            const order = new Order();
-            order.id = 1;
-            order.name = testOrder.name;
-            order.description = testOrder.description;
-            order.createdBy = testOrder.createdBy;
-            order.createdAt = new Date();
-            order.updatedAt = new Date();
-            order.from = zaisan;
-            order.to = tolgoit;
+            const transfer = new Transfer();
+            transfer.id = 1;
+            transfer.name = testTransfer.name;
+            transfer.description = testTransfer.description;
+            transfer.createdBy = testTransfer.createdBy;
+            transfer.createdAt = new Date();
+            transfer.updatedAt = new Date();
+            transfer.from = zaisan;
+            transfer.to = tolgoit;
 
-            jest.spyOn(orderRepo, 'findOne').mockImplementation((): any => {
-                return Promise.resolve(order);
+            jest.spyOn(transferRepo, 'findOne').mockImplementation((): any => {
+                return Promise.resolve(transfer);
             });
 
             jest.spyOn(destRepo, 'findOne').mockImplementationOnce(
@@ -485,10 +485,10 @@ describe('OrderService', () => {
             );
 
             const exceptionExpect = await expect(
-                service.update(order.id, {
-                    name: order.name,
-                    description: order.description,
-                    createdBy: order.createdBy,
+                service.update(transfer.id, {
+                    name: transfer.name,
+                    description: transfer.description,
+                    createdBy: transfer.createdBy,
                     fromDestinationId: 123,
                 }),
             ).rejects;
@@ -514,11 +514,11 @@ describe('OrderService', () => {
             },
         };
 
-        const entity = new Order('Transfer', '#123121');
+        const entity = new Transfer('Transfer', '#123121');
         entity.from = tolgoit;
         entity.to = zaisan;
 
-        const result = [testOrder, entity];
+        const result = [testTransfer, entity];
         jest.spyOn(filterService, 'search').mockImplementation(
             (_, filterDto) => {
                 expect(filterDto).toStrictEqual(query);
@@ -544,38 +544,42 @@ describe('OrderService', () => {
     });
 
     describe('remove', () => {
-        it('should remove an order', async () => {
-            const order = new Order();
-            order.id = 1;
-            order.name = testOrder.name;
-            order.description = testOrder.description;
-            order.createdBy = testOrder.createdBy;
-            order.createdAt = new Date();
-            order.updatedAt = new Date();
-            order.from = zaisan;
-            order.to = tolgoit;
+        it('should remove an transfer', async () => {
+            const transfer = new Transfer();
+            transfer.id = 1;
+            transfer.name = testTransfer.name;
+            transfer.description = testTransfer.description;
+            transfer.createdBy = testTransfer.createdBy;
+            transfer.createdAt = new Date();
+            transfer.updatedAt = new Date();
+            transfer.from = zaisan;
+            transfer.to = tolgoit;
 
-            jest.spyOn(orderRepo, 'findOne').mockImplementation((id): any => {
-                expect(id).toBe(order.id);
-                return Promise.resolve(order);
-            });
+            jest.spyOn(transferRepo, 'findOne').mockImplementation(
+                (id): any => {
+                    expect(id).toBe(transfer.id);
+                    return Promise.resolve(transfer);
+                },
+            );
 
             jest.spyOn(em, 'removeAndFlush').mockImplementationOnce(
                 (entity: any) => {
-                    expect(entity).toStrictEqual(order);
+                    expect(entity).toStrictEqual(transfer);
 
                     return Promise.resolve();
                 },
             );
 
-            await service.remove(order.id);
+            await service.remove(transfer.id);
         });
 
-        it('should throw error when the order is not found', async () => {
-            jest.spyOn(orderRepo, 'findOne').mockImplementation((id): any => {
-                expect(id).toBe(123);
-                return Promise.resolve(null);
-            });
+        it('should throw error when the transfer is not found', async () => {
+            jest.spyOn(transferRepo, 'findOne').mockImplementation(
+                (id): any => {
+                    expect(id).toBe(123);
+                    return Promise.resolve(null);
+                },
+            );
 
             await expect(service.remove(123)).rejects.toThrow(
                 NotFoundException,

@@ -1,5 +1,5 @@
 import { FilterService } from '@/common/module/filter/filter.service';
-import { Collection, QueryOrder } from '@mikro-orm/core';
+import { QueryOrder } from '@mikro-orm/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { plainToClass } from 'class-transformer';
 import { PaginatedDto } from '../../common/dto/paginated.dto';
@@ -8,43 +8,43 @@ import {
     getRepositoryMockConfig,
 } from '../../common/mock';
 import { Inventory } from '../../database/entities/inventory.entity';
-import { OrderItem } from '../../database/entities/order-item.entity';
-import { Order } from '../../database/entities/order.entity';
-import { CreateOrderItemDto } from './dto/create-order-item.dto';
-import { UpdateOrderItemDto } from './dto/update-order-item.dto';
-import { OrderItemController } from './order-item.controller';
-import { OrderItemService } from './order-item.service';
+import { TransferItem } from '../../database/entities/transfer-item.entity';
+import { Transfer } from '../../database/entities/transfer.entity';
+import { CreateTransferItemDto } from './dto/create-transfer-item.dto';
+import { UpdateTransferItemDto } from './dto/update-transfer-item.dto';
+import { TransferItemController } from './transfer-item.controller';
+import { TransferItemService } from './transfer-item.service';
 
-describe('OrderItemController', () => {
-    let controller: OrderItemController;
-    let service: OrderItemService;
+describe('TransferItemController', () => {
+    let controller: TransferItemController;
+    let service: TransferItemService;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
-            controllers: [OrderItemController],
+            controllers: [TransferItemController],
             providers: [
-                OrderItemService,
+                TransferItemService,
                 FilterService,
-                getRepositoryMockConfig(Order),
-                getRepositoryMockConfig(OrderItem),
+                getRepositoryMockConfig(Transfer),
+                getRepositoryMockConfig(TransferItem),
                 getRepositoryMockConfig(Inventory),
                 getEntityManagerMockConfig(),
             ],
         }).compile();
 
-        controller = module.get<OrderItemController>(OrderItemController);
-        service = module.get<OrderItemService>(OrderItemService);
+        controller = module.get<TransferItemController>(TransferItemController);
+        service = module.get<TransferItemService>(TransferItemService);
     });
 
-    it('should create new order item', async () => {
+    it('should create new transfer item', async () => {
         const data = {
-            orderId: 1,
+            transferId: 1,
             inventoryId: 3,
             inventoryAmount: 5,
             description: 'Lorem ipsum dolor sit amet',
         };
 
-        const result = plainToClass(OrderItem, { ...data, id: 2 });
+        const result = plainToClass(TransferItem, { ...data, id: 2 });
         jest.spyOn(service, 'create').mockImplementation(() => {
             result.id = 1;
             result.createdAt = new Date();
@@ -52,14 +52,14 @@ describe('OrderItemController', () => {
         });
 
         expect(
-            await controller.create(plainToClass(CreateOrderItemDto, data)),
+            await controller.create(plainToClass(CreateTransferItemDto, data)),
         ).toEqual(result);
     });
 
-    it('should find order by id', async () => {
+    it('should find transfer by id', async () => {
         const data = {
             id: 5,
-            orderId: 1,
+            transferId: 1,
             inventoryId: 3,
             inventoryAmount: 5,
             description: 'Lorem ipsum dolor sit amet',
@@ -67,23 +67,22 @@ describe('OrderItemController', () => {
 
         jest.spyOn(service, 'findOne').mockImplementation(id => {
             expect(id).toBe(data.id);
-            return Promise.resolve(plainToClass(OrderItem, data));
+            return Promise.resolve(plainToClass(TransferItem, data));
         });
 
         expect(await controller.findOne(`${data.id}`)).toEqual({
             ...data,
             createdAt: expect.any(Date),
-            inventories: expect.any(Collection),
         });
     });
 
-    it('should update order item', async () => {
+    it('should update transfer item', async () => {
         const data = {
             id: 1,
             description: 'Lorem ipsum dolor sit amet',
             inventoryAmount: 1000,
             inventoryId: 3,
-            orderId: 5,
+            transferId: 5,
             createdAt: new Date(),
             updatedAt: new Date(),
         };
@@ -93,12 +92,12 @@ describe('OrderItemController', () => {
         };
 
         jest.spyOn(service, 'update').mockImplementation(
-            (id: number, dto: UpdateOrderItemDto) => {
+            (id: number, dto: UpdateTransferItemDto) => {
                 expect(id).toBe(data.id);
                 expect(dto.description).toBe(updateValues.description);
 
                 return Promise.resolve(
-                    plainToClass(OrderItem, {
+                    plainToClass(TransferItem, {
                         ...data,
                         ...dto,
                     }),
@@ -108,9 +107,9 @@ describe('OrderItemController', () => {
 
         expect(
             await controller.update(`${data.id}`, updateValues),
-        ).toBeInstanceOf(OrderItem);
+        ).toBeInstanceOf(TransferItem);
         expect(await controller.update(`${data.id}`, updateValues)).toEqual({
-            ...plainToClass(OrderItem, {
+            ...plainToClass(TransferItem, {
                 ...data,
                 description: updateValues.description,
             }),
@@ -140,14 +139,14 @@ describe('OrderItemController', () => {
                 description: 'Lorem ipsum dolor sit amet tasty',
                 inventoryAmount: 1000,
                 inventoryId: 8,
-                orderId: 5,
+                transferId: 5,
             },
             {
                 id: 2,
                 description: 'Lorem ipsum dolor sit amet',
                 inventoryAmount: 4000,
                 inventoryId: 9,
-                orderId: 4,
+                transferId: 4,
             },
         ].map(data => plainToClass(Inventory, data));
 

@@ -10,7 +10,7 @@ import {
 } from '@mikro-orm/core';
 import { ApiProperty } from '@nestjs/swagger';
 import { Bundle } from './bundle.entity';
-import { OrderItem } from './order-item.entity';
+import { TransferItem } from './transfer-item.entity';
 import { WarehouseInventory } from './warehouse-inventory.entity';
 
 @Entity()
@@ -105,8 +105,8 @@ export class Inventory {
     @ManyToOne({ entity: () => Inventory })
     parent?: Inventory;
 
-    @ManyToOne({ entity: () => OrderItem })
-    orderItem?: OrderItem;
+    @OneToMany({ entity: () => TransferItem, mappedBy: 'inventory' })
+    transferItem = new Collection<TransferItem>(this);
 
     @ManyToOne({
         entity: () => Bundle,

@@ -6,13 +6,13 @@ import {
     OneToMany,
     Property,
 } from '@mikro-orm/core';
-import { OrderStatus } from '../../common/enum/order-status.enum';
+import { TransferStatus } from '../../common/enum/transfer-status.enum';
 import { Destination } from './destination.entity';
-import { OrderItem } from './order-item.entity';
 import { ParentEntity } from './parent.entity';
+import { TransferItem } from './transfer-item.entity';
 
 @Entity()
-export class Order extends ParentEntity {
+export class Transfer extends ParentEntity {
     @Property()
     name: string;
 
@@ -22,8 +22,8 @@ export class Order extends ParentEntity {
     @Property({ nullable: true })
     createdBy?: string;
 
-    @Enum(() => OrderStatus)
-    status = OrderStatus.NEW;
+    @Enum(() => TransferStatus)
+    status = TransferStatus.NEW;
 
     @ManyToOne({ entity: () => Destination })
     from: Destination;
@@ -32,11 +32,11 @@ export class Order extends ParentEntity {
     to: Destination;
 
     @OneToMany({
-        entity: () => OrderItem,
-        mappedBy: 'order',
+        entity: () => TransferItem,
+        mappedBy: 'transfer',
         orphanRemoval: true,
     })
-    orderItems = new Collection<OrderItem>(this);
+    transferItems = new Collection<TransferItem>(this);
 
     constructor(name?: string, description?: string, createdBy?: string) {
         super();

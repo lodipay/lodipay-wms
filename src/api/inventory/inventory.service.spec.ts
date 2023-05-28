@@ -102,6 +102,7 @@ describe('InventoryService', () => {
             ...expectedData,
             expireDate: expect.any(Date),
             warehouses: expect.any(Collection),
+            transferItem: expect.any(Collection),
         });
     });
 

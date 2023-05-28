@@ -8,89 +8,97 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { plainToClass } from 'class-transformer';
 import { PaginatedDto } from '../../common/dto/paginated.dto';
 import { Destination } from '../../database/entities/destination.entity';
-import { Order } from '../../database/entities/order.entity';
+import { Transfer } from '../../database/entities/transfer.entity';
 import { Warehouse } from '../../database/entities/warehouse.entity';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
-import { OrderController } from './order.controller';
-import { OrderService } from './order.service';
+import { CreateTransferDto } from './dto/create-transfer.dto';
+import { UpdateTransferDto } from './dto/update-transfer.dto';
+import { TransferController } from './transfer.controller';
+import { TransferService } from './transfer.service';
 
-describe('OrderController', () => {
-    let controller: OrderController;
-    let service: OrderService;
+describe('TransferController', () => {
+    let controller: TransferController;
+    let service: TransferService;
 
     const fromDestination = new Destination('Tolgoit', 'Tolgoit description');
     fromDestination.id = 1;
     const toDestination = new Destination('Zaisan', 'Zaisan description');
     toDestination.id = 2;
 
-    const order1 = new Order('order1', 'order1 description', 'user1');
-    order1.from = fromDestination;
-    order1.to = toDestination;
-    const order2 = new Order('order2', 'order2 description', 'user2');
-    order2.from = fromDestination;
-    order2.to = toDestination;
+    const transfer1 = new Transfer(
+        'transfer1',
+        'transfer1 description',
+        'user1',
+    );
+    transfer1.from = fromDestination;
+    transfer1.to = toDestination;
+    const transfer2 = new Transfer(
+        'transfer2',
+        'transfer2 description',
+        'user2',
+    );
+    transfer2.from = fromDestination;
+    transfer2.to = toDestination;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
-            controllers: [OrderController],
+            controllers: [TransferController],
             providers: [
-                OrderService,
+                TransferService,
                 FilterService,
                 getEntityManagerMockConfig(),
-                getRepositoryMockConfig(Order),
+                getRepositoryMockConfig(Transfer),
                 getRepositoryMockConfig(Destination),
                 getRepositoryMockConfig(Warehouse),
             ],
         }).compile();
 
-        controller = module.get<OrderController>(OrderController);
-        service = module.get<OrderService>(OrderService);
+        controller = module.get<TransferController>(TransferController);
+        service = module.get<TransferService>(TransferService);
     });
 
-    it('shoud create new order', async () => {
-        const newOrderDto = {
-            name: 'order1',
-            description: 'order1 description',
+    it('shoud create new transfer', async () => {
+        const newTransferDto = {
+            name: 'transfer1',
+            description: 'transfer1 description',
             createdBy: 'user1',
             fromDestinationId: 1,
             toDestinationId: 2,
         };
 
         jest.spyOn(service, 'create').mockImplementation(
-            (dto: CreateOrderDto) => {
-                const order = new Order(
+            (dto: CreateTransferDto) => {
+                const transfer = new Transfer(
                     dto.name,
                     dto.description,
                     dto.createdBy,
                 );
                 fromDestination.id = dto.fromDestinationId;
                 toDestination.id = dto.toDestinationId;
-                order.from = fromDestination;
-                order.to = toDestination;
-                order.id = 1;
+                transfer.from = fromDestination;
+                transfer.to = toDestination;
+                transfer.id = 1;
 
-                return Promise.resolve(order);
+                return Promise.resolve(transfer);
             },
         );
 
-        const result = await controller.create(newOrderDto);
-        expect(result).toBeInstanceOf(Order);
+        const result = await controller.create(newTransferDto);
+        expect(result).toBeInstanceOf(Transfer);
         expect(result.id).toBe(1);
         expect(result.createdAt).toBeInstanceOf(Date);
-        expect(result.name).toBe(newOrderDto.name);
-        expect(result.description).toBe(newOrderDto.description);
-        expect(result.createdBy).toBe(newOrderDto.createdBy);
+        expect(result.name).toBe(newTransferDto.name);
+        expect(result.description).toBe(newTransferDto.description);
+        expect(result.createdBy).toBe(newTransferDto.createdBy);
         expect(result.from).toBeInstanceOf(Destination);
         expect(result.from).toStrictEqual(fromDestination);
         expect(result.to).toBeInstanceOf(Destination);
         expect(result.to).toStrictEqual(toDestination);
     });
 
-    it('should update an order', async () => {
-        const result = new Order();
+    it('should update an transfer', async () => {
+        const result = new Transfer();
         jest.spyOn(service, 'update').mockImplementation(
-            (id: number, dto: UpdateOrderDto) => {
+            (id: number, dto: UpdateTransferDto) => {
                 (result.name = dto.name),
                     (result.description = dto.description),
                     (result.createdBy = dto.createdBy);
@@ -104,22 +112,22 @@ describe('OrderController', () => {
         );
 
         expect(
-            await controller.update('1', { name: 'order10' }),
-        ).toBeInstanceOf(Order);
-        expect(await controller.update('1', { name: 'order10' })).toStrictEqual(
-            result,
-        );
+            await controller.update('1', { name: 'transfer10' }),
+        ).toBeInstanceOf(Transfer);
+        expect(
+            await controller.update('1', { name: 'transfer10' }),
+        ).toStrictEqual(result);
     });
 
-    it('should find order by id', async () => {
-        order1.id = 1;
+    it('should find transfer by id', async () => {
+        transfer1.id = 1;
         jest.spyOn(service, 'findOne').mockImplementation(id => {
-            expect(id).toBe(order1.id);
-            return Promise.resolve(order1);
+            expect(id).toBe(transfer1.id);
+            return Promise.resolve(transfer1);
         });
 
-        expect(await controller.findOne(`${order1.id}`)).toEqual({
-            ...order1,
+        expect(await controller.findOne(`${transfer1.id}`)).toEqual({
+            ...transfer1,
             createdAt: expect.any(Date),
         });
     });
@@ -143,19 +151,19 @@ describe('OrderController', () => {
         const result = [
             {
                 id: 1,
-                name: 'order1',
+                name: 'transfer1',
                 description: 'Lorem ipsum dolor sit amet tasty',
                 from: new Destination('Tolgoit', 'Tolgoit description'),
                 to: new Destination('Zaisan', 'Zaisan description'),
             },
             {
                 id: 2,
-                name: 'order2',
+                name: 'transfer2',
                 description: 'Lorem ipsum dolor sit amet',
                 from: new Destination('Tolgoit', 'Tolgoit description'),
                 to: new Destination('Zaisan', 'Zaisan description'),
             },
-        ].map(data => plainToClass(Order, data));
+        ].map(data => plainToClass(Transfer, data));
 
         jest.spyOn(service, 'search').mockImplementation(filterDto => {
             expect(filterDto).toStrictEqual(query);

@@ -1,10 +1,5 @@
 import { FilterService } from '@/common/module/filter/filter.service';
-import {
-    Collection,
-    EntityManager,
-    EntityRepository,
-    QueryOrder,
-} from '@mikro-orm/core';
+import { EntityManager, EntityRepository, QueryOrder } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { TestingModule } from '@nestjs/testing';
 import { plainToClass } from 'class-transformer';
@@ -17,44 +12,44 @@ import {
 } from '../../common/mock';
 import { getTestingModule } from '../../common/mock/testing.module.mock';
 import { Inventory } from '../../database/entities/inventory.entity';
-import { OrderItem } from '../../database/entities/order-item.entity';
-import { Order } from '../../database/entities/order.entity';
-import { CreateOrderItemDto } from './dto/create-order-item.dto';
-import { OrderItemService } from './order-item.service';
+import { TransferItem } from '../../database/entities/transfer-item.entity';
+import { Transfer } from '../../database/entities/transfer.entity';
+import { CreateTransferItemDto } from './dto/create-transfer-item.dto';
+import { TransferItemService } from './transfer-item.service';
 
-describe('OrderItemService', () => {
-    let service: OrderItemService;
-    let orderRepo: EntityRepository<Order>;
-    let orderItemRepo: EntityRepository<OrderItem>;
+describe('TransferItemService', () => {
+    let service: TransferItemService;
+    let transferRepo: EntityRepository<Transfer>;
+    let transferItemRepo: EntityRepository<TransferItem>;
     let inventoryRepo: EntityRepository<Inventory>;
     let em: EntityManager;
     let filterService: FilterService;
-    let createDto: CreateOrderItemDto;
-    let order: Order;
-    let order2: Order;
-    let orderItem: OrderItem;
+    let createDto: CreateTransferItemDto;
+    let transfer: Transfer;
+    let transfer2: Transfer;
+    let transferItem: TransferItem;
     let inventory: Inventory;
     let inventory2: Inventory;
 
     beforeEach(async () => {
         const module: TestingModule = await getTestingModule({
             providers: [
-                OrderItemService,
+                TransferItemService,
                 FilterService,
                 getEntityManagerMockConfig(),
-                getRepositoryMockConfig(Order),
-                getRepositoryMockConfig(OrderItem),
+                getRepositoryMockConfig(Transfer),
+                getRepositoryMockConfig(TransferItem),
                 getRepositoryMockConfig(Inventory),
             ],
         });
 
-        service = module.get<OrderItemService>(OrderItemService);
+        service = module.get<TransferItemService>(TransferItemService);
         em = module.get<EntityManager>(EntityManager);
-        orderRepo = module.get<EntityRepository<Order>>(
-            getRepositoryToken(Order),
+        transferRepo = module.get<EntityRepository<Transfer>>(
+            getRepositoryToken(Transfer),
         );
-        orderItemRepo = module.get<EntityRepository<OrderItem>>(
-            getRepositoryToken(OrderItem),
+        transferItemRepo = module.get<EntityRepository<TransferItem>>(
+            getRepositoryToken(TransferItem),
         );
         inventoryRepo = module.get<EntityRepository<Inventory>>(
             getRepositoryToken(Inventory),
@@ -62,23 +57,23 @@ describe('OrderItemService', () => {
         filterService = module.get<FilterService>(FilterService);
 
         createDto = {
-            orderId: 3,
+            transferId: 3,
             inventoryId: 5,
             description: 'Lorem ipsum',
             inventoryAmount: 100,
         };
 
-        order = plainToClass(Order, {
+        transfer = plainToClass(Transfer, {
             id: 3,
-            name: 'Order 1',
-            description: 'Order 1 description',
+            name: 'Transfer 1',
+            description: 'Transfer 1 description',
             createdBy: 'Admin 1',
         });
 
-        order2 = plainToClass(Order, {
+        transfer2 = plainToClass(Transfer, {
             id: 15,
-            name: 'Order 2',
-            description: 'Order 2 description',
+            name: 'Transfer 2',
+            description: 'Transfer 2 description',
             createdBy: 'Admin 2',
         });
 
@@ -94,10 +89,10 @@ describe('OrderItemService', () => {
             weight: 10,
         });
 
-        order2 = plainToClass(Order, {
+        transfer2 = plainToClass(Transfer, {
             id: 15,
-            name: 'Order 2',
-            description: 'Order 2 description',
+            name: 'Transfer 2',
+            description: 'Transfer 2 description',
             createdBy: 'Admin 2',
         });
 
@@ -125,19 +120,19 @@ describe('OrderItemService', () => {
             weight: 100,
         });
 
-        orderItem = new OrderItem();
-        orderItem.description = createDto.description;
-        orderItem.inventoryAmount = createDto.inventoryAmount;
-        orderItem.inventories.add(inventory);
-        orderItem.order = order;
+        transferItem = new TransferItem();
+        transferItem.description = createDto.description;
+        transferItem.inventoryAmount = createDto.inventoryAmount;
+        transferItem.inventory = inventory;
+        transferItem.transfer = transfer;
     });
 
-    describe('orderItem create', () => {
-        it('should create a new order item', async () => {
-            jest.spyOn(orderRepo, 'findOne').mockImplementation(
+    describe('transferItem create', () => {
+        it('should create a new transfer item', async () => {
+            jest.spyOn(transferRepo, 'findOne').mockImplementation(
                 (id: number): any => {
-                    expect(id).toBe(order.id);
-                    return Promise.resolve(order);
+                    expect(id).toBe(transfer.id);
+                    return Promise.resolve(transfer);
                 },
             );
 
@@ -148,16 +143,18 @@ describe('OrderItemService', () => {
                 },
             );
 
-            jest.spyOn(order.orderItems, 'add').mockImplementation((): any => {
-                return Promise.resolve();
-            });
+            jest.spyOn(transfer.transferItems, 'add').mockImplementation(
+                (): any => {
+                    return Promise.resolve();
+                },
+            );
 
             const createdDate = new Date();
             jest.spyOn(em, 'persistAndFlush').mockImplementation(
                 (entities): any => {
-                    entities[0].id = order.id;
-                    entities[1].id = orderItem.id = 5;
-                    entities[1].order = order;
+                    entities[0].id = transfer.id;
+                    entities[1].id = transferItem.id = 5;
+                    entities[1].transfer = transfer;
                     entities[1].inventory = inventory;
                     entities[1].createdAt = createdDate;
                     entities[1].description = createDto.description;
@@ -166,29 +163,31 @@ describe('OrderItemService', () => {
                 },
             );
 
-            expect(await service.create(createDto)).toBeInstanceOf(OrderItem);
+            expect(await service.create(createDto)).toBeInstanceOf(
+                TransferItem,
+            );
             const responseData = await service.create(createDto);
             expect(responseData.createdAt).toEqual(expect.any(Date));
-            expect(responseData.inventories).toBeInstanceOf(Collection);
+            expect(responseData.inventory).toBeInstanceOf(Inventory);
             expect(responseData.inventoryAmount).toBe(
                 createDto.inventoryAmount,
             );
             expect(responseData.description).toBe(createDto.description);
         });
 
-        it('should throw an error if order not found', async () => {
+        it('should throw an error if transfer not found', async () => {
             const exception = expect(
-                service.create({ ...createDto, orderId: 4 }),
+                service.create({ ...createDto, transferId: 4 }),
             ).rejects;
             exception.toThrow(InvalidArgumentException);
-            exception.toThrowError('Order not found');
+            exception.toThrowError('Transfer not found');
         });
 
         it('should throw an error if inventory not found', async () => {
-            jest.spyOn(orderRepo, 'findOne').mockImplementation(
+            jest.spyOn(transferRepo, 'findOne').mockImplementation(
                 (id: number): any => {
-                    expect(id).toBe(order.id);
-                    return Promise.resolve(order);
+                    expect(id).toBe(transfer.id);
+                    return Promise.resolve(transfer);
                 },
             );
 
@@ -200,15 +199,15 @@ describe('OrderItemService', () => {
         });
     });
 
-    describe('orderItem update', () => {
-        it('should update an order item without updating order or inventory', async () => {
-            const orderId = 3;
-            orderItem.id = orderId;
+    describe('transferItem update', () => {
+        it('should update an transfer item without updating transfer or inventory', async () => {
+            const transferId = 3;
+            transferItem.id = transferId;
 
-            jest.spyOn(orderItemRepo, 'findOne').mockImplementation(
+            jest.spyOn(transferItemRepo, 'findOne').mockImplementation(
                 (id: number): any => {
-                    expect(id).toBe(orderItem.id);
-                    return Promise.resolve(orderItem);
+                    expect(id).toBe(transferItem.id);
+                    return Promise.resolve(transferItem);
                 },
             );
 
@@ -217,33 +216,33 @@ describe('OrderItemService', () => {
                 inventoryAmount: 200,
             };
 
-            jest.spyOn(orderItemRepo, 'upsert').mockImplementation(
+            jest.spyOn(transferItemRepo, 'upsert').mockImplementation(
                 (entity): any => {
-                    expect(entity.id).toBe(orderItem.id);
+                    expect(entity.id).toBe(transferItem.id);
                     entity.description = updateDto.description;
                     entity.inventoryAmount = updateDto.inventoryAmount;
                     entity.updatedAt = new Date();
-                    return Promise.resolve(orderItem);
+                    return Promise.resolve(transferItem);
                 },
             );
 
-            expect(await service.update(orderItem.id, updateDto)).toEqual(
-                orderItem,
+            expect(await service.update(transferItem.id, updateDto)).toEqual(
+                transferItem,
             );
         });
 
-        it('should update an order item with updating order or inventory', async () => {
-            jest.spyOn(orderItemRepo, 'findOne').mockImplementation(
+        it('should update an transfer item with updating transfer or inventory', async () => {
+            jest.spyOn(transferItemRepo, 'findOne').mockImplementation(
                 (id: number): any => {
-                    expect(id).toBe(orderItem.id);
-                    return Promise.resolve(orderItem);
+                    expect(id).toBe(transferItem.id);
+                    return Promise.resolve(transferItem);
                 },
             );
 
-            jest.spyOn(orderRepo, 'findOne').mockImplementation(
+            jest.spyOn(transferRepo, 'findOne').mockImplementation(
                 (id: number): any => {
-                    expect(id).toBe(order2.id);
-                    return Promise.resolve(order);
+                    expect(id).toBe(transfer2.id);
+                    return Promise.resolve(transfer);
                 },
             );
 
@@ -257,32 +256,32 @@ describe('OrderItemService', () => {
             const updateDto = {
                 description: 'UPDATED Lorem ipsum',
                 inventoryAmount: 200,
-                orderId: order2.id,
+                transferId: transfer2.id,
                 inventoryId: inventory2.id,
             };
 
-            jest.spyOn(orderItemRepo, 'upsert').mockImplementation(
-                (entity: OrderItem): any => {
-                    expect(entity.id).toBe(orderItem.id);
+            jest.spyOn(transferItemRepo, 'upsert').mockImplementation(
+                (entity: TransferItem): any => {
+                    expect(entity.id).toBe(transferItem.id);
                     entity.description = updateDto.description;
                     entity.inventoryAmount = updateDto.inventoryAmount;
-                    entity.inventories.add(inventory2);
-                    entity.order = order2;
+                    entity.inventory = inventory2;
+                    entity.transfer = transfer2;
                     entity.updatedAt = new Date();
-                    return Promise.resolve(orderItem);
+                    return Promise.resolve(transferItem);
                 },
             );
 
-            expect(await service.update(orderItem.id, updateDto)).toEqual(
-                orderItem,
+            expect(await service.update(transferItem.id, updateDto)).toEqual(
+                transferItem,
             );
         });
 
-        it('should throw an error if order item not found', async () => {
+        it('should throw an error if transfer item not found', async () => {
             const exception = await expect(service.update(100, createDto))
                 .rejects;
             exception.toThrow(InvalidArgumentException);
-            exception.toThrowError('OrderItem not found');
+            exception.toThrowError('TransferItem not found');
         });
     });
 
@@ -302,13 +301,13 @@ describe('OrderItemService', () => {
             },
         };
 
-        const orderItem2 = new OrderItem();
-        orderItem2.description = 'Lorem ipsum';
-        orderItem2.inventoryAmount = 100;
-        orderItem2.inventories.add(inventory);
-        orderItem2.order = order;
+        const transferItem2 = new TransferItem();
+        transferItem2.description = 'Lorem ipsum';
+        transferItem2.inventoryAmount = 100;
+        transferItem2.inventory = inventory;
+        transferItem2.transfer = transfer;
 
-        const result = [orderItem, orderItem2];
+        const result = [transferItem, transferItem2];
         jest.spyOn(filterService, 'search').mockImplementation(
             (_, filterDto) => {
                 expect(filterDto).toStrictEqual(query);
@@ -333,37 +332,39 @@ describe('OrderItemService', () => {
         expect(await service.search(query)).toStrictEqual(paginatedDto);
     });
 
-    describe('orderItem remove', () => {
-        it('should remove an order item', async () => {
-            orderItem.id = 1;
-            jest.spyOn(orderItemRepo, 'findOne').mockImplementation(
+    describe('transferItem remove', () => {
+        it('should remove an transfer item', async () => {
+            transferItem.id = 1;
+            jest.spyOn(transferItemRepo, 'findOne').mockImplementation(
                 (id): any => {
-                    expect(id).toBe(orderItem.id);
-                    return Promise.resolve(orderItem);
+                    expect(id).toBe(transferItem.id);
+                    return Promise.resolve(transferItem);
                 },
             );
 
             jest.spyOn(em, 'removeAndFlush').mockImplementationOnce(
                 (entity: any) => {
-                    expect(entity).toStrictEqual(orderItem);
+                    expect(entity).toStrictEqual(transferItem);
 
                     return Promise.resolve();
                 },
             );
 
-            expect(await service.remove(orderItem.id)).toStrictEqual('deleted');
+            expect(await service.remove(transferItem.id)).toStrictEqual(
+                'deleted',
+            );
         });
 
-        it('should throw error when the order item is not found', async () => {
-            orderItem.id = 1;
-            jest.spyOn(orderItemRepo, 'findOne').mockImplementation(
+        it('should throw error when the transfer item is not found', async () => {
+            transferItem.id = 1;
+            jest.spyOn(transferItemRepo, 'findOne').mockImplementation(
                 (id): any => {
-                    expect(id).toBe(orderItem.id);
+                    expect(id).toBe(transferItem.id);
                     return Promise.resolve(null);
                 },
             );
 
-            await expect(service.remove(orderItem.id)).rejects.toThrow(
+            await expect(service.remove(transferItem.id)).rejects.toThrow(
                 InvalidArgumentException,
             );
         });

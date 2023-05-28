@@ -4,8 +4,8 @@ import { BundleModule } from './bundle/bundle.module';
 import { DestinationModule } from './destination/destination.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { LocationModule } from './location/location.module';
-import { OrderItemModule } from './order-item/order-item.module';
-import { OrderModule } from './order/order.module';
+import { TransferItemModule } from './transfer-item/transfer-item.module';
+import { TransferModule } from './transfer/transfer.module';
 import { WarehouseModule } from './warehouse/warehouse.module';
 
 @Module({
@@ -13,10 +13,10 @@ import { WarehouseModule } from './warehouse/warehouse.module';
         WarehouseModule,
         LocationModule,
         BundleModule,
-        OrderModule,
+        TransferModule,
         DestinationModule,
         InventoryModule,
-        OrderItemModule,
+        TransferItemModule,
         BundleHolderModule,
     ],
 })
