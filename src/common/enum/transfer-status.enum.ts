@@ -1,0 +1,14 @@
+export enum TransferStatus {
+    NEW = 'NEW',
+    ACTIVE = 'ACTIVE',
+    INACTIVE = 'INACTIVE',
+    PACKING = 'PACKING',
+    PACKED = 'PACKED',
+    CANCELLED = 'CANCELLED',
+    DELIVERING = 'DELIVERING',
+    DELIVERED = 'DELIVERED',
+    RETURNING = 'RETURNING',
+    RETURNED = 'RETURNED',
+    RECEIVING = 'RECEIVING',
+    DONE = 'DONE',
+}
