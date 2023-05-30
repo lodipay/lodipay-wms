@@ -13,6 +13,7 @@ import { TestingModule } from '@nestjs/testing';
 import { plainToClass } from 'class-transformer';
 import { TransferStatus } from '../../common/enum/transfer-status.enum';
 import { getTestingModule } from '../../common/mock/testing.module.mock';
+import { TransferSMService } from '../../common/module/state-machine/transfer-sm/transfer-sm.service';
 import { Destination } from '../../database/entities/destination.entity';
 import { Transfer } from '../../database/entities/transfer.entity';
 import { Warehouse } from '../../database/entities/warehouse.entity';
@@ -30,11 +31,22 @@ describe('TransferService', () => {
     let testTransferDto: CreateTransferDto;
     let em: EntityManager;
     let filterService: FilterService;
+    let transferSMService: TransferSMService;
 
     beforeEach(async () => {
         const module: TestingModule = await getTestingModule({
             providers: [
                 TransferService,
+                {
+                    provide: TransferSMService,
+                    useValue: {
+                        machine: {
+                            transition: () => jest.fn(),
+                        },
+                        service: jest.fn(),
+                        getCurrentState: () => jest.fn(),
+                    },
+                },
                 FilterService,
                 getEntityManagerMockConfig(),
                 getRepositoryMockConfig(Transfer),
@@ -44,6 +56,7 @@ describe('TransferService', () => {
         });
 
         service = module.get<TransferService>(TransferService);
+        transferSMService = module.get<TransferSMService>(TransferSMService);
 
         tolgoit = plainToClass(Destination, {
             id: 1,
@@ -584,6 +597,482 @@ describe('TransferService', () => {
             await expect(service.remove(123)).rejects.toThrow(
                 NotFoundException,
             );
+        });
+    });
+
+    describe('change state', () => {
+        it('should change state of a transfer to active', async () => {
+            const transfer = new Transfer();
+            transfer.id = 1;
+            transfer.name = testTransfer.name;
+            transfer.description = testTransfer.description;
+            transfer.createdBy = testTransfer.createdBy;
+            transfer.createdAt = new Date();
+            transfer.updatedAt = new Date();
+            transfer.from = zaisan;
+            transfer.to = tolgoit;
+            transfer.status = TransferStatus.NEW;
+
+            jest.spyOn(transferRepo, 'findOne').mockImplementation(
+                (id): any => {
+                    expect(id).toBe(transfer.id);
+                    return Promise.resolve(transfer);
+                },
+            );
+
+            jest.spyOn(
+                transferSMService.machine,
+                'transition',
+            ).mockImplementation((): any => {
+                return {
+                    value: TransferStatus.ACTIVE,
+                    changed: true,
+                };
+            });
+
+            jest.spyOn(em, 'persistAndFlush').mockImplementationOnce(
+                (entity: any) => {
+                    expect(entity).toStrictEqual(transfer);
+                    entity.status = TransferStatus.ACTIVE;
+                    return Promise.resolve();
+                },
+            );
+
+            expect(await service.activate(transfer.id)).toEqual(transfer);
+        });
+
+        it('should throw state is not changed by state machine', async () => {
+            const transfer = new Transfer();
+            transfer.id = 1;
+            transfer.name = testTransfer.name;
+            transfer.description = testTransfer.description;
+            transfer.createdBy = testTransfer.createdBy;
+            transfer.createdAt = new Date();
+            transfer.updatedAt = new Date();
+            transfer.from = zaisan;
+            transfer.to = tolgoit;
+            transfer.status = TransferStatus.NEW;
+
+            jest.spyOn(transferRepo, 'findOne').mockImplementation(
+                (id): any => {
+                    expect(id).toBe(transfer.id);
+                    return Promise.resolve(transfer);
+                },
+            );
+
+            jest.spyOn(
+                transferSMService.machine,
+                'transition',
+            ).mockImplementation((): any => {
+                return {
+                    value: TransferStatus.NEW,
+                    changed: false,
+                };
+            });
+
+            await expect(service.activate(transfer.id)).rejects.toThrow(
+                InvalidArgumentException,
+            );
+        });
+
+        it('should change state of a transfer to inactive', async () => {
+            const transfer = new Transfer();
+            transfer.id = 1;
+            transfer.name = testTransfer.name;
+            transfer.description = testTransfer.description;
+            transfer.createdBy = testTransfer.createdBy;
+            transfer.createdAt = new Date();
+            transfer.updatedAt = new Date();
+            transfer.from = zaisan;
+            transfer.to = tolgoit;
+            transfer.status = TransferStatus.ACTIVE;
+
+            jest.spyOn(transferRepo, 'findOne').mockImplementation(
+                (id): any => {
+                    expect(id).toBe(transfer.id);
+                    return Promise.resolve(transfer);
+                },
+            );
+
+            jest.spyOn(
+                transferSMService.machine,
+                'transition',
+            ).mockImplementation((): any => {
+                return {
+                    value: TransferStatus.INACTIVE,
+                    changed: true,
+                };
+            });
+
+            jest.spyOn(em, 'persistAndFlush').mockImplementationOnce(
+                (entity: any) => {
+                    expect(entity).toStrictEqual(transfer);
+                    entity.status = TransferStatus.ACTIVE;
+                    return Promise.resolve();
+                },
+            );
+
+            expect(await service.deactivate(transfer.id)).toEqual(transfer);
+        });
+
+        it('should change state of a transfer to cancel', async () => {
+            const transfer = new Transfer();
+            transfer.id = 1;
+            transfer.name = testTransfer.name;
+            transfer.description = testTransfer.description;
+            transfer.createdBy = testTransfer.createdBy;
+            transfer.createdAt = new Date();
+            transfer.updatedAt = new Date();
+            transfer.from = zaisan;
+            transfer.to = tolgoit;
+            transfer.status = TransferStatus.NEW;
+
+            jest.spyOn(transferRepo, 'findOne').mockImplementation(
+                (id): any => {
+                    expect(id).toBe(transfer.id);
+                    return Promise.resolve(transfer);
+                },
+            );
+
+            jest.spyOn(
+                transferSMService.machine,
+                'transition',
+            ).mockImplementation((): any => {
+                return {
+                    value: TransferStatus.CANCELLED,
+                    changed: true,
+                };
+            });
+
+            jest.spyOn(em, 'persistAndFlush').mockImplementationOnce(
+                (entity: any) => {
+                    expect(entity).toStrictEqual(transfer);
+                    entity.status = TransferStatus.CANCELLED;
+                    return Promise.resolve();
+                },
+            );
+
+            expect(await service.cancel(transfer.id)).toEqual(transfer);
+        });
+
+        it('should change state of a transfer to packing', async () => {
+            const transfer = new Transfer();
+            transfer.id = 1;
+            transfer.name = testTransfer.name;
+            transfer.description = testTransfer.description;
+            transfer.createdBy = testTransfer.createdBy;
+            transfer.createdAt = new Date();
+            transfer.updatedAt = new Date();
+            transfer.from = zaisan;
+            transfer.to = tolgoit;
+            transfer.status = TransferStatus.ACTIVE;
+
+            jest.spyOn(transferRepo, 'findOne').mockImplementation(
+                (id): any => {
+                    expect(id).toBe(transfer.id);
+                    return Promise.resolve(transfer);
+                },
+            );
+
+            jest.spyOn(
+                transferSMService.machine,
+                'transition',
+            ).mockImplementation((): any => {
+                return {
+                    value: TransferStatus.PACKING,
+                    changed: true,
+                };
+            });
+
+            jest.spyOn(em, 'persistAndFlush').mockImplementationOnce(
+                (entity: any) => {
+                    expect(entity).toStrictEqual(transfer);
+                    entity.status = TransferStatus.PACKING;
+                    return Promise.resolve();
+                },
+            );
+
+            expect(await service.packing(transfer.id)).toEqual(transfer);
+        });
+
+        it('should change state of a transfer to packed', async () => {
+            const transfer = new Transfer();
+            transfer.id = 1;
+            transfer.name = testTransfer.name;
+            transfer.description = testTransfer.description;
+            transfer.createdBy = testTransfer.createdBy;
+            transfer.createdAt = new Date();
+            transfer.updatedAt = new Date();
+            transfer.from = zaisan;
+            transfer.to = tolgoit;
+            transfer.status = TransferStatus.PACKING;
+
+            jest.spyOn(transferRepo, 'findOne').mockImplementation(
+                (id): any => {
+                    expect(id).toBe(transfer.id);
+                    return Promise.resolve(transfer);
+                },
+            );
+
+            jest.spyOn(
+                transferSMService.machine,
+                'transition',
+            ).mockImplementation((): any => {
+                return {
+                    value: TransferStatus.PACKED,
+                    changed: true,
+                };
+            });
+
+            jest.spyOn(em, 'persistAndFlush').mockImplementationOnce(
+                (entity: any) => {
+                    expect(entity).toStrictEqual(transfer);
+                    entity.status = TransferStatus.PACKED;
+                    return Promise.resolve();
+                },
+            );
+
+            expect(await service.packed(transfer.id)).toEqual(transfer);
+        });
+
+        it('should change state of a transfer to delivering', async () => {
+            const transfer = new Transfer();
+            transfer.id = 1;
+            transfer.name = testTransfer.name;
+            transfer.description = testTransfer.description;
+            transfer.createdBy = testTransfer.createdBy;
+            transfer.createdAt = new Date();
+            transfer.updatedAt = new Date();
+            transfer.from = zaisan;
+            transfer.to = tolgoit;
+            transfer.status = TransferStatus.PACKED;
+
+            jest.spyOn(transferRepo, 'findOne').mockImplementation(
+                (id): any => {
+                    expect(id).toBe(transfer.id);
+                    return Promise.resolve(transfer);
+                },
+            );
+
+            jest.spyOn(
+                transferSMService.machine,
+                'transition',
+            ).mockImplementation((): any => {
+                return {
+                    value: TransferStatus.DELIVERING,
+                    changed: true,
+                };
+            });
+
+            jest.spyOn(em, 'persistAndFlush').mockImplementationOnce(
+                (entity: any) => {
+                    expect(entity).toStrictEqual(transfer);
+                    entity.status = TransferStatus.DELIVERING;
+                    return Promise.resolve();
+                },
+            );
+
+            expect(await service.startDelivery(transfer.id)).toEqual(transfer);
+        });
+
+        it('should change state of a transfer to delivered', async () => {
+            const transfer = new Transfer();
+            transfer.id = 1;
+            transfer.name = testTransfer.name;
+            transfer.description = testTransfer.description;
+            transfer.createdBy = testTransfer.createdBy;
+            transfer.createdAt = new Date();
+            transfer.updatedAt = new Date();
+            transfer.from = zaisan;
+            transfer.to = tolgoit;
+            transfer.status = TransferStatus.DELIVERING;
+
+            jest.spyOn(transferRepo, 'findOne').mockImplementation(
+                (id): any => {
+                    expect(id).toBe(transfer.id);
+                    return Promise.resolve(transfer);
+                },
+            );
+
+            jest.spyOn(
+                transferSMService.machine,
+                'transition',
+            ).mockImplementation((): any => {
+                return {
+                    value: TransferStatus.DELIVERED,
+                    changed: true,
+                };
+            });
+
+            jest.spyOn(em, 'persistAndFlush').mockImplementationOnce(
+                (entity: any) => {
+                    expect(entity).toStrictEqual(transfer);
+                    entity.status = TransferStatus.DELIVERED;
+                    return Promise.resolve();
+                },
+            );
+
+            expect(await service.delivered(transfer.id)).toEqual(transfer);
+        });
+
+        it('should change state of a transfer to returning', async () => {
+            const transfer = new Transfer();
+            transfer.id = 1;
+            transfer.name = testTransfer.name;
+            transfer.description = testTransfer.description;
+            transfer.createdBy = testTransfer.createdBy;
+            transfer.createdAt = new Date();
+            transfer.updatedAt = new Date();
+            transfer.from = zaisan;
+            transfer.to = tolgoit;
+            transfer.status = TransferStatus.DELIVERING;
+
+            jest.spyOn(transferRepo, 'findOne').mockImplementation(
+                (id): any => {
+                    expect(id).toBe(transfer.id);
+                    return Promise.resolve(transfer);
+                },
+            );
+
+            jest.spyOn(
+                transferSMService.machine,
+                'transition',
+            ).mockImplementation((): any => {
+                return {
+                    value: TransferStatus.RETURNING,
+                    changed: true,
+                };
+            });
+
+            jest.spyOn(em, 'persistAndFlush').mockImplementationOnce(
+                (entity: any) => {
+                    expect(entity).toStrictEqual(transfer);
+                    entity.status = TransferStatus.RETURNING;
+                    return Promise.resolve();
+                },
+            );
+
+            expect(await service.return(transfer.id)).toEqual(transfer);
+        });
+
+        it('should change state of a transfer to returned', async () => {
+            const transfer = new Transfer();
+            transfer.id = 1;
+            transfer.name = testTransfer.name;
+            transfer.description = testTransfer.description;
+            transfer.createdBy = testTransfer.createdBy;
+            transfer.createdAt = new Date();
+            transfer.updatedAt = new Date();
+            transfer.from = zaisan;
+            transfer.to = tolgoit;
+            transfer.status = TransferStatus.RETURNING;
+
+            jest.spyOn(transferRepo, 'findOne').mockImplementation(
+                (id): any => {
+                    expect(id).toBe(transfer.id);
+                    return Promise.resolve(transfer);
+                },
+            );
+
+            jest.spyOn(
+                transferSMService.machine,
+                'transition',
+            ).mockImplementation((): any => {
+                return {
+                    value: TransferStatus.RETURNED,
+                    changed: true,
+                };
+            });
+
+            jest.spyOn(em, 'persistAndFlush').mockImplementationOnce(
+                (entity: any) => {
+                    expect(entity).toStrictEqual(transfer);
+                    entity.status = TransferStatus.RETURNED;
+                    return Promise.resolve();
+                },
+            );
+
+            expect(await service.returned(transfer.id)).toEqual(transfer);
+        });
+
+        it('should change state of a transfer to receiving', async () => {
+            const transfer = new Transfer();
+            transfer.id = 1;
+            transfer.name = testTransfer.name;
+            transfer.description = testTransfer.description;
+            transfer.createdBy = testTransfer.createdBy;
+            transfer.createdAt = new Date();
+            transfer.updatedAt = new Date();
+            transfer.from = zaisan;
+            transfer.to = tolgoit;
+            transfer.status = TransferStatus.DELIVERED;
+
+            jest.spyOn(transferRepo, 'findOne').mockImplementation(
+                (id): any => {
+                    expect(id).toBe(transfer.id);
+                    return Promise.resolve(transfer);
+                },
+            );
+
+            jest.spyOn(
+                transferSMService.machine,
+                'transition',
+            ).mockImplementation((): any => {
+                return {
+                    value: TransferStatus.RECEIVING,
+                    changed: true,
+                };
+            });
+
+            jest.spyOn(em, 'persistAndFlush').mockImplementationOnce(
+                (entity: any) => {
+                    expect(entity).toStrictEqual(transfer);
+                    entity.status = TransferStatus.RECEIVING;
+                    return Promise.resolve();
+                },
+            );
+
+            expect(await service.startReceive(transfer.id)).toEqual(transfer);
+        });
+
+        it('should change state of a transfer to received', async () => {
+            const transfer = new Transfer();
+            transfer.id = 1;
+            transfer.name = testTransfer.name;
+            transfer.description = testTransfer.description;
+            transfer.createdBy = testTransfer.createdBy;
+            transfer.createdAt = new Date();
+            transfer.updatedAt = new Date();
+            transfer.from = zaisan;
+            transfer.to = tolgoit;
+            transfer.status = TransferStatus.RECEIVING;
+
+            jest.spyOn(transferRepo, 'findOne').mockImplementation(
+                (id): any => {
+                    expect(id).toBe(transfer.id);
+                    return Promise.resolve(transfer);
+                },
+            );
+
+            jest.spyOn(
+                transferSMService.machine,
+                'transition',
+            ).mockImplementation((): any => {
+                return {
+                    value: TransferStatus.DONE,
+                    changed: true,
+                };
+            });
+
+            jest.spyOn(em, 'persistAndFlush').mockImplementationOnce(
+                (entity: any) => {
+                    expect(entity).toStrictEqual(transfer);
+                    entity.status = TransferStatus.DONE;
+                    return Promise.resolve();
+                },
+            );
+
+            expect(await service.received(transfer.id)).toEqual(transfer);
         });
     });
 });

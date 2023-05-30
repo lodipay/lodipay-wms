@@ -7,6 +7,8 @@ import { QueryOrder } from '@mikro-orm/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { plainToClass } from 'class-transformer';
 import { PaginatedDto } from '../../common/dto/paginated.dto';
+import { TransferStatus } from '../../common/enum/transfer-status.enum';
+import { TransferSMService } from '../../common/module/state-machine/transfer-sm/transfer-sm.service';
 import { Destination } from '../../database/entities/destination.entity';
 import { Transfer } from '../../database/entities/transfer.entity';
 import { Warehouse } from '../../database/entities/warehouse.entity';
@@ -43,6 +45,16 @@ describe('TransferController', () => {
         const module: TestingModule = await Test.createTestingModule({
             controllers: [TransferController],
             providers: [
+                {
+                    provide: TransferSMService,
+                    useValue: {
+                        machine: {
+                            transition: () => jest.fn(),
+                        },
+                        service: jest.fn(),
+                        getCurrentState: () => jest.fn(),
+                    },
+                },
                 TransferService,
                 FilterService,
                 getEntityManagerMockConfig(),
@@ -192,5 +204,128 @@ describe('TransferController', () => {
             return Promise.resolve();
         });
         expect(await controller.remove('1')).toBe(undefined);
+    });
+
+    describe('change transfer state', () => {
+        it('should change transfer status to active', async () => {
+            jest.spyOn(service, 'activate').mockImplementation((id: number) => {
+                expect(id).toBe(1);
+                transfer1.status = TransferStatus.ACTIVE;
+                transfer1.updatedAt = new Date();
+                return Promise.resolve(transfer1);
+            });
+
+            expect(await controller.activateState('1')).toBe(transfer1);
+        });
+
+        it('should change transfer status to deactivated', async () => {
+            jest.spyOn(service, 'deactivate').mockImplementation(
+                (id: number) => {
+                    expect(id).toBe(1);
+                    transfer1.status = TransferStatus.INACTIVE;
+                    transfer1.updatedAt = new Date();
+                    return Promise.resolve(transfer1);
+                },
+            );
+
+            expect(await controller.deactivateState('1')).toBe(transfer1);
+        });
+
+        it('should change transfer status to cancelled', async () => {
+            jest.spyOn(service, 'cancel').mockImplementation((id: number) => {
+                expect(id).toBe(1);
+                transfer1.status = TransferStatus.CANCELLED;
+                transfer1.updatedAt = new Date();
+                return Promise.resolve(transfer1);
+            });
+
+            expect(await controller.cancelState('1')).toBe(transfer1);
+        });
+
+        it('should change transfer status to packing', async () => {
+            jest.spyOn(service, 'packing').mockImplementation((id: number) => {
+                expect(id).toBe(1);
+                transfer1.status = TransferStatus.PACKING;
+                transfer1.updatedAt = new Date();
+                return Promise.resolve(transfer1);
+            });
+            expect(await controller.packingState('1')).toBe(transfer1);
+        });
+
+        it('should change transfer status to packed', async () => {
+            jest.spyOn(service, 'packed').mockImplementation((id: number) => {
+                expect(id).toBe(1);
+                transfer1.status = TransferStatus.PACKED;
+                transfer1.updatedAt = new Date();
+                return Promise.resolve(transfer1);
+            });
+            expect(await controller.packedState('1')).toBe(transfer1);
+        });
+
+        it('should change transfer status to delivering', async () => {
+            jest.spyOn(service, 'startDelivery').mockImplementation(
+                (id: number) => {
+                    expect(id).toBe(1);
+                    transfer1.status = TransferStatus.DELIVERING;
+                    transfer1.updatedAt = new Date();
+                    return Promise.resolve(transfer1);
+                },
+            );
+            expect(await controller.startDeliveryState('1')).toBe(transfer1);
+        });
+
+        it('should change transfer status to delivered', async () => {
+            jest.spyOn(service, 'delivered').mockImplementation(
+                (id: number) => {
+                    expect(id).toBe(1);
+                    transfer1.status = TransferStatus.DELIVERED;
+                    transfer1.updatedAt = new Date();
+                    return Promise.resolve(transfer1);
+                },
+            );
+            expect(await controller.deliveredState('1')).toBe(transfer1);
+        });
+
+        it('should change transfer status to returning', async () => {
+            jest.spyOn(service, 'return').mockImplementation((id: number) => {
+                expect(id).toBe(1);
+                transfer1.status = TransferStatus.RETURNING;
+                transfer1.updatedAt = new Date();
+                return Promise.resolve(transfer1);
+            });
+            expect(await controller.returnState('1')).toBe(transfer1);
+        });
+
+        it('should change transfer status to returned', async () => {
+            jest.spyOn(service, 'returned').mockImplementation((id: number) => {
+                expect(id).toBe(1);
+                transfer1.status = TransferStatus.RETURNED;
+                transfer1.updatedAt = new Date();
+                return Promise.resolve(transfer1);
+            });
+            expect(await controller.returnedState('1')).toBe(transfer1);
+        });
+
+        it('should change transfer status to receiving', async () => {
+            jest.spyOn(service, 'startReceive').mockImplementation(
+                (id: number) => {
+                    expect(id).toBe(1);
+                    transfer1.status = TransferStatus.RECEIVING;
+                    transfer1.updatedAt = new Date();
+                    return Promise.resolve(transfer1);
+                },
+            );
+            expect(await controller.startReceiveState('1')).toBe(transfer1);
+        });
+
+        it('should change transfer status to received', async () => {
+            jest.spyOn(service, 'received').mockImplementation((id: number) => {
+                expect(id).toBe(1);
+                transfer1.status = TransferStatus.DONE;
+                transfer1.updatedAt = new Date();
+                return Promise.resolve(transfer1);
+            });
+            expect(await controller.receivedState('1')).toBe(transfer1);
+        });
     });
 });

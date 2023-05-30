@@ -1,13 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { createMachine, interpret } from 'xstate';
-import { TransferAction } from '../../../../enum/transfer-action.enum';
-import { TransferStatus } from '../../../../enum/transfer-status.enum';
+import { TransferAction } from '../../../enum/transfer-action.enum';
+import { TransferStatus } from '../../../enum/transfer-status.enum';
 
 export interface TransferContext {
-    // Add any properties you need for the transfer context
-    // For example:
     transferId: string;
-    // ... other properties ...
 }
 
 export type TransferEvent =
@@ -25,14 +22,16 @@ export type TransferEvent =
     | { type: TransferAction.RETURNED };
 
 @Injectable()
-export class InventoryTransferService {
-    private machine = createMachine({
+export class TransferSMService {
+    machine = createMachine({
         id: 'inventory-transfer',
         initial: TransferStatus.NEW,
+        predictableActionArguments: true,
         states: {
             [TransferStatus.NEW]: {
                 on: {
-                    [TransferAction.CREATE]: TransferStatus.ACTIVE,
+                    [TransferAction.ACTIVATE]: TransferStatus.ACTIVE,
+                    [TransferAction.CANCEL]: TransferStatus.CANCELLED,
                 },
             },
             [TransferStatus.ACTIVE]: {
@@ -95,61 +94,13 @@ export class InventoryTransferService {
         },
     });
 
-    private service = interpret(this.machine);
+    service = interpret(this.machine);
 
     constructor() {
         this.service.start();
     }
 
-    getCurrentState() {
-        return this.service.getSnapshot().value as TransferStatus;
-    }
-
-    transition(action: TransferAction) {
-        this.service.send(action);
-    }
-
-    createTransfer() {
-        this.transition[TransferAction.CREATE];
-    }
-
-    deactivateTransfer() {
-        this.transition[TransferAction.DEACTIVATE];
-    }
-
-    cancelTransfer() {
-        this.transition[TransferAction.CANCEL];
-    }
-
-    packTransfer() {
-        this.transition[TransferAction.PACK];
-    }
-
-    confirmPacked() {
-        this.transition[TransferAction.PACKED];
-    }
-
-    startDelivery() {
-        this.transition[TransferAction.START_DELIVERY];
-    }
-
-    markDelivered() {
-        this.transition[TransferAction.DELIVERED];
-    }
-
-    startReceiving() {
-        this.transition[TransferAction.START_RECEIVE];
-    }
-
-    markReceived() {
-        this.transition[TransferAction.RECEIVED];
-    }
-
-    requestReturn() {
-        this.transition[TransferAction.RETURN];
-    }
-
-    markReturned() {
-        this.transition[TransferAction.RETURNED];
-    }
+    // transition(action: TransferAction) {
+    //     this.service.send(action);
+    // }
 }

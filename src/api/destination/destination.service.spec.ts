@@ -174,56 +174,118 @@ describe('DestinationService', () => {
         });
     });
 
-    it('should update', async () => {
-        const result = {
-            id: 1,
-            name: createDto.name,
-            description: createDto.description,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        };
+    describe('update', () => {
+        it('should update without warehouse', async () => {
+            const result = {
+                id: 1,
+                name: createDto.name,
+                description: createDto.description,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            };
 
-        jest.spyOn(service, 'findOne').mockImplementation(() => {
-            const destination = new Destination(
+            jest.spyOn(service, 'findOne').mockImplementation(() => {
+                const destination = new Destination(
+                    createDto.name,
+                    createDto.description,
+                );
+                destination.id = result.id;
+
+                return Promise.resolve(destination);
+            });
+
+            jest.spyOn(em, 'assign').mockImplementation(
+                (obj1: Destination, obj2: Destination) => {
+                    const mergedObj = { ...obj1, ...obj2 };
+                    obj1.id = mergedObj.id;
+                    obj1.name = mergedObj.name;
+                    obj1.description = mergedObj.description;
+                    obj1.updatedAt = new Date();
+
+                    return obj1;
+                },
+            );
+
+            const updatedResult = new Destination(
                 createDto.name,
                 createDto.description,
             );
-            destination.id = result.id;
+            updatedResult.id = 1;
+            updatedResult.createdAt = new Date();
+            updatedResult.updatedAt = new Date();
 
-            return Promise.resolve(destination);
-        });
-
-        jest.spyOn(em, 'assign').mockImplementation(
-            (obj1: Destination, obj2: Destination) => {
-                const mergedObj = { ...obj1, ...obj2 };
-                obj1.id = mergedObj.id;
-                obj1.name = mergedObj.name;
-                obj1.description = mergedObj.description;
-                obj1.updatedAt = new Date();
-
-                return obj1;
-            },
-        );
-
-        const updatedResult = new Destination(
-            createDto.name,
-            createDto.description,
-        );
-        updatedResult.id = 1;
-        updatedResult.createdAt = new Date();
-        updatedResult.updatedAt = new Date();
-
-        expect(
-            await service.update(1, {
+            expect(
+                await service.update(1, {
+                    name: createDto.name,
+                    description: createDto.description,
+                }),
+            ).toEqual({
+                ...updatedResult,
                 name: createDto.name,
                 description: createDto.description,
-            }),
-        ).toEqual({
-            ...updatedResult,
-            name: createDto.name,
-            description: createDto.description,
-            createdAt: expect.any(Date),
-            updatedAt: expect.any(Date),
+                createdAt: expect.any(Date),
+                updatedAt: expect.any(Date),
+            });
+        });
+
+        it('should update with warehouse', async () => {
+            const result = {
+                id: 1,
+                name: createDto.name,
+                description: createDto.description,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            };
+
+            jest.spyOn(service, 'findOne').mockImplementation(() => {
+                const destination = new Destination(
+                    createDto.name,
+                    createDto.description,
+                );
+                destination.id = result.id;
+                destination.warehouse = warehouse;
+
+                return Promise.resolve(destination);
+            });
+
+            jest.spyOn(whRepo, 'findOne').mockImplementation((): any => {
+                return Promise.resolve(warehouse);
+            });
+
+            jest.spyOn(em, 'assign').mockImplementation(
+                (obj1: Destination, obj2: Destination) => {
+                    const mergedObj = { ...obj1, ...obj2 };
+                    obj1.id = mergedObj.id;
+                    obj1.name = mergedObj.name;
+                    obj1.description = mergedObj.description;
+                    obj1.updatedAt = new Date();
+                    obj1.warehouse = warehouse;
+                    return obj1;
+                },
+            );
+
+            const updatedResult = new Destination(
+                createDto.name,
+                createDto.description,
+            );
+            updatedResult.id = 1;
+            updatedResult.createdAt = new Date();
+            updatedResult.updatedAt = new Date();
+            updatedResult.warehouse = warehouse;
+
+            expect(
+                await service.update(1, {
+                    name: createDto.name,
+                    description: createDto.description,
+                    warehouseId: warehouse.id,
+                }),
+            ).toEqual({
+                ...updatedResult,
+                name: createDto.name,
+                description: createDto.description,
+                createdAt: expect.any(Date),
+                updatedAt: expect.any(Date),
+            });
         });
     });
 

@@ -5,7 +5,9 @@ import { FilterService } from '@/common/module/filter/filter.service';
 import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
+import { TransferAction } from '../../common/enum/transfer-action.enum';
 import { TransferStatus } from '../../common/enum/transfer-status.enum';
+import { TransferSMService } from '../../common/module/state-machine/transfer-sm/transfer-sm.service';
 import { Destination } from '../../database/entities/destination.entity';
 import { Transfer } from '../../database/entities/transfer.entity';
 import { Warehouse } from '../../database/entities/warehouse.entity';
@@ -26,6 +28,7 @@ export class TransferService {
 
         private readonly em: EntityManager,
         private readonly filterService: FilterService,
+        private readonly transferSMService: TransferSMService,
     ) {}
 
     async create(createTransferDto: CreateTransferDto) {
@@ -142,5 +145,160 @@ export class TransferService {
         }
 
         return this.em.removeAndFlush(transfer);
+    }
+
+    async activate(id: number) {
+        const { transfer, nextState } = await this.getNextState(
+            id,
+            TransferAction.ACTIVATE,
+        );
+
+        return await this.updateTransferStatus(
+            transfer,
+            nextState.value as TransferStatus,
+        );
+    }
+
+    async deactivate(id: number) {
+        const { transfer, nextState } = await this.getNextState(
+            id,
+            TransferAction.DEACTIVATE,
+        );
+
+        return await this.updateTransferStatus(
+            transfer,
+            nextState.value as TransferStatus,
+        );
+    }
+
+    async cancel(id: number) {
+        const { transfer, nextState } = await this.getNextState(
+            id,
+            TransferAction.CANCEL,
+        );
+
+        return await this.updateTransferStatus(
+            transfer,
+            nextState.value as TransferStatus,
+        );
+    }
+
+    async packing(id: number) {
+        const { transfer, nextState } = await this.getNextState(
+            id,
+            TransferAction.PACK,
+        );
+
+        return await this.updateTransferStatus(
+            transfer,
+            nextState.value as TransferStatus,
+        );
+    }
+
+    async packed(id: number) {
+        const { transfer, nextState } = await this.getNextState(
+            id,
+            TransferAction.PACKED,
+        );
+
+        return await this.updateTransferStatus(
+            transfer,
+            nextState.value as TransferStatus,
+        );
+    }
+
+    async startDelivery(id: number) {
+        const { transfer, nextState } = await this.getNextState(
+            id,
+            TransferAction.START_DELIVERY,
+        );
+
+        return await this.updateTransferStatus(
+            transfer,
+            nextState.value as TransferStatus,
+        );
+    }
+
+    async delivered(id: number) {
+        const { transfer, nextState } = await this.getNextState(
+            id,
+            TransferAction.DELIVERED,
+        );
+
+        return await this.updateTransferStatus(
+            transfer,
+            nextState.value as TransferStatus,
+        );
+    }
+
+    async return(id: number) {
+        const { transfer, nextState } = await this.getNextState(
+            id,
+            TransferAction.RETURN,
+        );
+
+        return await this.updateTransferStatus(
+            transfer,
+            nextState.value as TransferStatus,
+        );
+    }
+
+    async returned(id: number) {
+        const { transfer, nextState } = await this.getNextState(
+            id,
+            TransferAction.RETURNED,
+        );
+
+        return await this.updateTransferStatus(
+            transfer,
+            nextState.value as TransferStatus,
+        );
+    }
+
+    async startReceive(id: number) {
+        const { transfer, nextState } = await this.getNextState(
+            id,
+            TransferAction.START_RECEIVE,
+        );
+
+        return await this.updateTransferStatus(
+            transfer,
+            nextState.value as TransferStatus,
+        );
+    }
+
+    async received(id: number) {
+        const { transfer, nextState } = await this.getNextState(
+            id,
+            TransferAction.RECEIVED,
+        );
+
+        return await this.updateTransferStatus(
+            transfer,
+            nextState.value as TransferStatus,
+        );
+    }
+
+    async getNextState(id: number, action: TransferAction) {
+        const transfer = await this.findOne(id);
+        const nextState = this.transferSMService.machine.transition(
+            transfer.status,
+            { type: action },
+        );
+
+        if (!nextState.changed) {
+            throw new InvalidArgumentException('Invalid action or state');
+        }
+
+        return {
+            nextState,
+            transfer,
+        };
+    }
+
+    async updateTransferStatus(transfer: Transfer, status: TransferStatus) {
+        transfer.status = status;
+        await this.em.persistAndFlush(transfer);
+        return transfer;
     }
 }

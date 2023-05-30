@@ -112,6 +112,8 @@ describe('WarehouseController', () => {
                 return Promise.resolve(result);
             },
         );
+
+        expect(await controller.findOne('1')).toEqual(result);
     });
 
     it('should update warehouse', async () => {
@@ -207,9 +209,13 @@ describe('WarehouseController', () => {
         );
 
         expect(
-            await warehouseService.updateInventory(warehouse.id, inventory.id, {
-                quantity: updateQuantity,
-            }),
+            await controller.updateInventory(
+                `${warehouse.id}`,
+                `${inventory.id}`,
+                {
+                    quantity: updateQuantity,
+                },
+            ),
         ).toEqual({
             ...warehouseInventory1,
             quantity: updateQuantity,

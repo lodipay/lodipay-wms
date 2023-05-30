@@ -52,4 +52,59 @@ export class TransferController {
     remove(@Param('id') id: string) {
         return this.transferService.remove(+id);
     }
+
+    @Post('update-state/:id/activate')
+    activateState(@Param('id') id: string) {
+        return this.transferService.activate(+id);
+    }
+
+    @Post('update-state/:id/deactivate')
+    deactivateState(@Param('id') id: string) {
+        return this.transferService.deactivate(+id);
+    }
+
+    @Post('update-state/:id/cancel')
+    cancelState(@Param('id') id: string) {
+        return this.transferService.cancel(+id);
+    }
+
+    @Post('update-state/:id/packing')
+    packingState(@Param('id') id: string) {
+        return this.transferService.packing(+id);
+    }
+
+    @Post('update-state/:id/packed')
+    packedState(@Param('id') id: string) {
+        return this.transferService.packed(+id);
+    }
+
+    @Post('update-state/:id/start-delivery')
+    startDeliveryState(@Param('id') id: string) {
+        return this.transferService.startDelivery(+id);
+    }
+
+    @Post('update-state/:id/delivered')
+    deliveredState(@Param('id') id: string) {
+        return this.transferService.delivered(+id);
+    }
+
+    @Post('update-state/:id/return')
+    returnState(@Param('id') id: string) {
+        return this.transferService.return(+id);
+    }
+
+    @Post('update-state/:id/returned')
+    returnedState(@Param('id') id: string) {
+        return this.transferService.returned(+id);
+    }
+
+    @Post('update-state/:id/start-receive')
+    startReceiveState(@Param('id') id: string) {
+        return this.transferService.startReceive(+id);
+    }
+
+    @Post('update-state/:id/received')
+    receivedState(@Param('id') id: string) {
+        return this.transferService.received(+id);
+    }
 }

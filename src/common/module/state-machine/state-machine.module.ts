@@ -1,8 +1,9 @@
 import { Global, Module } from '@nestjs/common';
-import { InventoryTransferService } from './inventory-transfer/inventory-transfer/inventory-transfer.service';
+import { TransferSMService } from './transfer-sm/transfer-sm.service';
 
 @Module({
-    providers: [InventoryTransferService],
+    providers: [TransferSMService],
+    exports: [TransferSMService],
 })
 @Global()
 export class StateMachineModule {}
