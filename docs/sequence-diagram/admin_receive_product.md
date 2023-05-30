@@ -8,58 +8,57 @@ participant "WHS" as whs
 participant "Database" as db
 participant "Event bus" as eb
 
-!$orderStatusReady = "READY"
+!$transferStatusReady = "READY"
 !$statusReceived = "RECEIVED"
-!$inventoryStatusOrdered = "ORDERED"
+!$inventoryStatusTransfered = "ORDERED"
 !$inventoryStatusExtra = "EXTRA"
 !$inventoryStatusDamaged = "DAMAGED"
-!$inventoryStatusOrdered = "ORDERED"
 !$inventoryStatusWrong = "WRONG"
 
-staff -> whs ++: Get order list page
+staff -> whs ++: Get transfer list page
 note right
     ?page={page_number}
 
     wh_id={id}
 end note
-whs -> db ++: Get orders
-db --> whs --: Return orders
-whs --> staff --: Orders list page
+whs -> db ++: Get transfers
+db --> whs --: Return transfers
+whs --> staff --: Transfers list page
 
 alt 
-    staff -> whs ++: Search order by filter
+    staff -> whs ++: Search transfer by filter
     note right
-        status=$orderStatusReady
+        status=$transferStatusReady
     end note
-    whs -> db : Get orders by filter
+    whs -> db : Get transfers by filter
     db --> whs: Return filter result
-    whs --> staff --: Orders list by query page
+    whs --> staff --: Transfers list by query page
 end
 
 |||
 
-staff -> staff ++--: Select order
+staff -> staff ++--: Select transfer
 
 |||
 
-staff -> whs ++: Get selected order information
+staff -> whs ++: Get selected transfer information
 note right
-    order_id={order_id}
+    transfer_id={transfer_id}
 end note
-whs -> db ++: Get selected order by ID
-db --> whs --: Return order information & inventory list
-whs --> staff --: Selected order page && inventory list
+whs -> db ++: Get selected transfer by ID
+db --> whs --: Return transfer information & inventory list
+whs --> staff --: Selected transfer page && inventory list
 
 staff -> staff ++--: Fill required inventories information
 
 staff -> whs++: Save the inventory information
 note right
-    order_id={order_id}
+    transfer_id={transfer_id}
     warehouse_id={warehouse_id}
     inventory_id={inventory_id}
     quantity={items_quantity}
     exp_date={expire_date}
-    inventory_status=$inventoryStatusOrdered | $inventoryStatusExtra | $inventoryStatusDamaged | $inventoryStatusWrong
+    inventory_status=$inventoryStatusTransfered | $inventoryStatusExtra | $inventoryStatusDamaged | $inventoryStatusWrong
     description={description}
 end note
 
