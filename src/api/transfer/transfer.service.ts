@@ -1,6 +1,5 @@
 import { FilterDto } from '@/common/dto/filter.dto';
 import { InvalidArgumentException } from '@/common/exception/invalid.argument.exception';
-import { NotFoundException } from '@/common/exception/not.found.exception';
 import { FilterService } from '@/common/module/filter/filter.service';
 import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
@@ -79,15 +78,19 @@ export class TransferService {
         return this.transferRepository.findAll();
     }
 
-    findOne(id: number) {
-        return this.transferRepository.findOne(id);
+    async findOne(id: number) {
+        const transfer = await this.transferRepository.findOne(id);
+
+        if (!transfer) {
+            throw new InvalidArgumentException('Transfer not found');
+        }
+
+        return transfer;
     }
 
     async update(id: number, updateTransferDto: UpdateTransferDto) {
         const transfer = await this.findOne(id);
-        if (!transfer) {
-            throw new NotFoundException('Transfer not found');
-        }
+
         if (
             updateTransferDto.toDestinationId &&
             updateTransferDto.toDestinationId !== transfer.to.id
@@ -139,10 +142,6 @@ export class TransferService {
 
     async remove(id: number) {
         const transfer = await this.findOne(id);
-
-        if (!transfer) {
-            throw new NotFoundException('transfer not found');
-        }
 
         return this.em.removeAndFlush(transfer);
     }

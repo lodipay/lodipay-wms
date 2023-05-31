@@ -1,6 +1,5 @@
 import { PaginatedDto } from '@/common/dto/paginated.dto';
 import { InvalidArgumentException } from '@/common/exception/invalid.argument.exception';
-import { NotFoundException } from '@/common/exception/not.found.exception';
 import {
     getEntityManagerMockConfig,
     getRepositoryMockConfig,
@@ -244,38 +243,34 @@ describe('TransferService', () => {
         expect(await service.findAll()).toStrictEqual(result);
     });
 
-    it('should find an transfer', async () => {
-        const transfer = new Transfer();
-        transfer.id = 1;
-        transfer.name = testTransfer.name;
-        transfer.description = testTransfer.description;
-        transfer.createdBy = testTransfer.createdBy;
-        transfer.createdAt = new Date();
-        transfer.updatedAt = new Date();
-        transfer.from = tolgoit;
-        transfer.to = zaisan;
-
-        jest.spyOn(transferRepo, 'findOne').mockImplementation((): any => {
-            return Promise.resolve(transfer);
+    describe('findOne', () => {
+        it('should find an transfer', async () => {
+            const transfer = new Transfer();
+            transfer.id = 1;
+            transfer.name = testTransfer.name;
+            transfer.description = testTransfer.description;
+            transfer.createdBy = testTransfer.createdBy;
+            transfer.createdAt = new Date();
+            transfer.updatedAt = new Date();
+            transfer.from = tolgoit;
+            transfer.to = zaisan;
+            jest.spyOn(transferRepo, 'findOne').mockImplementation((): any => {
+                return Promise.resolve(transfer);
+            });
+            expect(await service.findOne(1)).toBe(transfer);
         });
 
-        expect(await service.findOne(1)).toBe(transfer);
+        it('should find an transfer', async () => {
+            jest.spyOn(transferRepo, 'findOne').mockImplementation((): any => {
+                return Promise.resolve(undefined);
+            });
+            await expect(service.findOne(1)).rejects.toThrow(
+                InvalidArgumentException,
+            );
+        });
     });
 
     describe('update', () => {
-        it('should throw error when transfer not found', async () => {
-            jest.spyOn(transferRepo, 'findOne').mockImplementation(id => {
-                expect(id).toBe(123);
-                return Promise.resolve(null);
-            });
-
-            await expect(
-                service.update(123, {
-                    fromDestinationId: zaisan.id,
-                    toDestinationId: guchinhoyr.id,
-                }),
-            ).rejects.toThrow(NotFoundException);
-        });
         it('should update an transfer', async () => {
             const transfer = new Transfer();
             transfer.id = 1;
@@ -584,19 +579,6 @@ describe('TransferService', () => {
             );
 
             await service.remove(transfer.id);
-        });
-
-        it('should throw error when the transfer is not found', async () => {
-            jest.spyOn(transferRepo, 'findOne').mockImplementation(
-                (id): any => {
-                    expect(id).toBe(123);
-                    return Promise.resolve(null);
-                },
-            );
-
-            await expect(service.remove(123)).rejects.toThrow(
-                NotFoundException,
-            );
         });
     });
 
