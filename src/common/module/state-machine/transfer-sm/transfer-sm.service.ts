@@ -99,8 +99,4 @@ export class TransferSMService {
     constructor() {
         this.service.start();
     }
-
-    // transition(action: TransferAction) {
-    //     this.service.send(action);
-    // }
 }

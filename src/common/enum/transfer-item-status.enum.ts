@@ -3,5 +3,4 @@ export enum TransferItemStatus {
     EXTRA = 'EXTRA',
     SHORT = 'SHORT',
     DAMAGED = 'DAMAGED',
-    WRONG = 'WRONG',
 }
