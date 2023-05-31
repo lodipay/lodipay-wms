@@ -34,7 +34,6 @@ export class Transfer extends ParentEntity {
     @OneToMany({
         entity: () => TransferItem,
         mappedBy: 'transfer',
-        orphanRemoval: true,
     })
     transferItems = new Collection<TransferItem>(this);
 

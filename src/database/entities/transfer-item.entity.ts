@@ -20,8 +20,6 @@ export class TransferItem extends ParentEntity {
 
     @ManyToOne({
         entity: () => Inventory,
-        // mappedBy: 'transferItem',
-        // orphanRemoval: false,
     })
     inventory: Inventory;
 }

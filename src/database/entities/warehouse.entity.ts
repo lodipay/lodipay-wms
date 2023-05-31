@@ -33,7 +33,6 @@ export class Warehouse extends ParentEntity {
     @OneToMany({
         entity: () => Location,
         mappedBy: 'warehouse',
-        orphanRemoval: true,
     })
     locations = new Collection<Location>(this);
 
