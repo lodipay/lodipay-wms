@@ -26,7 +26,7 @@ export class Transfer extends ParentEntity {
     status = TransferStatus.NEW;
 
     @ManyToOne({ entity: () => Destination })
-    from: Destination;
+    from?: Destination;
 
     @ManyToOne({ entity: () => Destination })
     to: Destination;

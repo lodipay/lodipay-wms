@@ -317,7 +317,6 @@ describe('TransferService', () => {
                     createdBy: transfer.createdBy,
                     fromDestinationId: zaisan.id,
                     toDestinationId: guchinhoyr.id,
-                    status: testTransfer.status,
                 }),
             ).toEqual({
                 id: 1,

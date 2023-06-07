@@ -1,33 +1,40 @@
 import { FilterDto } from '@/common/dto/filter.dto';
 import { InvalidArgumentException } from '@/common/exception/invalid.argument.exception';
 import { FilterService } from '@/common/module/filter/filter.service';
-import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { Injectable } from '@nestjs/common';
+import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { TransferAction } from '../../common/enum/transfer-action.enum';
 import { TransferStatus } from '../../common/enum/transfer-status.enum';
 import { TransferSMService } from '../../common/module/state-machine/transfer-sm/transfer-sm.service';
 import { Destination } from '../../database/entities/destination.entity';
+import { TenantItem } from '../../database/entities/tenant-item.entity';
+import { TransferItem } from '../../database/entities/transfer-item.entity';
 import { Transfer } from '../../database/entities/transfer.entity';
 import { Warehouse } from '../../database/entities/warehouse.entity';
+import { TransferItemService } from '../transfer-item/transfer-item.service';
 import { CreateTransferDto } from './dto/create-transfer.dto';
+import { ReceiveTransferItemDto } from './dto/receive-transfer-item.dto';
 import { UpdateTransferDto } from './dto/update-transfer.dto';
 
 @Injectable()
 export class TransferService {
     constructor(
         @InjectRepository(Transfer)
-        private readonly transferRepository: EntityRepository<Transfer>,
+        private transferRepository: EntityRepository<Transfer>,
 
         @InjectRepository(Destination)
-        private readonly destRepository: EntityRepository<Destination>,
+        private destRepository: EntityRepository<Destination>,
 
         @InjectRepository(Warehouse)
-        private readonly warehouseRepository: EntityRepository<Warehouse>,
+        private warehouseRepository: EntityRepository<Warehouse>,
 
-        private readonly em: EntityManager,
-        private readonly filterService: FilterService,
-        private readonly transferSMService: TransferSMService,
+        @Inject(forwardRef(() => TransferItemService))
+        private transferItemService: TransferItemService,
+
+        private em: EntityManager,
+        private filterService: FilterService,
+        private transferSMService: TransferSMService,
     ) {}
 
     async create(createTransferDto: CreateTransferDto) {
@@ -49,10 +56,6 @@ export class TransferService {
         const fromDestination = await this.destRepository.findOne({
             id: createTransferDto.fromDestinationId,
         });
-
-        if (!fromDestination) {
-            throw new InvalidArgumentException('Invalid from destination');
-        }
 
         transfer.from = fromDestination;
 
@@ -130,10 +133,9 @@ export class TransferService {
         }
 
         transfer.createdBy = updateTransferDto.createdBy || transfer.createdBy;
-        transfer.name = updateTransferDto.name || transfer.createdBy;
+        transfer.name = updateTransferDto.name || transfer.name;
         transfer.description =
-            updateTransferDto.description || transfer.createdBy;
-        transfer.status = updateTransferDto.status || transfer.status;
+            updateTransferDto.description || transfer.description;
 
         this.em.persistAndFlush(transfer);
 
@@ -175,6 +177,19 @@ export class TransferService {
             id,
             TransferAction.CANCEL,
         );
+
+        const transferItems = await this.em.find(TransferItem, {
+            transfer: transfer,
+        });
+
+        if (transfer.from?.warehouse?.id) {
+            for await (const transferItem of transferItems) {
+                await this.transferItemService.returnTenantItem(
+                    transfer,
+                    transferItem,
+                );
+            }
+        }
 
         return await this.updateTransferStatus(
             transfer,
@@ -248,6 +263,19 @@ export class TransferService {
             TransferAction.RETURNED,
         );
 
+        const transferItems = await this.em.find(TransferItem, {
+            transfer: transfer,
+        });
+
+        if (transfer.from?.warehouse?.id) {
+            for await (const transferItem of transferItems) {
+                await this.transferItemService.returnTenantItem(
+                    transfer,
+                    transferItem,
+                );
+            }
+        }
+
         return await this.updateTransferStatus(
             transfer,
             nextState.value as TransferStatus,
@@ -299,5 +327,65 @@ export class TransferService {
         transfer.status = status;
         await this.em.persistAndFlush(transfer);
         return transfer;
+    }
+
+    async receiveTransferItem(
+        id: number,
+        transferItemId: number,
+        receiveTransferItemDto: ReceiveTransferItemDto,
+    ) {
+        const transfer = await this.findOne(id);
+        const transferItem = await this.transferItemService.findOne(
+            transferItemId,
+        );
+
+        if (transferItem.transferedStatus) {
+            throw new InvalidArgumentException('Item already transfered');
+        }
+
+        const deliveredWarehouse = await this.em
+            .getRepository(Warehouse)
+            .findOne(transfer.to.id);
+
+        const newTenant = transferItem.toTenant;
+
+        const tenantItemInWarehouse = await this.em.findOne(TenantItem, {
+            warehouse: {
+                id: deliveredWarehouse.id,
+            },
+            tenant: {
+                id: newTenant.id,
+            },
+        });
+
+        if (tenantItemInWarehouse) {
+            const tenantItemQb = this.em.createQueryBuilder(TenantItem, 'ti');
+            await tenantItemQb
+                .update({
+                    quantity: tenantItemQb.raw(
+                        `ti.quantity + ${transferItem.quantity}`,
+                    ),
+                    updatedAt: new Date(),
+                })
+                .where({
+                    id: tenantItemInWarehouse.id,
+                })
+                .execute();
+        } else {
+            const tenantItem = new TenantItem();
+            tenantItem.tenant = newTenant;
+            tenantItem.warehouse = deliveredWarehouse;
+            tenantItem.inventory = transferItem.inventory;
+            tenantItem.quantity = transferItem.quantity;
+
+            await this.em.persistAndFlush(tenantItem);
+        }
+
+        transferItem.transferedStatus =
+            receiveTransferItemDto.transferItemStatus;
+
+        await this.em.persistAndFlush(transferItem);
+
+        return transferItem;
     }
 }

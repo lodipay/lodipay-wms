@@ -7,38 +7,38 @@ import {
     getRepositoryMockConfig,
 } from '../../common/mock';
 import { FilterService } from '../../common/module/filter/filter.service';
-import { BundleHolder } from '../../database/entities/bundle-holder.entity';
-import { Bundle } from '../../database/entities/bundle.entity';
 import { Inventory } from '../../database/entities/inventory.entity';
-import { BundleHolderService } from '../bundle-holder/bundle-holder.service';
+import { TenantItem } from '../../database/entities/tenant-item.entity';
+import { Tenant } from '../../database/entities/tenant.entity';
 import { InventoryService } from '../inventory/inventory.service';
-import { BundleController } from './bundle.controller';
-import { BundleService } from './bundle.service';
-import { CreateBundleDto } from './dto/create-bundle.dto';
+import { TenantService } from '../tenant/tenant.service';
+import { CreateTenantItemDto } from './dto/create-tenant-item.dto';
+import { TenantItemController } from './tenant-item.controller';
+import { TenantItemService } from './tenant-item.service';
 
-describe('BundleController', () => {
-    let controller: BundleController;
-    let bundleService: BundleService;
+describe('TenantItemController', () => {
+    let controller: TenantItemController;
+    let tenantItemService: TenantService;
     const yesterday = new Date(Date.now() - 1000 * 60 * 60 * 24);
     const tomorrow = new Date(Date.now() + 1000 * 60 * 60 * 24);
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
-            controllers: [BundleController],
+            controllers: [TenantItemController],
             providers: [
-                BundleService,
+                TenantService,
                 FilterService,
-                BundleHolderService,
+                TenantService,
                 InventoryService,
-                getRepositoryMockConfig(Bundle),
-                getRepositoryMockConfig(BundleHolder),
+                getRepositoryMockConfig(TenantItem),
+                getRepositoryMockConfig(Tenant),
                 getRepositoryMockConfig(Inventory),
                 getEntityManagerMockConfig(),
             ],
         }).compile();
 
-        controller = module.get<BundleController>(BundleController);
-        bundleService = module.get<BundleService>(BundleService);
+        controller = module.get<TenantItemController>(TenantItemController);
+        tenantItemService = module.get<TenantItemService>(TenantItemService);
     });
 
     it('create', async () => {
@@ -46,13 +46,13 @@ describe('BundleController', () => {
             description: 'E-commerce',
             activeFrom: new Date(Date.now() - 1000 * 60 * 60 * 24),
             activeTo: new Date(Date.now()),
-            bundleHolderId: 1,
+            tenantId: 1,
             inventoryId: 1,
             inventoryQuantity: 50,
         };
-        const bundleHolder = new BundleHolder();
-        bundleHolder.name = 'E-commerce';
-        bundleHolder.description = 'E-commerce description';
+        const tenant = new Tenant();
+        tenant.name = 'E-commerce';
+        tenant.description = 'E-commerce description';
 
         const inventory = new Inventory();
         inventory.id = 1;
@@ -61,23 +61,23 @@ describe('BundleController', () => {
         inventory.quantity = 50;
         inventory.batchCode = 'BATCH_CODE';
 
-        jest.spyOn(bundleService, 'create').mockImplementation(
-            (dto: CreateBundleDto) => {
-                const bundle = new Bundle();
-                bundle.description = dto.description;
-                bundle.activeFrom = dto.activeFrom;
-                bundle.activeTo = dto.activeTo;
-                bundle.bundleHolder = bundleHolder;
-                bundle.id = 1;
-                bundle.createdAt = new Date();
+        jest.spyOn(tenantItemService, 'create').mockImplementation(
+            (dto: CreateTenantItemDto) => {
+                const tenantItem = new TenantItem();
+                tenantItem.description = dto.description;
+                tenantItem.activeFrom = dto.activeFrom;
+                tenantItem.activeTo = dto.activeTo;
+                tenantItem.tenant = tenant;
+                tenantItem.id = 1;
+                tenantItem.createdAt = new Date();
 
-                return Promise.resolve(bundle);
+                return Promise.resolve(tenantItem);
             },
         );
 
-        delete data.bundleHolderId;
+        delete data.tenantId;
         const result = await controller.create(data);
-        expect(result).toBeInstanceOf(Bundle);
+        expect(result).toBeInstanceOf(Tenant);
 
         delete data.inventoryId;
         delete data.inventoryQuantity;
@@ -86,7 +86,7 @@ describe('BundleController', () => {
             id: 1,
             ...data,
             createdAt: expect.any(Date),
-            bundleHolder: expect.any(BundleHolder),
+            tenant: expect.any(Tenant),
             inventories: expect.any(Collection),
         });
     });
@@ -108,21 +108,23 @@ describe('BundleController', () => {
         };
 
         const result = [
-            plainToClass(Bundle, { id: 1, description: 'E-commerce 1' }),
-            plainToClass(Bundle, { id: 2, description: 'E-commerce 2' }),
+            plainToClass(Tenant, { id: 1, description: 'E-commerce 1' }),
+            plainToClass(Tenant, { id: 2, description: 'E-commerce 2' }),
         ];
 
-        jest.spyOn(bundleService, 'search').mockImplementation(filterDto => {
-            expect(filterDto).toStrictEqual(query);
-            const paginatedDto = new PaginatedDto();
-            paginatedDto.result = result;
-            paginatedDto.page = filterDto.page;
-            paginatedDto.limit = filterDto.limit;
-            paginatedDto.total = 100;
-            paginatedDto.totalPage = 10;
+        jest.spyOn(tenantItemService, 'search').mockImplementation(
+            filterDto => {
+                expect(filterDto).toStrictEqual(query);
+                const paginatedDto = new PaginatedDto();
+                paginatedDto.result = result;
+                paginatedDto.page = filterDto.page;
+                paginatedDto.limit = filterDto.limit;
+                paginatedDto.total = 100;
+                paginatedDto.totalPage = 10;
 
-            return Promise.resolve(paginatedDto);
-        });
+                return Promise.resolve(paginatedDto);
+            },
+        );
 
         const paginatedDto = new PaginatedDto();
         paginatedDto.result = result;
@@ -135,12 +137,12 @@ describe('BundleController', () => {
     });
 
     it('findOne', async () => {
-        const result = plainToClass(Bundle, {
+        const result = plainToClass(Tenant, {
             description: 'E-commerce',
             activeFrom: yesterday,
             activeTo: tomorrow,
         });
-        jest.spyOn(bundleService, 'findOne').mockImplementation(
+        jest.spyOn(tenantItemService, 'findOne').mockImplementation(
             (id: number) => {
                 result.id = id;
                 return Promise.resolve(result);
@@ -150,21 +152,21 @@ describe('BundleController', () => {
     });
 
     it('update', async () => {
-        const demoBundle = plainToClass(Bundle, {
+        const demoTenant = plainToClass(Tenant, {
             description: 'E-commerce',
             activeFrom: yesterday,
             activeTo: tomorrow,
         });
-        const result = demoBundle;
+        const result = demoTenant;
         result.id = 1;
 
-        jest.spyOn(bundleService, 'update').mockImplementation(() => {
+        jest.spyOn(tenantItemService, 'update').mockImplementation(() => {
             return Promise.resolve(result);
         });
         expect(
             await controller.update(
                 '1',
-                plainToClass(Bundle, {
+                plainToClass(Tenant, {
                     description: 'E-commerce',
                 }),
             ),
@@ -173,7 +175,7 @@ describe('BundleController', () => {
 
     it('remove', async () => {
         const result = 'deleted';
-        jest.spyOn(bundleService, 'remove').mockImplementation(() => {
+        jest.spyOn(tenantItemService, 'remove').mockImplementation(() => {
             return Promise.resolve(result);
         });
         expect(await controller.remove('1')).toBe(result);

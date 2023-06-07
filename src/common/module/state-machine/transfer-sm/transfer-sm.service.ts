@@ -36,15 +36,9 @@ export class TransferSMService {
             },
             [TransferStatus.ACTIVE]: {
                 on: {
-                    [TransferAction.DEACTIVATE]: TransferStatus.INACTIVE,
+                    [TransferAction.DEACTIVATE]: TransferStatus.NEW,
                     [TransferAction.CANCEL]: TransferStatus.CANCELLED,
                     [TransferAction.PACK]: TransferStatus.PACKING,
-                },
-            },
-            [TransferStatus.INACTIVE]: {
-                on: {
-                    [TransferAction.ACTIVATE]: TransferStatus.ACTIVE,
-                    [TransferAction.CANCEL]: TransferStatus.CANCELLED,
                 },
             },
             [TransferStatus.PACKING]: {

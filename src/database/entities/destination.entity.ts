@@ -1,6 +1,5 @@
-import { Entity, Filter, OneToMany, OneToOne, Property } from '@mikro-orm/core';
+import { Entity, Filter, OneToOne, Property } from '@mikro-orm/core';
 import { ParentEntity } from './parent.entity';
-import { Transfer } from './transfer.entity';
 import { Warehouse } from './warehouse.entity';
 
 @Entity()
@@ -22,10 +21,4 @@ export class Destination extends ParentEntity {
         owner: true,
     })
     warehouse?: Warehouse;
-
-    @OneToMany(() => Transfer, transfer => transfer.from)
-    from?: Transfer;
-
-    @OneToMany(() => Transfer, transfer => transfer.to)
-    to?: Transfer;
 }

@@ -14,41 +14,38 @@ import {
 } from '../../common/mock';
 import { getTestingModule } from '../../common/mock/testing.module.mock';
 import { FilterService } from '../../common/module/filter/filter.service';
-import { BundleHolder } from '../../database/entities/bundle-holder.entity';
-import { Bundle } from '../../database/entities/bundle.entity';
 import { Inventory } from '../../database/entities/inventory.entity';
-import { BundleHolderService } from '../bundle-holder/bundle-holder.service';
+import { Tenant } from '../../database/entities/tenant-item.entity';
 import { InventoryService } from '../inventory/inventory.service';
-import { BundleService } from './bundle.service';
+import { TenantService } from '../tenant/tenant.service';
 
-describe('BundleService', () => {
-    let service: BundleService;
+describe('TenantService', () => {
+    let service: TenantService;
     let em: EntityManager;
-    let repository: EntityRepository<Bundle>;
+    let repository: EntityRepository<Tenant>;
     const yesterday = new Date(Date.now() - 1000 * 60 * 60 * 24);
     const tomorrow = new Date(Date.now() + 1000 * 60 * 60 * 24);
     let filterService: FilterService;
-    let bundleHolderService: BundleHolderService;
+    let tenantService: TenantService;
 
     beforeEach(async () => {
         const module: TestingModule = await getTestingModule({
             providers: [
-                BundleService,
+                TenantService,
                 getEntityManagerMockConfig(),
-                getRepositoryMockConfig(Bundle),
-                getRepositoryMockConfig(BundleHolder),
+                getRepositoryMockConfig(Tenant),
+                getRepositoryMockConfig(Tenant),
                 getRepositoryMockConfig(Inventory),
                 FilterService,
-                BundleHolderService,
+                TenantService,
                 InventoryService,
             ],
         });
-        service = module.get<BundleService>(BundleService);
-        bundleHolderService =
-            module.get<BundleHolderService>(BundleHolderService);
+        service = module.get<TenantService>(TenantService);
+        tenantService = module.get<TenantService>(TenantService);
         em = module.get<EntityManager>(EntityManager);
-        repository = module.get<EntityRepository<Bundle>>(
-            getRepositoryToken(Bundle),
+        repository = module.get<EntityRepository<Tenant>>(
+            getRepositoryToken(Tenant),
         );
         filterService = module.get<FilterService>(FilterService);
     });
@@ -58,18 +55,18 @@ describe('BundleService', () => {
             description: 'E-commerce',
             activeFrom: yesterday,
             activeTo: tomorrow,
-            bundleHolderId: 1,
+            tenantId: 1,
             inventoryId: 1,
             inventoryQuantity: 50,
         };
-        const bundleHolder = plainToClass(BundleHolder, {
+        const tenant = plainToClass(Tenant, {
             id: 1,
             name: 'E-commerce',
             description: 'E-commerce description',
         });
 
-        jest.spyOn(bundleHolderService, 'findOne').mockImplementation(() => {
-            return Promise.resolve(bundleHolder);
+        jest.spyOn(tenantService, 'findOne').mockImplementation(() => {
+            return Promise.resolve(tenant);
         });
 
         const inventory = new Inventory();
@@ -79,18 +76,18 @@ describe('BundleService', () => {
         inventory.quantity = 50;
         inventory.batchCode = 'BATCH_CODE';
 
-        const result = new Bundle();
+        const result = new Tenant();
         result.description = dto.description;
         result.activeFrom = dto.activeFrom;
         result.activeTo = dto.activeTo;
-        result.bundleHolder = bundleHolder;
+        result.tenant = tenant;
         result.inventories.add(inventory);
 
         jest.spyOn(em, 'assign').mockImplementation(() => {
             return result;
         });
 
-        jest.spyOn(em, 'persistAndFlush').mockImplementation((obj: Bundle) => {
+        jest.spyOn(em, 'persistAndFlush').mockImplementation((obj: Tenant) => {
             result.id = obj.id = 1;
             result.createdAt = obj.createdAt;
             return Promise.resolve();
@@ -115,12 +112,12 @@ describe('BundleService', () => {
             },
         };
 
-        const bundle1 = new Bundle();
+        const bundle1 = new Tenant();
         bundle1.description = 'E-commerce';
         bundle1.activeFrom = yesterday;
         bundle1.activeTo = tomorrow;
 
-        const bundle2 = new Bundle();
+        const bundle2 = new Tenant();
         bundle2.description = 'Deliver to warehouse 1';
         bundle2.activeFrom = yesterday;
         bundle2.activeTo = tomorrow;
@@ -152,7 +149,7 @@ describe('BundleService', () => {
     });
 
     it('findOne', async () => {
-        const result = new Bundle();
+        const result = new Tenant();
         result.description = 'Deliver to warehouse 2';
         result.activeFrom = yesterday;
         result.activeTo = tomorrow;
@@ -177,7 +174,7 @@ describe('BundleService', () => {
         };
 
         jest.spyOn(service, 'findOne').mockImplementation(() => {
-            const warehouse = new Bundle();
+            const warehouse = new Tenant();
             warehouse.description = result.description;
             warehouse.activeFrom = result.activeFrom;
             warehouse.activeTo = result.activeTo;
@@ -188,7 +185,7 @@ describe('BundleService', () => {
         });
 
         jest.spyOn(em, 'assign').mockImplementation(
-            (obj1: Bundle, obj2: Bundle) => {
+            (obj1: Tenant, obj2: Tenant) => {
                 const mergedObj = Object.assign({}, obj1, obj2);
                 obj1.description = mergedObj.description;
                 obj1.activeFrom = mergedObj.activeFrom;
@@ -198,7 +195,7 @@ describe('BundleService', () => {
             },
         );
 
-        const updatedResult = new Bundle();
+        const updatedResult = new Tenant();
         updatedResult.description = 'Delivery to warehouse 3';
         updatedResult.activeFrom = result.activeFrom;
         updatedResult.activeTo = result.activeTo;
@@ -220,7 +217,7 @@ describe('BundleService', () => {
     });
 
     it('remove', async () => {
-        const result = new Bundle();
+        const result = new Tenant();
         result.description = 'Delivery to warehouse 1';
         result.id = 1;
 

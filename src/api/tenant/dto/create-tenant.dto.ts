@@ -1,6 +1,6 @@
 import { IsString } from 'class-validator';
 
-export class CreateBundleHolderDto {
+export class CreateTenantDto {
     @IsString()
     name: string;
 

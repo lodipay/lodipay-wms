@@ -1,6 +1,5 @@
 import { OmitType } from '@nestjs/swagger';
-import { IsNumber, IsOptional } from 'class-validator';
-import { TransferItemStatus } from '../../../common/enum/transfer-item-status.enum';
+import { IsNumber } from 'class-validator';
 import { TransferItem } from '../../../database/entities/transfer-item.entity';
 
 export class CreateTransferItemDto extends OmitType(TransferItem, [
@@ -10,6 +9,9 @@ export class CreateTransferItemDto extends OmitType(TransferItem, [
     'transfer',
     'inventory',
     'transferedStatus',
+    'fromTenant',
+    'toTenant',
+    'transferedStatus',
 ]) {
     @IsNumber()
     transferId: number;
@@ -17,6 +19,9 @@ export class CreateTransferItemDto extends OmitType(TransferItem, [
     @IsNumber()
     inventoryId: number;
 
-    @IsOptional()
-    transferItemStatus?: TransferItemStatus;
+    @IsNumber()
+    fromTenantId?: number;
+
+    @IsNumber()
+    toTenantId: number;
 }

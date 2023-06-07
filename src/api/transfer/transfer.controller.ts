@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateTransferDto } from './dto/create-transfer.dto';
+import { ReceiveTransferItemDto } from './dto/receive-transfer-item.dto';
 import { UpdateTransferDto } from './dto/update-transfer.dto';
 import { TransferService } from './transfer.service';
 
@@ -106,5 +107,18 @@ export class TransferController {
     @Post('update-state/:id/received')
     receivedState(@Param('id') id: string) {
         return this.transferService.received(+id);
+    }
+
+    @Post(':id/receive-transfer-item/:transferItemId')
+    receiveTransferItem(
+        @Param('id') id: string,
+        @Param('transferItemId') transferItemId: string,
+        @Body() receiveTransferItem: ReceiveTransferItemDto,
+    ) {
+        return this.transferService.receiveTransferItem(
+            +id,
+            +transferItemId,
+            receiveTransferItem,
+        );
     }
 }

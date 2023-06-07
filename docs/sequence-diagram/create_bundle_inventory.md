@@ -5,7 +5,7 @@
 
 participant "Controller" as controller
 participant "BundleService" as bundleService
-participant "BundleHolderService" as bundleHolderService
+participant "TenantService" as tenantService
 participant "BundleRepo" as bundleRepo
 participant "WarehouseService" as warehouseService
 participant "InventoryService" as inventoryService
@@ -14,12 +14,12 @@ participant "InventoryBundleRepo" as inventoryBundleRepo
 group Create bundle inventory
     controller -> bundleService ++: Bundle inventory
 
-    bundleService -> bundleHolderService: Get bundle holder by id \n bundleHolderRepo.findOne({ id: bundleId })
+    bundleService -> tenantService: Get tenant by id \n tenantRepo.findOne({ id: bundleId })
 
-    bundleHolderService --> bundleService: Return bundle holder result
+    tenantService --> bundleService: Return tenant result
 
-        alt bundleHolder not found
-        bundleHolderService --> controller: <InvalidRequestException> \n ('Bundle holder not found')
+        alt tenant not found
+        tenantService --> controller: <InvalidRequestException> \n ('Tenant not found')
     end
 
     |||

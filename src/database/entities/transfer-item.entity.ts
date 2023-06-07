@@ -2,6 +2,7 @@ import { Entity, ManyToOne, Property } from '@mikro-orm/core';
 import { TransferItemStatus } from '../../common/enum/transfer-item-status.enum';
 import { Inventory } from './inventory.entity';
 import { ParentEntity } from './parent.entity';
+import { Tenant } from './tenant.entity';
 import { Transfer } from './transfer.entity';
 
 @Entity()
@@ -10,7 +11,7 @@ export class TransferItem extends ParentEntity {
     description?: string;
 
     @Property()
-    inventoryAmount: number;
+    quantity: number;
 
     @Property({ nullable: true })
     transferedStatus: TransferItemStatus;
@@ -22,4 +23,10 @@ export class TransferItem extends ParentEntity {
         entity: () => Inventory,
     })
     inventory: Inventory;
+
+    @ManyToOne({ entity: () => Tenant })
+    fromTenant?: Tenant;
+
+    @ManyToOne({ entity: () => Tenant })
+    toTenant: Tenant;
 }

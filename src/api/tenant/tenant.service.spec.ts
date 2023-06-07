@@ -15,92 +15,88 @@ import {
 } from '../../common/mock';
 import { getTestingModule } from '../../common/mock/testing.module.mock';
 import { FilterService } from '../../common/module/filter/filter.service';
-import { BundleHolder } from '../../database/entities/bundle-holder.entity';
-import { BundleHolderService } from './bundle-holder.service';
-import { UpdateBundleHolderDto } from './dto/update-bundle-holder.dto';
+import { Tenant } from '../../database/entities/tenant.entity';
+import { UpdateTenantDto } from './dto/update-tenant.dto';
+import { TenantService } from './tenant.service';
 
-describe('BundleHolderService', () => {
-    let service: BundleHolderService;
-    let bundleHolderRepo: EntityRepository<BundleHolder>;
-    let bundleHolder1: BundleHolder;
-    let bundleHolder2: BundleHolder;
+describe('TenantService', () => {
+    let service: TenantService;
+    let tenantRepo: EntityRepository<Tenant>;
+    let tenant1: Tenant;
+    let tenant2: Tenant;
     let filterService: FilterService;
     let em: EntityManager;
 
     beforeEach(async () => {
         const module: TestingModule = await getTestingModule({
             providers: [
-                BundleHolderService,
+                TenantService,
                 FilterService,
                 getEntityManagerMockConfig(),
-                getRepositoryMockConfig(BundleHolder),
+                getRepositoryMockConfig(Tenant),
             ],
         });
 
-        service = module.get<BundleHolderService>(BundleHolderService);
+        service = module.get<TenantService>(TenantService);
         filterService = module.get<FilterService>(FilterService);
-        bundleHolderRepo = module.get<EntityRepository<BundleHolder>>(
-            getRepositoryToken(BundleHolder),
+        tenantRepo = module.get<EntityRepository<Tenant>>(
+            getRepositoryToken(Tenant),
         );
         em = module.get<EntityManager>(EntityManager);
 
-        bundleHolder1 = plainToClass(BundleHolder, {
-            name: 'Bundle holder 1',
-            description: 'Bundle holder 1 description',
+        tenant1 = plainToClass(Tenant, {
+            name: 'Tenant holder 1',
+            description: 'Tenant holder 1 description',
         });
-        bundleHolder2 = plainToClass(BundleHolder, {
-            name: 'Bundle holder 2',
-            description: 'Bundle holder 2 description',
+        tenant2 = plainToClass(Tenant, {
+            name: 'Tenant holder 2',
+            description: 'Tenant holder 2 description',
         });
     });
 
-    it('should create a bundle holder', async () => {
-        jest.spyOn(em, 'persistAndFlush').mockImplementation(
-            (obj: BundleHolder) => {
-                obj.id = bundleHolder1.id = 1;
-                obj.createdAt = new Date();
-                return Promise.resolve();
-            },
-        );
+    it('should create a tenantItem holder', async () => {
+        jest.spyOn(em, 'persistAndFlush').mockImplementation((obj: Tenant) => {
+            obj.id = tenant1.id = 1;
+            obj.createdAt = new Date();
+            return Promise.resolve();
+        });
 
         expect(
             await service.create({
-                name: bundleHolder1.name,
-                description: bundleHolder1.description,
+                name: tenant1.name,
+                description: tenant1.description,
             }),
-        ).toBeInstanceOf(BundleHolder);
+        ).toBeInstanceOf(Tenant);
 
         expect(
             await service.create({
-                name: bundleHolder1.name,
-                description: bundleHolder1.description,
+                name: tenant1.name,
+                description: tenant1.description,
             }),
         ).toMatchObject({
-            ...bundleHolder1,
+            ...tenant1,
             createdAt: expect.any(Date),
-            bundles: expect.any(Collection<BundleHolder>),
+            tenantItems: expect.any(Collection<Tenant>),
         });
     });
 
-    it('should find bundle holder by id', async () => {
-        bundleHolder1.id = 1;
-        jest.spyOn(bundleHolderRepo, 'findOne').mockImplementation(
+    it('should find tenantItem holder by id', async () => {
+        tenant1.id = 1;
+        jest.spyOn(tenantRepo, 'findOne').mockImplementation(
             (id: number): any => {
-                expect(id).toBe(bundleHolder1.id);
-                return Promise.resolve(bundleHolder1);
+                expect(id).toBe(tenant1.id);
+                return Promise.resolve(tenant1);
             },
         );
 
-        expect(await service.findOne(bundleHolder1.id)).toBeInstanceOf(
-            BundleHolder,
-        );
-        expect(await service.findOne(bundleHolder1.id)).toEqual(bundleHolder1);
+        expect(await service.findOne(tenant1.id)).toBeInstanceOf(Tenant);
+        expect(await service.findOne(tenant1.id)).toEqual(tenant1);
     });
 
     describe('update', () => {
-        it('should throw error when bundle holder not found', async () => {
+        it('should throw error when tenantItem holder not found', async () => {
             const searchId = 123;
-            jest.spyOn(bundleHolderRepo, 'findOne').mockImplementation(
+            jest.spyOn(tenantRepo, 'findOne').mockImplementation(
                 (id: number): any => {
                     expect(id).toBe(searchId);
 
@@ -110,30 +106,28 @@ describe('BundleHolderService', () => {
 
             await expect(
                 service.update(searchId, {
-                    name: bundleHolder1.name,
-                    description: bundleHolder1.description,
+                    name: tenant1.name,
+                    description: tenant1.description,
                 }),
             ).rejects.toThrow(InvalidArgumentException);
         });
 
-        it('should update bundle holder', async () => {
+        it('should update tenantItem holder', async () => {
             const updateData = {
                 id: 1,
                 name: 'Updated name',
                 description: 'Updated description',
             };
 
-            jest.spyOn(bundleHolderRepo, 'findOne').mockImplementation(
-                (id): any => {
-                    expect(id).toBe(updateData.id);
-                    bundleHolder1.id = updateData.id;
-                    bundleHolder1.createdAt = new Date();
-                    return Promise.resolve(bundleHolder1);
-                },
-            );
+            jest.spyOn(tenantRepo, 'findOne').mockImplementation((id): any => {
+                expect(id).toBe(updateData.id);
+                tenant1.id = updateData.id;
+                tenant1.createdAt = new Date();
+                return Promise.resolve(tenant1);
+            });
 
             jest.spyOn(em, 'assign').mockImplementation(
-                (obj1: BundleHolder, obj2: UpdateBundleHolderDto) => {
+                (obj1: Tenant, obj2: UpdateTenantDto) => {
                     obj1.name = obj2.name || obj2.name;
                     obj1.description = obj2.description || obj1.description;
                     return obj1;
@@ -143,22 +137,22 @@ describe('BundleHolderService', () => {
             jest.spyOn(em, 'persistAndFlush').mockImplementation(() => {
                 return Promise.resolve();
             });
-            bundleHolder1.updatedAt = new Date();
-            bundleHolder1.name = updateData.name;
-            bundleHolder1.description = updateData.description;
+            tenant1.updatedAt = new Date();
+            tenant1.name = updateData.name;
+            tenant1.description = updateData.description;
 
             expect(
                 await service.update(updateData.id, {
                     name: updateData.name,
                     description: updateData.description,
                 }),
-            ).toBeInstanceOf(BundleHolder);
+            ).toBeInstanceOf(Tenant);
             expect(
                 await service.update(updateData.id, {
                     name: updateData.name,
                     description: updateData.description,
                 }),
-            ).toEqual(bundleHolder1);
+            ).toEqual(tenant1);
         });
     });
 
@@ -178,7 +172,7 @@ describe('BundleHolderService', () => {
             },
         };
 
-        const result = [bundleHolder1, bundleHolder2];
+        const result = [tenant1, tenant2];
 
         jest.spyOn(filterService, 'search').mockImplementation(
             (_, filterDto) => {
@@ -205,10 +199,10 @@ describe('BundleHolderService', () => {
     });
 
     it('should remove', async () => {
-        bundleHolder1.id = 1;
+        tenant1.id = 1;
         jest.spyOn(service, 'findOne').mockImplementation((id: number): any => {
-            expect(id).toBe(bundleHolder1.id);
-            return Promise.resolve(bundleHolder1);
+            expect(id).toBe(tenant1.id);
+            return Promise.resolve(tenant1);
         });
 
         expect(await service.remove(1)).toStrictEqual('success');

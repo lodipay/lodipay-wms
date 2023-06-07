@@ -7,112 +7,111 @@ import {
     getRepositoryMockConfig,
 } from '../../common/mock';
 import { FilterService } from '../../common/module/filter/filter.service';
-import { BundleHolder } from '../../database/entities/bundle-holder.entity';
-import { BundleHolderController } from './bundle-holder.controller';
-import { BundleHolderService } from './bundle-holder.service';
-import { CreateBundleHolderDto } from './dto/create-bundle-holder.dto';
-import { UpdateBundleHolderDto } from './dto/update-bundle-holder.dto';
+import { Tenant } from '../../database/entities/tenant.entity';
+import { CreateTenantDto } from './dto/create-tenant.dto';
+import { UpdateTenantDto } from './dto/update-tenant.dto';
+import { TenantController } from './tenant.controller';
+import { TenantService } from './tenant.service';
 
-describe('BundleHolderController', () => {
-    let controller: BundleHolderController;
-    let service: BundleHolderService;
-    let bundleHolder1: BundleHolder;
-    let bundleHolder2: BundleHolder;
+describe('TenantController', () => {
+    let controller: TenantController;
+    let service: TenantService;
+    let tenant1: Tenant;
+    let tenant2: Tenant;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
-                BundleHolderService,
+                TenantService,
                 FilterService,
-                getRepositoryMockConfig(BundleHolder),
+                getRepositoryMockConfig(Tenant),
                 getEntityManagerMockConfig(),
             ],
-            controllers: [BundleHolderController],
+            controllers: [TenantController],
         }).compile();
 
-        controller = module.get<BundleHolderController>(BundleHolderController);
-        service = module.get<BundleHolderService>(BundleHolderService);
-        bundleHolder1 = plainToClass(BundleHolder, {
+        controller = module.get<TenantController>(TenantController);
+        service = module.get<TenantService>(TenantService);
+        tenant1 = plainToClass(Tenant, {
             id: 1,
-            name: 'Bundle holder 1',
-            description: 'Bundle holder 1 description',
+            name: 'Tenant holder 1',
+            description: 'Tenant holder 1 description',
             createdAt: new Date(),
         });
-        bundleHolder1 = plainToClass(BundleHolder, {
+        tenant1 = plainToClass(Tenant, {
             id: 2,
-            name: 'Bundle holder 2',
-            description: 'Bundle holder 2 description',
+            name: 'Tenant holder 2',
+            description: 'Tenant holder 2 description',
             createdAt: new Date(),
         });
     });
 
-    it('should update an bundle-holder', async () => {
+    it('should update an tenantItem-holder', async () => {
         const updateData = {
-            name: 'Update bundle holder name to 1',
+            name: 'Update tenantItem holder name to 1',
         };
         jest.spyOn(service, 'update').mockImplementation(
-            (id: number, dto: UpdateBundleHolderDto) => {
-                expect(id).toBe(bundleHolder1.id);
-                bundleHolder1.updatedAt = new Date();
-                bundleHolder1.createdAt = new Date();
-                bundleHolder1.name = dto.name;
-                bundleHolder1.description =
-                    dto.description && bundleHolder1.description;
+            (id: number, dto: UpdateTenantDto) => {
+                expect(id).toBe(tenant1.id);
+                tenant1.updatedAt = new Date();
+                tenant1.createdAt = new Date();
+                tenant1.name = dto.name;
+                tenant1.description = dto.description && tenant1.description;
 
-                return Promise.resolve(bundleHolder1);
+                return Promise.resolve(tenant1);
             },
         );
 
         expect(
-            await controller.update(`${bundleHolder1.id}`, {
+            await controller.update(`${tenant1.id}`, {
                 name: updateData.name,
             }),
-        ).toBeInstanceOf(BundleHolder);
+        ).toBeInstanceOf(Tenant);
         expect(
-            await controller.update(`${bundleHolder1.id}`, {
+            await controller.update(`${tenant1.id}`, {
                 name: updateData.name,
             }),
         ).toMatchObject({
-            ...bundleHolder1,
+            ...tenant1,
             updatedAt: expect.any(Date),
             createdAt: expect.any(Date),
             name: updateData.name,
         });
     });
 
-    it('should create new bundle holder', async () => {
+    it('should create new tenantItem holder', async () => {
         const data = {
             name: 'E-commerce',
             description: 'E-commerce description',
         };
         jest.spyOn(service, 'create').mockImplementation(() => {
-            const createdObj = plainToClass(BundleHolder, { ...data, id: 1 });
+            const createdObj = plainToClass(Tenant, { ...data, id: 1 });
             createdObj.createdAt = new Date();
             return Promise.resolve(createdObj);
         });
 
         expect(
-            await controller.create(plainToClass(CreateBundleHolderDto, data)),
+            await controller.create(plainToClass(CreateTenantDto, data)),
         ).toMatchObject({
-            ...plainToClass(BundleHolder, { ...data, id: 1 }),
+            ...plainToClass(Tenant, { ...data, id: 1 }),
             createdAt: expect.any(Date),
-            bundles: expect.any(Collection),
+            tenantItems: expect.any(Collection),
         });
     });
 
-    it('should find a bundle by id', async () => {
+    it('should find a tenantItem by id', async () => {
         jest.spyOn(service, 'findOne').mockImplementation(id => {
-            expect(id).toBe(bundleHolder1.id);
-            return Promise.resolve(bundleHolder1);
+            expect(id).toBe(tenant1.id);
+            return Promise.resolve(tenant1);
         });
 
-        expect(await controller.findOne(`${bundleHolder1.id}`)).toEqual({
-            ...bundleHolder1,
+        expect(await controller.findOne(`${tenant1.id}`)).toEqual({
+            ...tenant1,
             createdAt: expect.any(Date),
         });
     });
 
-    it('should search bundle-holders', async () => {
+    it('should search tenantItem-holders', async () => {
         const query = {
             page: 2,
             limit: 10,
@@ -128,7 +127,7 @@ describe('BundleHolderController', () => {
             },
         };
 
-        const result = [bundleHolder1, bundleHolder2];
+        const result = [tenant1, tenant2];
 
         jest.spyOn(service, 'search').mockImplementation(filterDto => {
             expect(filterDto).toStrictEqual(query);
@@ -157,6 +156,6 @@ describe('BundleHolderController', () => {
         jest.spyOn(service, 'remove').mockImplementation(() => {
             return Promise.resolve(result);
         });
-        expect(await controller.remove(`${bundleHolder1.id}`)).toBe(result);
+        expect(await controller.remove(`${tenant1.id}`)).toBe(result);
     });
 });
