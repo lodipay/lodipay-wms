@@ -5,6 +5,7 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { TransferAction } from '../../common/enum/transfer-action.enum';
+import { TransferItemStatus } from '../../common/enum/transfer-item-status.enum';
 import { TransferStatus } from '../../common/enum/transfer-status.enum';
 import { TransferSMService } from '../../common/module/state-machine/transfer-sm/transfer-sm.service';
 import { Destination } from '../../database/entities/destination.entity';
@@ -149,6 +150,12 @@ export class TransferService {
     }
 
     async activate(id: number) {
+        const transferToActivate = await this.transferRepository.findOne(id);
+
+        if (!transferToActivate.transferItems.length) {
+            throw new InvalidArgumentException('Transfer has no items');
+        }
+
         const { transfer, nextState } = await this.getNextState(
             id,
             TransferAction.ACTIVATE,
@@ -295,6 +302,23 @@ export class TransferService {
     }
 
     async received(id: number) {
+        const transferToCheck = await this.transferRepository.findOne(id);
+        const transferItems = await this.em.find(TransferItem, {
+            transfer: transferToCheck,
+        });
+
+        const notReceivedTransferItem = transferItems.find(
+            transferItem =>
+                transferItem.transferedStatus === undefined ||
+                transferItem.transferedStatus === null,
+        );
+
+        if (notReceivedTransferItem) {
+            throw new InvalidArgumentException(
+                `All transfer items must be received before transfer can be received, ${notReceivedTransferItem.id} is not received`,
+            );
+        }
+
         const { transfer, nextState } = await this.getNextState(
             id,
             TransferAction.RECEIVED,
@@ -334,58 +358,87 @@ export class TransferService {
         transferItemId: number,
         receiveTransferItemDto: ReceiveTransferItemDto,
     ) {
-        const transfer = await this.findOne(id);
-        const transferItem = await this.transferItemService.findOne(
-            transferItemId,
-        );
+        try {
+            const transfer = await this.findOne(id);
+            const transferItem = await this.transferItemService.findOne(
+                transferItemId,
+            );
 
-        if (transferItem.transferedStatus) {
-            throw new InvalidArgumentException('Item already transfered');
+            if (transferItem.transferedStatus) {
+                throw new InvalidArgumentException(
+                    `Item already transfered with ${transferItem.transferedStatus} status`,
+                );
+            }
+
+            const deliveredDestination = await this.em
+                .getRepository(Destination)
+                .findOne(
+                    {
+                        id: transfer.to.id,
+                    },
+                    {
+                        populate: ['warehouse'],
+                    },
+                );
+
+            const deliveredWarehouse = deliveredDestination.warehouse;
+
+            const newTenant = transferItem.toTenant;
+
+            const tenantItemInWarehouse = await this.em.findOne(TenantItem, {
+                warehouse: {
+                    id: deliveredWarehouse.id,
+                },
+                tenant: {
+                    id: newTenant.id,
+                },
+                inventory: {
+                    id: transferItemId,
+                },
+            });
+
+            if (tenantItemInWarehouse) {
+                const tenantItemQb = this.em.createQueryBuilder(
+                    TenantItem,
+                    'ti',
+                );
+                await tenantItemQb
+                    .update({
+                        quantity: tenantItemQb.raw(
+                            `ti.c_quantity + ${transferItem.quantity} - ${receiveTransferItemDto.damagedQuantity}`,
+                        ),
+                        updatedAt: new Date(),
+                    })
+                    .where({
+                        id: tenantItemInWarehouse.id,
+                    })
+                    .execute();
+            } else {
+                const tenantItem = new TenantItem();
+                tenantItem.tenant = newTenant;
+                tenantItem.warehouse = deliveredWarehouse;
+                tenantItem.inventory = transferItem.inventory;
+                tenantItem.quantity =
+                    transferItem.quantity -
+                    receiveTransferItemDto.damagedQuantity;
+                tenantItem.damagedQuantity =
+                    receiveTransferItemDto.damagedQuantity || undefined;
+
+                await this.em.persistAndFlush(tenantItem);
+            }
+
+            transferItem.transferedStatus =
+                receiveTransferItemDto.transferItemStatus;
+
+            if (receiveTransferItemDto.damagedQuantity) {
+                transferItem.transferedStatus = TransferItemStatus.DAMAGED;
+            }
+
+            await this.em.persistAndFlush(transferItem);
+
+            return transferItem;
+        } catch (error) {
+            console.log(error);
         }
-
-        const deliveredWarehouse = await this.em
-            .getRepository(Warehouse)
-            .findOne(transfer.to.id);
-
-        const newTenant = transferItem.toTenant;
-
-        const tenantItemInWarehouse = await this.em.findOne(TenantItem, {
-            warehouse: {
-                id: deliveredWarehouse.id,
-            },
-            tenant: {
-                id: newTenant.id,
-            },
-        });
-
-        if (tenantItemInWarehouse) {
-            const tenantItemQb = this.em.createQueryBuilder(TenantItem, 'ti');
-            await tenantItemQb
-                .update({
-                    quantity: tenantItemQb.raw(
-                        `ti.quantity + ${transferItem.quantity}`,
-                    ),
-                    updatedAt: new Date(),
-                })
-                .where({
-                    id: tenantItemInWarehouse.id,
-                })
-                .execute();
-        } else {
-            const tenantItem = new TenantItem();
-            tenantItem.tenant = newTenant;
-            tenantItem.warehouse = deliveredWarehouse;
-            tenantItem.inventory = transferItem.inventory;
-            tenantItem.quantity = transferItem.quantity;
-
-            await this.em.persistAndFlush(tenantItem);
-        }
-
-        transferItem.transferedStatus =
-            receiveTransferItemDto.transferItemStatus;
-
-        await this.em.persistAndFlush(transferItem);
-
-        return transferItem;
     }
 }

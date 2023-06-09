@@ -113,12 +113,12 @@ export class TransferController {
     receiveTransferItem(
         @Param('id') id: string,
         @Param('transferItemId') transferItemId: string,
-        @Body() receiveTransferItem: ReceiveTransferItemDto,
+        @Body() receiveTransferItemDot: ReceiveTransferItemDto,
     ) {
         return this.transferService.receiveTransferItem(
             +id,
             +transferItemId,
-            receiveTransferItem,
+            receiveTransferItemDot,
         );
     }
 }

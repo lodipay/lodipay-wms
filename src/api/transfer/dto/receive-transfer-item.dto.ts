@@ -2,4 +2,5 @@ import { TransferItemStatus } from '../../../common/enum/transfer-item-status.en
 
 export class ReceiveTransferItemDto {
     transferItemStatus: TransferItemStatus;
+    damagedQuantity = 0;
 }

@@ -17,10 +17,13 @@ export class TenantItem extends ParentEntity {
     id: number;
 
     @Property()
-    description: string;
+    description?: string;
 
     @Property()
     quantity = 0;
+
+    @Property()
+    damagedQuantity?: number;
 
     @ManyToOne(() => Tenant)
     tenant: Tenant;
