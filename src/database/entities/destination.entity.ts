@@ -5,7 +5,7 @@ import { Warehouse } from './warehouse.entity';
 @Entity()
 @Filter({ name: 'mainFilter', cond: args => args })
 export class Destination extends ParentEntity {
-    constructor(name: string, description?: string) {
+    constructor(name?: string, description?: string) {
         super();
         this.name = name;
         this.description = description;

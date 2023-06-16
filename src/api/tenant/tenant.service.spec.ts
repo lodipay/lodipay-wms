@@ -16,6 +16,7 @@ import {
 import { getTestingModule } from '../../common/mock/testing.module.mock';
 import { FilterService } from '../../common/module/filter/filter.service';
 import { Tenant } from '../../database/entities/tenant.entity';
+import { TransferItem } from '../../database/entities/transfer-item.entity';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
 import { TenantService } from './tenant.service';
 
@@ -54,7 +55,7 @@ describe('TenantService', () => {
         });
     });
 
-    it('should create a tenantItem holder', async () => {
+    it('should create a tenant', async () => {
         jest.spyOn(em, 'persistAndFlush').mockImplementation((obj: Tenant) => {
             obj.id = tenant1.id = 1;
             obj.createdAt = new Date();
@@ -77,6 +78,8 @@ describe('TenantService', () => {
             ...tenant1,
             createdAt: expect.any(Date),
             tenantItems: expect.any(Collection<Tenant>),
+            fromTenant: expect.any(Collection<TransferItem>),
+            toTenant: expect.any(Collection<TransferItem>),
         });
     });
 

@@ -1,39 +1,83 @@
 import { FilterService } from '@/common/module/filter/filter.service';
 import { QueryOrder } from '@mikro-orm/core';
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { plainToClass } from 'class-transformer';
 import { PaginatedDto } from '../../common/dto/paginated.dto';
+import { TransferStatus } from '../../common/enum/transfer-status.enum';
 import {
+    getEntityManagerDriverMockConfig,
     getEntityManagerMockConfig,
     getRepositoryMockConfig,
 } from '../../common/mock';
+import { getTestingModule } from '../../common/mock/testing.module.mock';
+import { TransferSMService } from '../../common/module/state-machine/transfer-sm/transfer-sm.service';
+import { Destination } from '../../database/entities/destination.entity';
 import { Inventory } from '../../database/entities/inventory.entity';
+import { TenantItem } from '../../database/entities/tenant-item.entity';
+import { Tenant } from '../../database/entities/tenant.entity';
 import { TransferItem } from '../../database/entities/transfer-item.entity';
 import { Transfer } from '../../database/entities/transfer.entity';
+import { Warehouse } from '../../database/entities/warehouse.entity';
+import { InventoryService } from '../inventory/inventory.service';
+import { TenantService } from '../tenant/tenant.service';
+import { TransferService } from '../transfer/transfer.service';
+import { WarehouseService } from '../warehouse/warehouse.service';
 import { CreateTransferItemDto } from './dto/create-transfer-item.dto';
-import { UpdateTransferItemDto } from './dto/update-transfer-item.dto';
 import { TransferItemController } from './transfer-item.controller';
 import { TransferItemService } from './transfer-item.service';
 
 describe('TransferItemController', () => {
     let controller: TransferItemController;
     let service: TransferItemService;
+    let transfer: Transfer;
+    let transferItem1: TransferItem;
+    let transferItem2: TransferItem;
+    let warehouse1: Warehouse;
+    let warehouse2: Warehouse;
+    let tenantItem: TenantItem;
 
     beforeEach(async () => {
-        const module: TestingModule = await Test.createTestingModule({
+        const module: TestingModule = await getTestingModule({
             controllers: [TransferItemController],
             providers: [
-                TransferItemService,
                 FilterService,
+                InventoryService,
+                TenantService,
+                TransferItemService,
+                TransferService,
+                TransferItemService,
+                TransferSMService,
+                WarehouseService,
+                getRepositoryMockConfig(Destination),
+                getRepositoryMockConfig(Inventory),
                 getRepositoryMockConfig(Transfer),
                 getRepositoryMockConfig(TransferItem),
-                getRepositoryMockConfig(Inventory),
+                getRepositoryMockConfig(Tenant),
+                getRepositoryMockConfig(Warehouse),
                 getEntityManagerMockConfig(),
+                getEntityManagerDriverMockConfig(),
             ],
-        }).compile();
+        });
 
         controller = module.get<TransferItemController>(TransferItemController);
         service = module.get<TransferItemService>(TransferItemService);
+
+        warehouse1 = new Warehouse();
+        warehouse1.name = 'Warehouse 1';
+        warehouse1.description = 'Warehouse 1 desc';
+
+        warehouse2 = new Warehouse();
+        warehouse2.name = 'Warehouse 2';
+        warehouse2.description = 'Warehouse 2 desc';
+
+        transfer = new Transfer();
+        transfer.name = 'Transfer 1';
+        transfer.status = TransferStatus.ACTIVE;
+        transfer.to = warehouse1;
+
+        transferItem1 = new TransferItem();
+        transferItem1.quantity = 100;
+        transferItem1.inventory = new Inventory();
     });
 
     it('should create new transfer item', async () => {
@@ -77,44 +121,67 @@ describe('TransferItemController', () => {
     });
 
     it('should update transfer item', async () => {
-        const data = {
-            id: 1,
-            description: 'Lorem ipsum dolor sit amet',
-            inventoryAmount: 1000,
-            inventoryId: 3,
-            transferId: 5,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        };
+        transferItem1.id = 1;
 
         const updateValues = {
-            description: 'UPDATE Lorem ipsum dolor sit amet',
+            quantity: 300,
         };
 
         jest.spyOn(service, 'update').mockImplementation(
-            (id: number, dto: UpdateTransferItemDto) => {
-                expect(id).toBe(data.id);
-                expect(dto.description).toBe(updateValues.description);
+            (id, dto): Promise<TransferItem> => {
+                expect(id).toBe(transferItem1.id);
+                expect(dto.quantity).toBe(updateValues.quantity);
+                transferItem1.quantity = dto.quantity;
 
-                return Promise.resolve(
-                    plainToClass(TransferItem, {
-                        ...data,
-                        ...dto,
-                    }),
-                );
+                return Promise.resolve(transferItem1);
             },
         );
 
-        expect(
-            await controller.update(`${data.id}`, updateValues),
-        ).toBeInstanceOf(TransferItem);
-        expect(await controller.update(`${data.id}`, updateValues)).toEqual({
-            ...plainToClass(TransferItem, {
-                ...data,
-                description: updateValues.description,
-            }),
-            createdAt: expect.any(Date),
+        const result = await controller.update(
+            `${transferItem1.id}`,
+            updateValues,
+        );
+
+        expect(result).toBeInstanceOf(TransferItem);
+        expect(result).toEqual({
+            ...transferItem1,
+            quantity: updateValues.quantity,
         });
+
+        // const data = {
+        //     id: 1,
+        //     description: 'Lorem ipsum dolor sit amet',
+        //     inventoryAmount: 1000,
+        //     inventoryId: 3,
+        //     transferId: 5,
+        //     createdAt: new Date(),
+        //     updatedAt: new Date(),
+        // };
+        // const updateValues = {
+        //     description: 'UPDATE Lorem ipsum dolor sit amet',
+        // };
+        // jest.spyOn(service, 'update').mockImplementation(
+        //     (id: number, dto: UpdateTransferItemDto) => {
+        //         expect(id).toBe(data.id);
+        //         expect(dto.description).toBe(updateValues.description);
+        //         return Promise.resolve(
+        //             plainToClass(TransferItem, {
+        //                 ...data,
+        //                 ...dto,
+        //             }),
+        //         );
+        //     },
+        // );
+        // expect(
+        //     await controller.update(`${data.id}`, updateValues),
+        // ).toBeInstanceOf(TransferItem);
+        // expect(await controller.update(`${data.id}`, updateValues)).toEqual({
+        //     ...plainToClass(TransferItem, {
+        //         ...data,
+        //         description: updateValues.description,
+        //     }),
+        //     createdAt: expect.any(Date),
+        // });
     });
 
     it('should search', async () => {

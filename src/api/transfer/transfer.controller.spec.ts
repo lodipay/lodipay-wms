@@ -1,4 +1,5 @@
 import {
+    getEntityManagerDriverMockConfig,
     getEntityManagerMockConfig,
     getRepositoryMockConfig,
 } from '@/common/mock';
@@ -10,8 +11,15 @@ import { PaginatedDto } from '../../common/dto/paginated.dto';
 import { TransferStatus } from '../../common/enum/transfer-status.enum';
 import { TransferSMService } from '../../common/module/state-machine/transfer-sm/transfer-sm.service';
 import { Destination } from '../../database/entities/destination.entity';
+import { Inventory } from '../../database/entities/inventory.entity';
+import { Tenant } from '../../database/entities/tenant.entity';
+import { TransferItem } from '../../database/entities/transfer-item.entity';
 import { Transfer } from '../../database/entities/transfer.entity';
 import { Warehouse } from '../../database/entities/warehouse.entity';
+import { InventoryService } from '../inventory/inventory.service';
+import { TenantService } from '../tenant/tenant.service';
+import { TransferItemService } from '../transfer-item/transfer-item.service';
+import { WarehouseService } from '../warehouse/warehouse.service';
 import { CreateTransferDto } from './dto/create-transfer.dto';
 import { UpdateTransferDto } from './dto/update-transfer.dto';
 import { TransferController } from './transfer.controller';
@@ -56,10 +64,18 @@ describe('TransferController', () => {
                     },
                 },
                 TransferService,
+                TransferItemService,
+                InventoryService,
                 FilterService,
+                WarehouseService,
+                TenantService,
                 getEntityManagerMockConfig(),
-                getRepositoryMockConfig(Transfer),
+                getEntityManagerDriverMockConfig(),
                 getRepositoryMockConfig(Destination),
+                getRepositoryMockConfig(Inventory),
+                getRepositoryMockConfig(Tenant),
+                getRepositoryMockConfig(Transfer),
+                getRepositoryMockConfig(TransferItem),
                 getRepositoryMockConfig(Warehouse),
             ],
         }).compile();

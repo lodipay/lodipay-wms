@@ -38,7 +38,7 @@ describe('TenantController', () => {
             description: 'Tenant holder 1 description',
             createdAt: new Date(),
         });
-        tenant1 = plainToClass(Tenant, {
+        tenant2 = plainToClass(Tenant, {
             id: 2,
             name: 'Tenant holder 2',
             description: 'Tenant holder 2 description',
@@ -47,7 +47,7 @@ describe('TenantController', () => {
     });
 
     it('should update an tenantItem-holder', async () => {
-        const updateData = {
+        const updateData: UpdateTenantDto = {
             name: 'Update tenantItem holder name to 1',
         };
         jest.spyOn(service, 'update').mockImplementation(
@@ -79,7 +79,7 @@ describe('TenantController', () => {
         });
     });
 
-    it('should create new tenantItem holder', async () => {
+    it('should create new tenant holder', async () => {
         const data = {
             name: 'E-commerce',
             description: 'E-commerce description',
@@ -96,6 +96,8 @@ describe('TenantController', () => {
             ...plainToClass(Tenant, { ...data, id: 1 }),
             createdAt: expect.any(Date),
             tenantItems: expect.any(Collection),
+            fromTenant: expect.any(Collection),
+            toTenant: expect.any(Collection),
         });
     });
 

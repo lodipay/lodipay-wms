@@ -101,7 +101,7 @@ describe('InventoryService', () => {
         expect(plainResult).toEqual({
             ...expectedData,
             expireDate: expect.any(Date),
-            warehouses: expect.any(Collection),
+            tenantItem: expect.any(Collection),
             transferItem: expect.any(Collection),
         });
     });

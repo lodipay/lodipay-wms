@@ -1,7 +1,10 @@
 import { FilterService } from '@/common/module/filter/filter.service';
-import { EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityManager, QueryBuilder } from '@mikro-orm/postgresql';
+import {
+    EntityManager,
+    EntityRepository,
+    QueryBuilder,
+} from '@mikro-orm/postgresql';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { FilterDto } from '../../common/dto/filter.dto';
 import { TransferStatus } from '../../common/enum/transfer-status.enum';
@@ -72,7 +75,7 @@ export class TransferItemService {
                 .getItems()
                 .find(
                     tenantItem =>
-                        tenantItem.inventory.id ===
+                        tenantItem?.inventory?.id ===
                         createTransferItemDto.inventoryId,
                 );
 
@@ -213,6 +216,7 @@ export class TransferItemService {
         );
 
         await this.em.persistAndFlush(transferItem);
+        return transferItem;
     }
 
     async remove(id: number) {

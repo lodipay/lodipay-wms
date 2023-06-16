@@ -42,7 +42,7 @@ export class Warehouse extends ParentEntity {
     @OneToMany(() => TenantItem, 'warehouse')
     tenantItem = new Collection<TenantItem>(this);
 
-    constructor(name: string, description: string) {
+    constructor(name?: string, description?: string) {
         super();
         this.name = name;
         this.description = description;

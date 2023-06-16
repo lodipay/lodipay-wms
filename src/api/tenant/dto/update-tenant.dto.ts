@@ -6,4 +6,6 @@ export class UpdateTenantDto extends OmitType(Tenant, [
     'createdAt',
     'updatedAt',
     'tenantItems',
+    'toTenant',
+    'fromTenant',
 ]) {}

@@ -1,21 +1,34 @@
-import { PaginatedDto } from '@/common/dto/paginated.dto';
-import { InvalidArgumentException } from '@/common/exception/invalid.argument.exception';
 import {
+    getEntityManagerDriverMockConfig,
     getEntityManagerMockConfig,
     getRepositoryMockConfig,
 } from '@/common/mock';
 import { FilterService } from '@/common/module/filter/filter.service';
-import { EntityManager, QueryOrder } from '@mikro-orm/core';
+import { QueryOrder } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
-import { EntityRepository } from '@mikro-orm/postgresql';
+import {
+    EntityManager,
+    EntityRepository as DriverEntityRepository,
+} from '@mikro-orm/postgresql';
 import { TestingModule } from '@nestjs/testing';
 import { plainToClass } from 'class-transformer';
+import { DateTime } from 'luxon';
+import { PaginatedDto } from '../../common/dto/paginated.dto';
+import { TransferItemStatus } from '../../common/enum/transfer-item-status.enum';
 import { TransferStatus } from '../../common/enum/transfer-status.enum';
+import { InvalidArgumentException } from '../../common/exception/invalid.argument.exception';
 import { getTestingModule } from '../../common/mock/testing.module.mock';
 import { TransferSMService } from '../../common/module/state-machine/transfer-sm/transfer-sm.service';
 import { Destination } from '../../database/entities/destination.entity';
+import { Inventory } from '../../database/entities/inventory.entity';
+import { Tenant } from '../../database/entities/tenant.entity';
+import { TransferItem } from '../../database/entities/transfer-item.entity';
 import { Transfer } from '../../database/entities/transfer.entity';
 import { Warehouse } from '../../database/entities/warehouse.entity';
+import { InventoryService } from '../inventory/inventory.service';
+import { TenantService } from '../tenant/tenant.service';
+import { TransferItemService } from '../transfer-item/transfer-item.service';
+import { WarehouseService } from '../warehouse/warehouse.service';
 import { CreateTransferDto } from './dto/create-transfer.dto';
 import { TransferService } from './transfer.service';
 
@@ -25,17 +38,20 @@ describe('TransferService', () => {
     let tolgoit: Destination;
     let zaisan: Destination;
     let guchinhoyr: Destination;
-    let destRepo: EntityRepository<Destination>;
-    let transferRepo: EntityRepository<Transfer>;
+    let destRepo: DriverEntityRepository<Destination>;
+    let transferRepo: DriverEntityRepository<Transfer>;
     let testTransferDto: CreateTransferDto;
     let em: EntityManager;
     let filterService: FilterService;
     let transferSMService: TransferSMService;
+    let transferItem: TransferItem;
+    let inventory: Inventory;
+    let inventory2: Inventory;
+    let warehouse: Warehouse;
 
     beforeEach(async () => {
         const module: TestingModule = await getTestingModule({
             providers: [
-                TransferService,
                 {
                     provide: TransferSMService,
                     useValue: {
@@ -47,9 +63,19 @@ describe('TransferService', () => {
                     },
                 },
                 FilterService,
+                InventoryService,
+                TenantService,
+                TransferItemService,
+                TransferService,
+                WarehouseService,
                 getEntityManagerMockConfig(),
-                getRepositoryMockConfig(Transfer),
+                getEntityManagerDriverMockConfig(),
                 getRepositoryMockConfig(Destination),
+                getRepositoryMockConfig(Inventory),
+                getRepositoryMockConfig(Tenant),
+                getRepositoryMockConfig(Transfer),
+                getRepositoryMockConfig(TransferItem),
+                getRepositoryMockConfig(TransferItem),
                 getRepositoryMockConfig(Warehouse),
             ],
         });
@@ -108,15 +134,48 @@ describe('TransferService', () => {
             testTransferData.createdBy,
         );
 
-        destRepo = module.get<EntityRepository<Destination>>(
+        destRepo = module.get<DriverEntityRepository<Destination>>(
             getRepositoryToken(Destination),
         );
-        transferRepo = module.get<EntityRepository<Transfer>>(
+        transferRepo = module.get<DriverEntityRepository<Transfer>>(
             getRepositoryToken(Transfer),
         );
         em = module.get<EntityManager>(EntityManager);
 
         filterService = module.get<FilterService>(FilterService);
+
+        inventory = plainToClass(Inventory, {
+            id: 5,
+            sku: 'SKU123123',
+            name: 'Female Shirt',
+            description:
+                'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+            quantity: 10,
+            expiryDate: DateTime.now().plus({ year: 1 }).toISO(),
+            batchCode: 'BATCH123',
+            weight: 10,
+        });
+
+        inventory2 = plainToClass(Inventory, {
+            id: 15,
+            sku: '2SKU123123',
+            name: 'Male Shirt',
+            description:
+                '2 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+            quantity: 100,
+            expiryDate: DateTime.now().plus({ year: 2 }).toISO(),
+            batchCode: '2BATCH123',
+            weight: 100,
+        });
+
+        transferItem = new TransferItem();
+        transferItem.description = 'transferItem description';
+        transferItem.inventory = inventory;
+
+        warehouse = new Warehouse();
+        warehouse.id = 1;
+        warehouse.name = 'warehouse name';
+        warehouse.description = 'warehouse description';
     });
 
     describe('create', () => {
@@ -168,7 +227,7 @@ describe('TransferService', () => {
             });
         });
 
-        it('should throw error when to and from destinations are same', () => {
+        it('should throw error when to and from destinations are same', async () => {
             const createDto = new CreateTransferDto(
                 testTransferDto.name,
                 testTransferDto.description,
@@ -184,7 +243,7 @@ describe('TransferService', () => {
             );
         });
 
-        it('should throw error when from destination is null', () => {
+        it('should throw error when from destination is null', async () => {
             const createDto = new CreateTransferDto(
                 testTransferDto.name,
                 testTransferDto.description,
@@ -192,27 +251,32 @@ describe('TransferService', () => {
                 zaisan.id,
                 testTransferDto.description,
             );
+
+            jest.spyOn(destRepo, 'findOne').mockImplementationOnce((): any => {
+                return Promise.resolve();
+            });
 
             const exception = expect(service.create(createDto)).rejects;
             exception.toThrow(InvalidArgumentException);
             exception.toThrowError('Invalid from destination');
         });
 
-        it('should throw error when to destination is null', async () => {
+        it('should throw error when from destination is null', async () => {
             const createDto = new CreateTransferDto(
                 testTransferDto.name,
                 testTransferDto.description,
-                zaisan.id,
                 null,
+                zaisan.id,
                 testTransferDto.description,
             );
 
-            jest.spyOn(destRepo, 'findOne').mockImplementationOnce(
-                (options: any): any => {
-                    expect(options.id).toBe(zaisan.id);
+            jest.spyOn(destRepo, 'findOne')
+                .mockImplementationOnce((): any => {
                     return Promise.resolve(zaisan);
-                },
-            );
+                })
+                .mockImplementationOnce((): any => {
+                    return Promise.resolve();
+                });
 
             const exception = expect(service.create(createDto)).rejects;
             exception.toThrow(InvalidArgumentException);
@@ -259,7 +323,6 @@ describe('TransferService', () => {
             });
             expect(await service.findOne(1)).toBe(transfer);
         });
-
         it('should find an transfer', async () => {
             jest.spyOn(transferRepo, 'findOne').mockImplementation((): any => {
                 return Promise.resolve(undefined);
@@ -282,11 +345,9 @@ describe('TransferService', () => {
             transfer.updatedAt = new Date();
             transfer.from = tolgoit;
             transfer.to = zaisan;
-
             jest.spyOn(transferRepo, 'findOne').mockImplementation((): any => {
                 return Promise.resolve(transfer);
             });
-
             jest.spyOn(destRepo, 'findOne')
                 .mockImplementationOnce((): any => {
                     return Promise.resolve(guchinhoyr);
@@ -294,14 +355,11 @@ describe('TransferService', () => {
                 .mockImplementationOnce((): any => {
                     return Promise.resolve(zaisan);
                 });
-
             const updatedResult = new Transfer(
                 testTransferDto.name,
                 testTransferDto.description,
             );
-
             testTransfer.status = TransferStatus.DELIVERED;
-
             updatedResult.id = 1;
             updatedResult.name = testTransfer.name;
             updatedResult.description = testTransfer.description;
@@ -309,7 +367,6 @@ describe('TransferService', () => {
             updatedResult.status = testTransfer.status;
             updatedResult.updatedAt = new Date();
             updatedResult.createdAt = new Date();
-
             expect(
                 await service.update(transfer.id, {
                     name: transfer.name,
@@ -328,10 +385,9 @@ describe('TransferService', () => {
                 updatedAt: expect.any(Date),
                 createdAt: expect.any(Date),
                 transferItems: expect.anything(),
-                status: testTransfer.status,
+                status: TransferStatus.NEW,
             });
         });
-
         it('should throw error when the given toDestination is the same as the from destination', async () => {
             const transfer = new Transfer();
             transfer.id = 1;
@@ -342,11 +398,9 @@ describe('TransferService', () => {
             transfer.updatedAt = new Date();
             transfer.from = zaisan;
             transfer.to = tolgoit;
-
             jest.spyOn(transferRepo, 'findOne').mockImplementation((): any => {
                 return Promise.resolve(transfer);
             });
-
             const exceptionExpect = await expect(
                 service.update(transfer.id, {
                     name: transfer.name,
@@ -355,13 +409,11 @@ describe('TransferService', () => {
                     toDestinationId: zaisan.id,
                 }),
             ).rejects;
-
             exceptionExpect.toThrow(InvalidArgumentException);
             exceptionExpect.toThrowError(
                 'From and to destinations cannot be the same',
             );
         });
-
         it('should throw error when the given toDestination is not found', async () => {
             const transfer = new Transfer();
             transfer.id = 1;
@@ -372,18 +424,15 @@ describe('TransferService', () => {
             transfer.updatedAt = new Date();
             transfer.from = zaisan;
             transfer.to = tolgoit;
-
             jest.spyOn(transferRepo, 'findOne').mockImplementation((): any => {
                 return Promise.resolve(transfer);
             });
-
             jest.spyOn(destRepo, 'findOne').mockImplementationOnce(
                 (options: any): any => {
                     expect(options.id).toBe(123);
                     return Promise.resolve(null);
                 },
             );
-
             const exceptionExpect = await expect(
                 service.update(transfer.id, {
                     name: transfer.name,
@@ -392,11 +441,9 @@ describe('TransferService', () => {
                     toDestinationId: 123,
                 }),
             ).rejects;
-
             exceptionExpect.toThrow(InvalidArgumentException);
             exceptionExpect.toThrowError('Invalid to destination');
         });
-
         it('should throw error when the given toDestination is not found', async () => {
             const transfer = new Transfer();
             transfer.id = 1;
@@ -407,18 +454,15 @@ describe('TransferService', () => {
             transfer.updatedAt = new Date();
             transfer.from = zaisan;
             transfer.to = tolgoit;
-
             jest.spyOn(transferRepo, 'findOne').mockImplementation((): any => {
                 return Promise.resolve(transfer);
             });
-
             jest.spyOn(destRepo, 'findOne').mockImplementationOnce(
                 (options: any): any => {
                     expect(options.id).toBe(123);
                     return Promise.resolve(null);
                 },
             );
-
             const exceptionExpect = await expect(
                 service.update(transfer.id, {
                     name: transfer.name,
@@ -427,11 +471,9 @@ describe('TransferService', () => {
                     toDestinationId: 123,
                 }),
             ).rejects;
-
             exceptionExpect.toThrow(InvalidArgumentException);
             exceptionExpect.toThrowError('Invalid to destination');
         });
-
         it('should throw error when the given fromDestination is same as the to destination', async () => {
             const transfer = new Transfer();
             transfer.id = 1;
@@ -442,18 +484,15 @@ describe('TransferService', () => {
             transfer.updatedAt = new Date();
             transfer.from = zaisan;
             transfer.to = tolgoit;
-
             jest.spyOn(transferRepo, 'findOne').mockImplementation((): any => {
                 return Promise.resolve(transfer);
             });
-
             jest.spyOn(destRepo, 'findOne').mockImplementationOnce(
                 (options: any): any => {
                     expect(options.id).toBe(tolgoit.id);
                     return Promise.resolve(tolgoit);
                 },
             );
-
             const exceptionExpect = await expect(
                 service.update(transfer.id, {
                     name: transfer.name,
@@ -462,13 +501,11 @@ describe('TransferService', () => {
                     fromDestinationId: tolgoit.id,
                 }),
             ).rejects;
-
             exceptionExpect.toThrow(InvalidArgumentException);
             exceptionExpect.toThrowError(
                 'From and to destinations cannot be the same',
             );
         });
-
         it('should throw error when the given fromDestination is not found', async () => {
             const transfer = new Transfer();
             transfer.id = 1;
@@ -479,18 +516,15 @@ describe('TransferService', () => {
             transfer.updatedAt = new Date();
             transfer.from = zaisan;
             transfer.to = tolgoit;
-
             jest.spyOn(transferRepo, 'findOne').mockImplementation((): any => {
                 return Promise.resolve(transfer);
             });
-
             jest.spyOn(destRepo, 'findOne').mockImplementationOnce(
                 (options: any): any => {
                     expect(options.id).toBe(123);
                     return Promise.resolve(null);
                 },
             );
-
             const exceptionExpect = await expect(
                 service.update(transfer.id, {
                     name: transfer.name,
@@ -499,7 +533,6 @@ describe('TransferService', () => {
                     fromDestinationId: 123,
                 }),
             ).rejects;
-
             exceptionExpect.toThrow(InvalidArgumentException);
             exceptionExpect.toThrowError('Invalid from destination');
         });
@@ -593,6 +626,7 @@ describe('TransferService', () => {
             transfer.from = zaisan;
             transfer.to = tolgoit;
             transfer.status = TransferStatus.NEW;
+            transfer.transferItems.add(transferItem);
 
             jest.spyOn(transferRepo, 'findOne').mockImplementation(
                 (id): any => {
@@ -707,6 +741,7 @@ describe('TransferService', () => {
             transfer.from = zaisan;
             transfer.to = tolgoit;
             transfer.status = TransferStatus.NEW;
+            transfer.transferItems.add(transferItem);
 
             jest.spyOn(transferRepo, 'findOne').mockImplementation(
                 (id): any => {
@@ -937,6 +972,11 @@ describe('TransferService', () => {
         });
 
         it('should change state of a transfer to returned', async () => {
+            const destination = new Destination();
+            destination.name = 'test name';
+            destination.description = 'test description';
+            destination.warehouse = warehouse;
+
             const transfer = new Transfer();
             transfer.id = 1;
             transfer.name = testTransfer.name;
@@ -947,6 +987,11 @@ describe('TransferService', () => {
             transfer.from = zaisan;
             transfer.to = tolgoit;
             transfer.status = TransferStatus.RETURNING;
+            transfer.transferItems.add(transferItem);
+
+            jest.spyOn(em, 'find').mockImplementation(() => {
+                return Promise.resolve(transfer.transferItems.getItems());
+            });
 
             jest.spyOn(transferRepo, 'findOne').mockImplementation(
                 (id): any => {
@@ -1027,6 +1072,13 @@ describe('TransferService', () => {
             transfer.from = zaisan;
             transfer.to = tolgoit;
             transfer.status = TransferStatus.RECEIVING;
+
+            transferItem.transferedStatus = TransferItemStatus.ORDERED;
+            transfer.transferItems.add(transferItem);
+
+            jest.spyOn(em, 'find').mockImplementation((): any => {
+                return Promise.resolve([transferItem]);
+            });
 
             jest.spyOn(transferRepo, 'findOne').mockImplementation(
                 (id): any => {

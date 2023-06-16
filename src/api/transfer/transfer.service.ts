@@ -12,7 +12,6 @@ import { Destination } from '../../database/entities/destination.entity';
 import { TenantItem } from '../../database/entities/tenant-item.entity';
 import { TransferItem } from '../../database/entities/transfer-item.entity';
 import { Transfer } from '../../database/entities/transfer.entity';
-import { Warehouse } from '../../database/entities/warehouse.entity';
 import { TransferItemService } from '../transfer-item/transfer-item.service';
 import { CreateTransferDto } from './dto/create-transfer.dto';
 import { ReceiveTransferItemDto } from './dto/receive-transfer-item.dto';
@@ -26,9 +25,6 @@ export class TransferService {
 
         @InjectRepository(Destination)
         private destRepository: EntityRepository<Destination>,
-
-        @InjectRepository(Warehouse)
-        private warehouseRepository: EntityRepository<Warehouse>,
 
         @Inject(forwardRef(() => TransferItemService))
         private transferItemService: TransferItemService,
@@ -57,6 +53,10 @@ export class TransferService {
         const fromDestination = await this.destRepository.findOne({
             id: createTransferDto.fromDestinationId,
         });
+
+        if (!fromDestination) {
+            throw new InvalidArgumentException('Invalid from destination');
+        }
 
         transfer.from = fromDestination;
 

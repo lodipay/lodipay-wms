@@ -1,9 +1,18 @@
 import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { faker } from '@mikro-orm/seeder';
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
+import {
+    getEntityManagerMockConfig,
+    getRepositoryMockConfig,
+} from '../../common/mock';
+import { getTestingModule } from '../../common/mock/testing.module.mock';
+import { FilterService } from '../../common/module/filter/filter.service';
 import { Destination } from '../../database/entities/destination.entity';
+import { Inventory } from '../../database/entities/inventory.entity';
 import { Warehouse } from '../../database/entities/warehouse.entity';
+import { InventoryService } from '../inventory/inventory.service';
+import { WarehouseService } from '../warehouse/warehouse.service';
 import { DestinationService } from './destination.service';
 import { CreateDestinationDto } from './dto/create-destination.dto';
 
@@ -17,40 +26,23 @@ describe('DestinationService', () => {
     let createDto: CreateDestinationDto;
 
     beforeEach(async () => {
-        const module: TestingModule = await Test.createTestingModule({
+        const module: TestingModule = await getTestingModule({
             providers: [
+                getEntityManagerMockConfig(),
                 DestinationService,
-                {
-                    provide: EntityManager,
-                    useFactory: jest.fn(() => ({
-                        flush: jest.fn(),
-                        persistAndFlush: jest.fn(),
-                        removeAndFlush: jest.fn(),
-                        assign: jest.fn(),
-                    })),
-                },
-                {
-                    provide: getRepositoryToken(Destination),
-                    useFactory: jest.fn(() => ({
-                        findAll: jest.fn(),
-                        findOne: jest.fn(),
-                    })),
-                },
-                {
-                    provide: getRepositoryToken(Warehouse),
-                    useFactory: jest.fn(() => ({
-                        findAll: jest.fn(),
-                        findOne: jest.fn(),
-                    })),
-                },
+                FilterService,
+                InventoryService,
+                WarehouseService,
+                getRepositoryMockConfig(Destination),
+                getRepositoryMockConfig(Inventory),
+                getRepositoryMockConfig(Warehouse),
             ],
-        }).compile();
+        });
 
-        createDto = new CreateDestinationDto(
-            faker.address.street(),
-            faker.address.streetAddress(),
-            1,
-        );
+        createDto = new CreateDestinationDto();
+        createDto.name = faker.address.street();
+        createDto.description = faker.address.streetAddress();
+        createDto.warehouseId = 1;
 
         service = module.get<DestinationService>(DestinationService);
         em = module.get<EntityManager>(EntityManager);
@@ -64,7 +56,7 @@ describe('DestinationService', () => {
             faker.company.name(),
             faker.company.catchPhrase(),
         );
-        warehouse.id = createDto.warehouseId;
+        warehouse.id = 1;
     });
 
     it('should create destination without warehouse', async () => {
@@ -101,16 +93,17 @@ describe('DestinationService', () => {
             (obj: Destination) => {
                 result.id = obj.id = 1;
                 warehouse.id = 1;
-                result.warehouse = warehouse;
-                result.createdAt = new Date();
-
                 return Promise.resolve();
             },
         );
 
-        expect(await service.create(createDto)).toEqual({
+        result.warehouse = warehouse;
+        result.createdAt = new Date();
+
+        expect(await service.create(createDto)).toMatchObject({
             ...result,
             createdAt: expect.any(Date),
+            warehouse: warehouse,
         });
     });
 
@@ -285,6 +278,7 @@ describe('DestinationService', () => {
                 description: createDto.description,
                 createdAt: expect.any(Date),
                 updatedAt: expect.any(Date),
+                warehouse: warehouse,
             });
         });
     });

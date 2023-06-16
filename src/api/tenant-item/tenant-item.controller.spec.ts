@@ -1,4 +1,4 @@
-import { Collection, QueryOrder } from '@mikro-orm/core';
+import { QueryOrder } from '@mikro-orm/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { plainToClass } from 'class-transformer';
 import { PaginatedDto } from '../../common/dto/paginated.dto';
@@ -10,15 +10,17 @@ import { FilterService } from '../../common/module/filter/filter.service';
 import { Inventory } from '../../database/entities/inventory.entity';
 import { TenantItem } from '../../database/entities/tenant-item.entity';
 import { Tenant } from '../../database/entities/tenant.entity';
+import { Warehouse } from '../../database/entities/warehouse.entity';
 import { InventoryService } from '../inventory/inventory.service';
 import { TenantService } from '../tenant/tenant.service';
+import { WarehouseService } from '../warehouse/warehouse.service';
 import { CreateTenantItemDto } from './dto/create-tenant-item.dto';
 import { TenantItemController } from './tenant-item.controller';
 import { TenantItemService } from './tenant-item.service';
 
 describe('TenantItemController', () => {
     let controller: TenantItemController;
-    let tenantItemService: TenantService;
+    let tenantItemService: TenantItemService;
     const yesterday = new Date(Date.now() - 1000 * 60 * 60 * 24);
     const tomorrow = new Date(Date.now() + 1000 * 60 * 60 * 24);
 
@@ -30,9 +32,12 @@ describe('TenantItemController', () => {
                 FilterService,
                 TenantService,
                 InventoryService,
+                TenantItemService,
+                WarehouseService,
                 getRepositoryMockConfig(TenantItem),
                 getRepositoryMockConfig(Tenant),
                 getRepositoryMockConfig(Inventory),
+                getRepositoryMockConfig(Warehouse),
                 getEntityManagerMockConfig(),
             ],
         }).compile();
@@ -44,11 +49,11 @@ describe('TenantItemController', () => {
     it('create', async () => {
         const data = {
             description: 'E-commerce',
-            activeFrom: new Date(Date.now() - 1000 * 60 * 60 * 24),
-            activeTo: new Date(Date.now()),
             tenantId: 1,
             inventoryId: 1,
             inventoryQuantity: 50,
+            warehouseId: 1,
+            quantity: 50,
         };
         const tenant = new Tenant();
         tenant.name = 'E-commerce';
@@ -65,8 +70,7 @@ describe('TenantItemController', () => {
             (dto: CreateTenantItemDto) => {
                 const tenantItem = new TenantItem();
                 tenantItem.description = dto.description;
-                tenantItem.activeFrom = dto.activeFrom;
-                tenantItem.activeTo = dto.activeTo;
+                tenantItem.quantity = dto.quantity;
                 tenantItem.tenant = tenant;
                 tenantItem.id = 1;
                 tenantItem.createdAt = new Date();
@@ -77,17 +81,17 @@ describe('TenantItemController', () => {
 
         delete data.tenantId;
         const result = await controller.create(data);
-        expect(result).toBeInstanceOf(Tenant);
+        expect(result).toBeInstanceOf(TenantItem);
 
         delete data.inventoryId;
         delete data.inventoryQuantity;
+        delete data.warehouseId;
 
         expect(result).toMatchObject({
             id: 1,
             ...data,
             createdAt: expect.any(Date),
             tenant: expect.any(Tenant),
-            inventories: expect.any(Collection),
         });
     });
 
@@ -137,10 +141,8 @@ describe('TenantItemController', () => {
     });
 
     it('findOne', async () => {
-        const result = plainToClass(Tenant, {
+        const result = plainToClass(TenantItem, {
             description: 'E-commerce',
-            activeFrom: yesterday,
-            activeTo: tomorrow,
         });
         jest.spyOn(tenantItemService, 'findOne').mockImplementation(
             (id: number) => {
@@ -160,13 +162,13 @@ describe('TenantItemController', () => {
         const result = demoTenant;
         result.id = 1;
 
-        jest.spyOn(tenantItemService, 'update').mockImplementation(() => {
+        jest.spyOn(tenantItemService, 'update').mockImplementation((): any => {
             return Promise.resolve(result);
         });
         expect(
             await controller.update(
                 '1',
-                plainToClass(Tenant, {
+                plainToClass(TenantItem, {
                     description: 'E-commerce',
                 }),
             ),

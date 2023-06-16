@@ -1,6 +1,5 @@
-import { FilterService } from '@/common/module/filter/filter.service';
 import { QueryOrder } from '@mikro-orm/core';
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { plainToClass } from 'class-transformer';
 import { DateTime } from 'luxon';
 import { PaginatedDto } from '../../common/dto/paginated.dto';
@@ -8,6 +7,8 @@ import {
     getEntityManagerMockConfig,
     getRepositoryMockConfig,
 } from '../../common/mock';
+import { getTestingModule } from '../../common/mock/testing.module.mock';
+import { FilterService } from '../../common/module/filter/filter.service';
 import { Inventory } from '../../database/entities/inventory.entity';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';
@@ -19,15 +20,15 @@ describe('InventoryController', () => {
     let service: InventoryService;
 
     beforeEach(async () => {
-        const module: TestingModule = await Test.createTestingModule({
-            controllers: [InventoryController],
+        const module: TestingModule = await getTestingModule({
             providers: [
                 InventoryService,
                 FilterService,
                 getRepositoryMockConfig(Inventory),
                 getEntityManagerMockConfig(),
             ],
-        }).compile();
+            controllers: [InventoryController],
+        });
 
         controller = module.get<InventoryController>(InventoryController);
         service = module.get<InventoryService>(InventoryService);

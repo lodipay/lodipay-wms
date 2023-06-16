@@ -18,8 +18,8 @@ export class CreateTransferDto {
     toDestinationId: number;
 
     constructor(
-        name: string,
-        description: string,
+        name?: string,
+        description?: string,
         fromDestinationId?: number,
         toDestinationId?: number,
         createdBy?: string,
