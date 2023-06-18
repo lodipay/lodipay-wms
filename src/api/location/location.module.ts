@@ -9,5 +9,6 @@ import { LocationService } from './location.service';
     imports: [MikroOrmModule.forFeature([Location, Warehouse])],
     controllers: [LocationController],
     providers: [LocationService],
+    exports: [LocationService],
 })
 export class LocationModule {}

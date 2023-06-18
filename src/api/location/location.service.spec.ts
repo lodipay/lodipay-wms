@@ -66,7 +66,7 @@ describe('LocationService', () => {
             ),
         ];
 
-        jest.spyOn(repository, 'findAll').mockImplementation(() => {
+        jest.spyOn(repository, 'findAll').mockImplementation((): any => {
             return Promise.resolve(result);
         });
 
@@ -81,21 +81,23 @@ describe('LocationService', () => {
         );
         result.id = 1;
 
-        jest.spyOn(repository, 'findOne').mockImplementation((options: any) => {
-            expect(options.id).toBe(result.id);
-            return Promise.resolve(result);
-        });
+        jest.spyOn(repository, 'findOne').mockImplementation(
+            (options: any): any => {
+                expect(options.id).toBe(result.id);
+                return Promise.resolve(result);
+            },
+        );
 
         expect(await service.findOne(1)).toStrictEqual(result);
     });
 
     it('should update location', async () => {
-        const result: Location = {
-            id: 1,
-            code: 'location-1-code',
-            warehouse: new Warehouse('WH1', 'WH1 description'),
-            description: 'location-1 description',
-        };
+        const result = new Location();
+        result.id = 1;
+        result.code = 'location-1-code';
+        result.warehouse = new Warehouse('WH1', 'WH1 description');
+        result.description = 'location-1 description';
+
         jest.spyOn(service, 'findOne').mockImplementation(() => {
             const locationData = new Location(
                 result.code,
@@ -138,10 +140,12 @@ describe('LocationService', () => {
         );
         result.id = 1;
 
-        jest.spyOn(repository, 'findOne').mockImplementation((options: any) => {
-            expect(options.id).toBe(result.id);
-            return Promise.resolve(result);
-        });
+        jest.spyOn(repository, 'findOne').mockImplementation(
+            (options: any): any => {
+                expect(options.id).toBe(result.id);
+                return Promise.resolve(result);
+            },
+        );
 
         expect(await service.remove(1)).toStrictEqual('deleted');
     });

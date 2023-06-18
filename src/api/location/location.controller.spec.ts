@@ -1,4 +1,4 @@
-import { EntityManager } from '@mikro-orm/core';
+import { Collection, EntityManager } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Location } from '../../database/entities/location.entity';
@@ -60,11 +60,12 @@ describe('LocationController', () => {
 
         const result = await controller.create(locationData);
         expect(result).toBeInstanceOf(Location);
-        expect(result).toEqual({
+        expect(result).toMatchObject({
             id: 1,
             code: locationData.code,
             description: locationData.description,
             warehouse: warehouse,
+            inventoryLocations: expect.any(Collection),
         });
     });
 

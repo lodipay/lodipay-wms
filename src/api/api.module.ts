@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { DestinationModule } from './destination/destination.module';
+import { InventoryLocationModule } from './inventory-location/inventory-location.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { LocationModule } from './location/location.module';
 import { TenantItemModule } from './tenant-item/tenant-item.module';
@@ -18,6 +19,7 @@ import { WarehouseModule } from './warehouse/warehouse.module';
         TransferItemModule,
         TenantModule,
         TenantItemModule,
+        InventoryLocationModule,
     ],
 })
 export class ApiModule {}
