@@ -1,22 +1,31 @@
 import type { EntityManager } from '@mikro-orm/core';
 import { faker, Seeder } from '@mikro-orm/seeder';
-import { Destination } from '../entities/destination.entity';
+import { TransferStatus } from '../../common/enum/transfer-status.enum';
+import { Inventory } from '../entities/inventory.entity';
+import { TenantItem } from '../entities/tenant-item.entity';
+import { Tenant } from '../entities/tenant.entity';
+import { TransferItem } from '../entities/transfer-item.entity';
+import { Transfer } from '../entities/transfer.entity';
 import { Warehouse } from '../entities/warehouse.entity';
-import { BundleHolderFactory } from './factory/bundle-holder.entity.factory';
-import { BundleFactory } from './factory/bundle.entity.factory';
 import { DestinationFactory } from './factory/destination.entity.factory';
 import { InventoryFactory } from './factory/inventory.entity.factory';
-import { OrderFactory } from './factory/order.entity.factory';
+import { TenantItemFactory } from './factory/tenant-item.entity.factory';
+import { TenantFactory } from './factory/tenant.entity.factory';
+import { TransferFactory } from './factory/transfer.entity.factory';
 
 export class DatabaseSeeder extends Seeder {
     warehouses: Map<string, Warehouse> = new Map();
+    inventories: Inventory[];
+    transfers: Transfer[];
+    loadQuantity = 100;
+
     async run(em: EntityManager): Promise<void> {
         this.loadWarehouses(em);
         this.loadDestination(em);
         this.loadExtraDestinations(em);
-        await this.loadOrders(em);
-        this.loadInventories(em);
-        this.loadBundlesHolders(em);
+        await this.loadInventories(em);
+        await this.loadTenants(em);
+        await this.loadTransfersWithItems(em);
     }
 
     private loadWarehouses(em: EntityManager) {
@@ -44,61 +53,110 @@ export class DatabaseSeeder extends Seeder {
         new DestinationFactory(em).make(2);
     }
 
-    private async loadOrders(em: EntityManager) {
-        const destinations = await em.find(Destination, {});
+    private async loadInventories(em: EntityManager) {
+        this.inventories = new InventoryFactory(em).make(this.loadQuantity);
+    }
 
-        new OrderFactory(em)
-            .each(order => {
-                const toDestinationIndex = faker.datatype.number({
+    private async loadTransfersWithItems(em: EntityManager) {
+        const transferStatusKeys = Object.keys(TransferStatus);
+        const tenantItems = await em.find(TenantItem, {});
+        const tenants = await em.find(Tenant, {});
+        this.transfers = new TransferFactory(em)
+            .each(async transfer => {
+                transfer.name = faker.commerce.productName();
+                transfer.status =
+                    TransferStatus[
+                        transferStatusKeys[
+                            faker.datatype.number({
+                                min: 0,
+                                max: transferStatusKeys.length - 1,
+                            })
+                        ]
+                    ];
+
+                const [num1, num2] = this.generateNotEqualTwoNumbers(
+                    1,
+                    this.warehouses.size,
+                );
+
+                transfer.from = this.warehouses.get(`${num1}`);
+                transfer.to = this.warehouses.get(`${num2}`);
+
+                const tenantItemsOfFromWarehouse = tenantItems.filter(
+                    tenantItem => tenantItem.warehouse.id === transfer.from.id,
+                );
+
+                const minNumber = faker.datatype.number({
                     min: 0,
-                    max: destinations.length - 1,
+                    max: tenantItemsOfFromWarehouse.length - 2,
                 });
-                let fromDestinationIndex = faker.datatype.number({
-                    min: 0,
-                    max: destinations.length - 1,
+                const maxNumber = faker.datatype.number({
+                    min: minNumber,
+                    max: tenantItemsOfFromWarehouse.length - 1,
                 });
-                while (toDestinationIndex === fromDestinationIndex) {
-                    fromDestinationIndex = faker.datatype.number({
-                        min: 0,
-                        max: destinations.length - 1,
+                const randomTenantItems = tenantItemsOfFromWarehouse.slice(
+                    minNumber,
+                    maxNumber,
+                );
+
+                randomTenantItems.map(tenantItem => {
+                    const transferItem = new TransferItem();
+                    transferItem.description = faker.commerce.product();
+                    transferItem.inventory = tenantItem.inventory;
+                    transferItem.quantity = faker.datatype.number({
+                        min: 1,
+                        max: tenantItem.quantity,
                     });
-                }
-                order.from = destinations[toDestinationIndex];
-                order.to = destinations[fromDestinationIndex];
+                    transferItem.fromTenant = tenantItem.tenant;
+                    transferItem.toTenant =
+                        tenants[
+                            faker.datatype.number({
+                                min: 0,
+                                max: tenants.length - 1,
+                            })
+                        ];
+                    transfer.transferItems.add(transferItem);
+                });
             })
-            .make(100);
+            .make(this.loadQuantity);
     }
 
-    private loadInventories(em: EntityManager) {
-        new InventoryFactory(em).make(100);
-    }
+    // private loadTransferItems(em: EntityManager) {
+    //     let transferIndex = 0;
+    //     new TransferItemFactory(em)
+    //         .each(transferItem => {
+    //             transferItem.transfer = this.transfers[transferIndex];
+    //             transferItem.description = faker.commerce.product();
+    //             transferItem.quantity = faker.datatype.number();
+    //             transferIndex++;
+    //         })
+    //         .make(this.loadQuantity);
+    // }
 
-    private loadBundlesHolders(em: EntityManager) {
-        new BundleHolderFactory(em)
+    private loadTenants(em: EntityManager) {
+        new TenantFactory(em)
             .each(owner => {
                 owner.name = faker.company.name();
 
-                owner.bundles.add(
-                    new BundleFactory(em)
-                        .each(bundle => {
-                            bundle.bundleQuantity = faker.datatype.number({
-                                min: 10,
+                owner.tenantItems.add(
+                    new TenantItemFactory(em)
+                        .each(tenantItem => {
+                            tenantItem.quantity = faker.datatype.number({
+                                min: 100,
                                 max: 1000,
                             });
-                            bundle.description = faker.commerce.product();
-                            bundle.inventories.add(
-                                new InventoryFactory(em).make(
-                                    faker.datatype.number({
-                                        min: 0,
-                                        max: 10,
-                                    }),
-                                ),
+                            tenantItem.description = faker.commerce.product();
+                            tenantItem.inventory = new InventoryFactory(
+                                em,
+                            ).makeOne();
+                            tenantItem.warehouse = this.warehouses.get(
+                                `${faker.datatype.number({ min: 1, max: 4 })}`,
                             );
                         })
                         .make(
                             faker.datatype.number({
                                 min: 0,
-                                max: 10,
+                                max: 100,
                             }),
                         ),
                 );
@@ -106,7 +164,12 @@ export class DatabaseSeeder extends Seeder {
             .make(10);
     }
 
-    private generateRandomBetween(max: number, min = 1) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
+    generateNotEqualTwoNumbers(min = 0, max = 3) {
+        const number1 = faker.datatype.number({ min, max });
+        let number2 = faker.datatype.number({ min, max });
+        while (number1 === number2) {
+            number2 = faker.datatype.number({ min, max });
+        }
+        return [number1, number2];
     }
 }

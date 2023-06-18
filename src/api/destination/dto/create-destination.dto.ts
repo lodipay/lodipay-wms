@@ -4,8 +4,6 @@ import { Destination } from '../../../database/entities/destination.entity';
 
 export class CreateDestinationDto extends OmitType(Destination, [
     'id',
-    'from',
-    'to',
     'warehouse',
     'createdAt',
     'updatedAt',
@@ -14,7 +12,7 @@ export class CreateDestinationDto extends OmitType(Destination, [
     @IsNumber()
     warehouseId?: number;
 
-    constructor(name: string, description: string, warehouseId: number) {
+    constructor(name?: string, description?: string, warehouseId?: number) {
         super();
         this.name = name;
         this.description = description;

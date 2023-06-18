@@ -1,7 +1,12 @@
-import { EntityManager, EntityRepository } from '@mikro-orm/core';
+import { EntityRepository } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { faker } from '@mikro-orm/seeder';
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
+import {
+    getEntityManagerMockConfig,
+    getRepositoryMockConfig,
+} from '../../common/mock';
+import { getTestingModule } from '../../common/mock/testing.module.mock';
 import { Destination } from '../../database/entities/destination.entity';
 import { Warehouse } from '../../database/entities/warehouse.entity';
 import { DestinationController } from './destination.controller';
@@ -17,31 +22,15 @@ describe('DestinationController', () => {
     let whRepo: EntityRepository<Warehouse>;
 
     beforeEach(async () => {
-        const module: TestingModule = await Test.createTestingModule({
-            controllers: [DestinationController],
+        const module: TestingModule = await getTestingModule({
             providers: [
+                getEntityManagerMockConfig(),
                 DestinationService,
-                {
-                    provide: EntityManager,
-                    useFactory: jest.fn(() => ({
-                        flush: jest.fn(),
-                    })),
-                },
-                {
-                    provide: getRepositoryToken(Destination),
-                    useFactory: jest.fn(() => ({
-                        findAll: jest.fn(),
-                        findOne: jest.fn(),
-                    })),
-                },
-                {
-                    provide: getRepositoryToken(Warehouse),
-                    useFactory: jest.fn(() => ({
-                        findOne: jest.fn(),
-                    })),
-                },
+                getRepositoryMockConfig(Warehouse),
+                getRepositoryMockConfig(Destination),
             ],
-        }).compile();
+            controllers: [DestinationController],
+        });
 
         controller = module.get<DestinationController>(DestinationController);
         service = module.get<DestinationService>(DestinationService);

@@ -7,6 +7,7 @@ import MainConfig from '../config/main.config';
 import { ApiModule } from './api/api.module';
 import { ResponseTransformInterceptor } from './common/interceptor/response-transform.interceptor';
 import { FilterModule } from './common/module/filter/filter.module';
+import { StateMachineModule } from './common/module/state-machine/state-machine.module';
 
 @Module({
     imports: [
@@ -22,6 +23,7 @@ import { FilterModule } from './common/module/filter/filter.module';
         }),
         ApiModule,
         FilterModule,
+        StateMachineModule,
     ],
     controllers: [],
     providers: [

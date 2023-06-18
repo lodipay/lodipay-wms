@@ -1,12 +1,11 @@
-import { Entity, Filter, OneToMany, OneToOne, Property } from '@mikro-orm/core';
-import { Order } from './order.entity';
+import { Entity, Filter, OneToOne, Property } from '@mikro-orm/core';
 import { ParentEntity } from './parent.entity';
 import { Warehouse } from './warehouse.entity';
 
 @Entity()
 @Filter({ name: 'mainFilter', cond: args => args })
 export class Destination extends ParentEntity {
-    constructor(name: string, description?: string) {
+    constructor(name?: string, description?: string) {
         super();
         this.name = name;
         this.description = description;
@@ -22,10 +21,4 @@ export class Destination extends ParentEntity {
         owner: true,
     })
     warehouse?: Warehouse;
-
-    @OneToMany(() => Order, order => order.from)
-    from?: Order;
-
-    @OneToMany(() => Order, order => order.to)
-    to?: Order;
 }

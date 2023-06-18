@@ -9,7 +9,7 @@ import {
 import { Destination } from './destination.entity';
 import { Location } from './location.entity';
 import { ParentEntity } from './parent.entity';
-import { WarehouseInventory } from './warehouse-inventory.entity';
+import { TenantItem } from './tenant-item.entity';
 
 @Entity()
 export class Warehouse extends ParentEntity {
@@ -33,20 +33,16 @@ export class Warehouse extends ParentEntity {
     @OneToMany({
         entity: () => Location,
         mappedBy: 'warehouse',
-        orphanRemoval: true,
     })
     locations = new Collection<Location>(this);
 
     @OneToOne(() => Destination, destination => destination.warehouse)
     destination?: Destination;
 
-    @OneToMany({
-        entity: () => WarehouseInventory,
-        mappedBy: 'warehouse',
-    })
-    inventories = new Collection<WarehouseInventory>(this);
+    @OneToMany(() => TenantItem, 'warehouse')
+    tenantItem = new Collection<TenantItem>(this);
 
-    constructor(name: string, description: string) {
+    constructor(name?: string, description?: string) {
         super();
         this.name = name;
         this.description = description;

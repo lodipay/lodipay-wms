@@ -20,8 +20,8 @@ RUN git config --global --add safe.directory '*'
 COPY . .
 RUN cp .env.example .env
 
-# Install dependencies from package-lock.json, see https://docs.npmjs.com/cli/v7/commands/npm-ci
 RUN npm ci
+RUN npm install -g @nestjs/cli
 
 CMD [ "npm", "run", "start:dev" ]
 

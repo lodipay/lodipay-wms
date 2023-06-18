@@ -1,13 +1,11 @@
-import { Collection, QueryOrder } from '@mikro-orm/core';
+import { Collection } from '@mikro-orm/core';
 import { Test, TestingModule } from '@nestjs/testing';
-import { PaginatedDto } from '../../common/dto/paginated.dto';
 import {
     getEntityManagerMockConfig,
     getRepositoryMockConfig,
 } from '../../common/mock';
 import { FilterService } from '../../common/module/filter/filter.service';
 import { Inventory } from '../../database/entities/inventory.entity';
-import { WarehouseInventory } from '../../database/entities/warehouse-inventory.entity';
 import { Warehouse } from '../../database/entities/warehouse.entity';
 import { InventoryService } from '../inventory/inventory.service';
 import { CreateWarehouseDto } from './dto/create-warehouse.dto';
@@ -21,8 +19,6 @@ describe('WarehouseController', () => {
     let warehouse: Warehouse;
     let inventory: Inventory;
     let inventory2: Inventory;
-    let warehouseInventory1: WarehouseInventory;
-    let warehouseInventory2: WarehouseInventory;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -33,7 +29,6 @@ describe('WarehouseController', () => {
                 FilterService,
                 getEntityManagerMockConfig(),
                 getRepositoryMockConfig(Warehouse),
-                getRepositoryMockConfig(WarehouseInventory),
                 getRepositoryMockConfig(Inventory),
             ],
         }).compile();
@@ -57,16 +52,6 @@ describe('WarehouseController', () => {
         inventory2.name = 'Inventory 2';
         inventory2.quantity = 1000;
         inventory2.sku = 'SKU 2';
-
-        warehouseInventory1 = new WarehouseInventory();
-        warehouseInventory1.inventory = inventory;
-        warehouseInventory1.quantity = 200;
-        warehouseInventory1.warehouse = warehouse;
-
-        warehouseInventory2 = new WarehouseInventory();
-        warehouseInventory2.inventory = inventory;
-        warehouseInventory2.quantity = 300;
-        warehouseInventory2.warehouse = warehouse;
     });
 
     it('should create a new warehouse', async () => {
@@ -112,6 +97,8 @@ describe('WarehouseController', () => {
                 return Promise.resolve(result);
             },
         );
+
+        expect(await controller.findOne('1')).toEqual(result);
     });
 
     it('should update warehouse', async () => {
@@ -137,97 +124,5 @@ describe('WarehouseController', () => {
             return Promise.resolve(result);
         });
         expect(await controller.remove('1')).toBe(result);
-    });
-
-    it('should assign new warehouse inventory', async () => {
-        jest.spyOn(warehouseService, 'assignInventory').mockImplementation(
-            () => {
-                warehouseInventory1.id = 1;
-                warehouseInventory1.createdAt = new Date();
-                return Promise.resolve(warehouseInventory1);
-            },
-        );
-
-        const result = await controller.assignInventory('1', {
-            inventoryId: inventory.id,
-            quantity: warehouseInventory1.quantity,
-        });
-
-        expect(result).toBeInstanceOf(WarehouseInventory);
-        expect(result).toStrictEqual(warehouseInventory1);
-    });
-
-    it('should get warehouse inventories list', async () => {
-        const query = {
-            page: 2,
-            limit: 10,
-            query: {
-                filter: {
-                    inventory: {
-                        name: {
-                            $ilike: '%inventory%',
-                        },
-                    },
-                },
-                order: {
-                    id: QueryOrder.ASC,
-                },
-            },
-            populate: ['inventory'],
-        };
-
-        const result = [warehouseInventory1, warehouseInventory2];
-
-        const paginatedDto = new PaginatedDto();
-        jest.spyOn(warehouseService, 'getInventories').mockImplementation(
-            filterDto => {
-                expect(filterDto).toStrictEqual(query);
-                paginatedDto.result = result;
-                paginatedDto.page = filterDto.page;
-                paginatedDto.limit = filterDto.limit;
-                paginatedDto.total = 100;
-                paginatedDto.totalPage = 10;
-
-                return Promise.resolve(paginatedDto);
-            },
-        );
-
-        expect(await controller.getInventories(query)).toStrictEqual(
-            paginatedDto,
-        );
-    });
-
-    it('should edit warehouse inventory', async () => {
-        const updateQuantity = 2000;
-        jest.spyOn(warehouseService, 'updateInventory').mockImplementation(
-            () => {
-                warehouseInventory1.quantity = updateQuantity;
-                return Promise.resolve(warehouseInventory1);
-            },
-        );
-
-        expect(
-            await warehouseService.updateInventory(warehouse.id, inventory.id, {
-                quantity: updateQuantity,
-            }),
-        ).toEqual({
-            ...warehouseInventory1,
-            quantity: updateQuantity,
-        });
-    });
-
-    it('should remove warehouse inventory', async () => {
-        jest.spyOn(warehouseService, 'removeInventory').mockImplementation(
-            () => {
-                return Promise.resolve();
-            },
-        );
-
-        expect(
-            await controller.deleteInventory(
-                `${warehouse.id}`,
-                `${inventory.id}`,
-            ),
-        ).toBe(undefined);
     });
 });

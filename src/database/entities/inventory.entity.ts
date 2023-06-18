@@ -9,9 +9,8 @@ import {
     Unique,
 } from '@mikro-orm/core';
 import { ApiProperty } from '@nestjs/swagger';
-import { Bundle } from './bundle.entity';
-import { OrderItem } from './order-item.entity';
-import { WarehouseInventory } from './warehouse-inventory.entity';
+import { TenantItem } from './tenant-item.entity';
+import { TransferItem } from './transfer-item.entity';
 
 @Entity()
 @Filter({ name: 'mainFilter', cond: args => args })
@@ -105,19 +104,14 @@ export class Inventory {
     @ManyToOne({ entity: () => Inventory })
     parent?: Inventory;
 
-    @ManyToOne({ entity: () => OrderItem })
-    orderItem?: OrderItem;
-
-    @ManyToOne({
-        entity: () => Bundle,
-    })
-    bundle?: Bundle;
+    @OneToMany({ entity: () => TransferItem, mappedBy: 'inventory' })
+    transferItem = new Collection<TransferItem>(this);
 
     @OneToMany({
-        entity: () => WarehouseInventory,
+        entity: () => TenantItem,
         mappedBy: 'inventory',
     })
-    warehouses = new Collection<WarehouseInventory>(this);
+    tenantItem = new Collection<TenantItem>(this);
 
     get parentId() {
         return this.parent?.id;
