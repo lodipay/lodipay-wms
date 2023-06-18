@@ -1,7 +1,5 @@
 import { QueryOrder } from '@mikro-orm/core';
 import { TestingModule } from '@nestjs/testing';
-import { plainToClass } from 'class-transformer';
-import { DateTime } from 'luxon';
 import { PaginatedDto } from '../../common/dto/paginated.dto';
 import { InventoryLocationStatus } from '../../common/enum/inventory-location-status.enum';
 import {
@@ -49,16 +47,15 @@ describe('InventoryLocationController', () => {
             InventoryLocationService,
         );
 
-        inventory = plainToClass(Inventory, {
-            sku: 'SKU123123',
-            name: 'Female Shirt',
-            description:
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-            quantity: 10,
-            expiryDate: DateTime.now().plus({ year: 1 }).toISO(),
-            batchCode: 'BATCH123',
-            weight: 10,
-        });
+        inventory = new Inventory();
+        inventory.sku = 'SKU123123';
+        inventory.name = 'Female Shirt';
+        inventory.description =
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
+        inventory.quantity = 10;
+        inventory.expireDate = new Date();
+        inventory.batchCode = 'BATCH123';
+        inventory.weight = 10;
 
         warehouse = new Warehouse();
         warehouse.id = 1;
@@ -195,7 +192,7 @@ describe('InventoryLocationController', () => {
 
         jest.spyOn(
             inventoryLocationService,
-            'updatePositionStatus',
+            'updateToPositioned',
         ).mockImplementation(() => {
             newInventoryLocation.status = InventoryLocationStatus.POSITIONED;
             return Promise.resolve(newInventoryLocation);

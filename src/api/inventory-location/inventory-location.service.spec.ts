@@ -244,7 +244,7 @@ describe('InventoryLocationService', () => {
         });
 
         expect(
-            await inventoryLocationService.updatePositionStatus(
+            await inventoryLocationService.updateToPositioned(
                 inventoryLocation.id,
             ),
         ).toEqual(inventoryLocation);

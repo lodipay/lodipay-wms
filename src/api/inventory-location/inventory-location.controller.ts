@@ -51,7 +51,7 @@ export class InventoryLocationController {
     }
 
     @Post(':id/positioned')
-    updatePositionStatus(@Param('id') id: string) {
-        return this.inventoryLocationService.updatePositionStatus(+id);
+    updateToPositioned(@Param('id') id: string) {
+        return this.inventoryLocationService.updateToPositioned(+id);
     }
 }

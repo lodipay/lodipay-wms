@@ -85,7 +85,7 @@ export class InventoryLocationService {
         return 'deleted';
     }
 
-    async updatePositionStatus(id: number) {
+    async updateToPositioned(id: number) {
         const inventoryLocation = await this.findOne(id);
         inventoryLocation.status = InventoryLocationStatus.POSITIONED;
         await this.em.persistAndFlush(inventoryLocation);
