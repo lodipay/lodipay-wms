@@ -9,6 +9,7 @@ import { Transfer } from '../entities/transfer.entity';
 import { Warehouse } from '../entities/warehouse.entity';
 import { DestinationFactory } from './factory/destination.entity.factory';
 import { InventoryFactory } from './factory/inventory.entity.factory';
+import { LocationFactory } from './factory/location.entity.factory';
 import { TenantItemFactory } from './factory/tenant-item.entity.factory';
 import { TenantFactory } from './factory/tenant.entity.factory';
 import { TransferFactory } from './factory/transfer.entity.factory';
@@ -26,6 +27,7 @@ export class DatabaseSeeder extends Seeder {
         await this.loadInventories(em);
         await this.loadTenants(em);
         await this.loadTransfersWithItems(em);
+        this.loadLocations(em);
     }
 
     private loadWarehouses(em: EntityManager) {
@@ -119,6 +121,19 @@ export class DatabaseSeeder extends Seeder {
                 });
             })
             .make(this.loadQuantity);
+    }
+
+    private loadLocations(em: EntityManager) {
+        new LocationFactory(em)
+            .each(location => {
+                location.warehouse = this.warehouses.get(
+                    `${faker.datatype.number({
+                        min: 1,
+                        max: this.warehouses.size,
+                    })}`,
+                );
+            })
+            .make(1000);
     }
 
     // private loadTransferItems(em: EntityManager) {
