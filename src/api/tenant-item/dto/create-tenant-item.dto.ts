@@ -9,6 +9,7 @@ export class CreateTenantItemDto extends OmitType(TenantItem, [
     'warehouse',
     'inventory',
     'tenant',
+    'inventoryLocations',
 ]) {
     @IsNumber()
     tenantId: number;

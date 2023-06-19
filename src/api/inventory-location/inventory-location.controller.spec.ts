@@ -11,9 +11,14 @@ import { FilterService } from '../../common/module/filter/filter.service';
 import { InventoryLocation } from '../../database/entities/inventory-location.entity';
 import { Inventory } from '../../database/entities/inventory.entity';
 import { Location } from '../../database/entities/location.entity';
+import { TenantItem } from '../../database/entities/tenant-item.entity';
+import { Tenant } from '../../database/entities/tenant.entity';
 import { Warehouse } from '../../database/entities/warehouse.entity';
 import { InventoryService } from '../inventory/inventory.service';
 import { LocationService } from '../location/location.service';
+import { TenantItemService } from '../tenant-item/tenant-item.service';
+import { TenantService } from '../tenant/tenant.service';
+import { WarehouseService } from '../warehouse/warehouse.service';
 import { InventoryLocationController } from './inventory-location.controller';
 import { InventoryLocationService } from './inventory-location.service';
 
@@ -23,6 +28,8 @@ describe('InventoryLocationController', () => {
     let inventory: Inventory;
     let location: Location;
     let warehouse: Warehouse;
+    let tenantItem: TenantItem;
+    let tenant: Tenant;
 
     beforeEach(async () => {
         const module: TestingModule = await getTestingModule({
@@ -32,11 +39,16 @@ describe('InventoryLocationController', () => {
                 InventoryService,
                 LocationService,
                 FilterService,
+                TenantItemService,
+                TenantService,
+                WarehouseService,
                 getEntityManagerMockConfig(),
                 getRepositoryMockConfig(InventoryLocation),
                 getRepositoryMockConfig(Location),
                 getRepositoryMockConfig(Inventory),
                 getRepositoryMockConfig(Warehouse),
+                getRepositoryMockConfig(TenantItem),
+                getRepositoryMockConfig(Tenant),
             ],
         });
 
@@ -46,6 +58,12 @@ describe('InventoryLocationController', () => {
         inventoryLocationService = module.get<InventoryLocationService>(
             InventoryLocationService,
         );
+
+        tenant = new Tenant();
+        tenant.id = 1;
+        tenant.name = 'Tenant 1';
+        tenant.description = 'Tenant 1 desc';
+        tenant.createdAt = new Date();
 
         inventory = new Inventory();
         inventory.sku = 'SKU123123';
@@ -67,17 +85,24 @@ describe('InventoryLocationController', () => {
         location.warehouse = warehouse;
         location.code = 'LOC123';
         location.description = 'Location 1 desc';
+
+        tenantItem = new TenantItem();
+        tenantItem.tenant = tenant;
+        tenantItem.quantity = 100;
+        tenantItem.inventory = inventory;
+        tenantItem.quantity = 200;
+        tenantItem.warehouse = warehouse;
     });
 
     it('should create new inventory location', async () => {
         const createDto = {
-            inventoryId: 1,
+            tenantItemId: 1,
             locationId: 1,
             quantity: 10,
         };
 
         const newInventoryLocation = new InventoryLocation();
-        newInventoryLocation.inventory = inventory;
+        newInventoryLocation.tenantItem = tenantItem;
         newInventoryLocation.location = location;
         newInventoryLocation.createdAt = new Date();
 
@@ -112,13 +137,13 @@ describe('InventoryLocationController', () => {
 
         const newInventoryLocation = new InventoryLocation();
         newInventoryLocation.id = 1;
-        newInventoryLocation.inventory = inventory;
+        newInventoryLocation.tenantItem = tenantItem;
         newInventoryLocation.location = location;
         newInventoryLocation.createdAt = new Date();
 
         const newInventoryLocation2 = new InventoryLocation();
         newInventoryLocation.id = 2;
-        newInventoryLocation.inventory = inventory;
+        newInventoryLocation.tenantItem = tenantItem;
         newInventoryLocation.location = location;
         newInventoryLocation.createdAt = new Date();
 
@@ -142,7 +167,7 @@ describe('InventoryLocationController', () => {
     it('should find inventory location by id', async () => {
         const newInventoryLocation = new InventoryLocation();
         newInventoryLocation.id = 1;
-        newInventoryLocation.inventory = inventory;
+        newInventoryLocation.tenantItem = tenantItem;
         newInventoryLocation.location = location;
         newInventoryLocation.createdAt = new Date();
 
@@ -160,7 +185,7 @@ describe('InventoryLocationController', () => {
     it('should remove inventory location by id', async () => {
         const newInventoryLocation = new InventoryLocation();
         newInventoryLocation.id = 1;
-        newInventoryLocation.inventory = inventory;
+        newInventoryLocation.tenantItem = tenantItem;
         newInventoryLocation.location = location;
         newInventoryLocation.createdAt = new Date();
 
@@ -180,7 +205,7 @@ describe('InventoryLocationController', () => {
 
         const newInventoryLocation = new InventoryLocation();
         newInventoryLocation.id = 1;
-        newInventoryLocation.inventory = inventory;
+        newInventoryLocation.tenantItem = tenantItem;
         newInventoryLocation.location = location;
         newInventoryLocation.createdAt = new Date();
 

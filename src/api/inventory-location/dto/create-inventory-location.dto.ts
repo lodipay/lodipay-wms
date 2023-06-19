@@ -5,11 +5,11 @@ export class CreateInventoryLocationDto extends OmitType(InventoryLocation, [
     'id',
     'createdAt',
     'updatedAt',
-    'inventory',
+    'tenantItem',
     'location',
     'status',
 ] as const) {
-    inventoryId: number;
+    tenantItemId: number;
     locationId: number;
     quantity: number;
 }

@@ -1,8 +1,8 @@
 import { Entity, ManyToOne, Property } from '@mikro-orm/core';
 import { InventoryLocationStatus } from '../../common/enum/inventory-location-status.enum';
-import { Inventory } from './inventory.entity';
 import { Location } from './location.entity';
 import { ParentEntity } from './parent.entity';
+import { TenantItem } from './tenant-item.entity';
 
 @Entity()
 export class InventoryLocation extends ParentEntity {
@@ -18,7 +18,7 @@ export class InventoryLocation extends ParentEntity {
     location: Location;
 
     @ManyToOne({
-        entity: () => Inventory,
+        entity: () => TenantItem,
     })
-    inventory: Inventory;
+    tenantItem: TenantItem;
 }

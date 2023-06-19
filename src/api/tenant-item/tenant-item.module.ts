@@ -16,5 +16,6 @@ import { TenantItemService } from './tenant-item.service';
     ],
     controllers: [TenantItemController],
     providers: [TenantItemService],
+    exports: [TenantItemService],
 })
 export class TenantItemModule {}

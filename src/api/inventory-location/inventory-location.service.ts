@@ -6,8 +6,8 @@ import { InventoryLocationStatus } from '../../common/enum/inventory-location-st
 import { InvalidArgumentException } from '../../common/exception/invalid.argument.exception';
 import { FilterService } from '../../common/module/filter/filter.service';
 import { InventoryLocation } from '../../database/entities/inventory-location.entity';
-import { InventoryService } from '../inventory/inventory.service';
 import { LocationService } from '../location/location.service';
+import { TenantItemService } from '../tenant-item/tenant-item.service';
 import { CreateInventoryLocationDto } from './dto/create-inventory-location.dto';
 import { UpdateInventoryLocationDto } from './dto/update-inventory-location.dto';
 
@@ -20,16 +20,16 @@ export class InventoryLocationService {
         private readonly em: EntityManager,
         private readonly filterService: FilterService,
 
-        @Inject(InventoryService)
-        private readonly inventoryService: InventoryService,
+        @Inject(TenantItemService)
+        private readonly tenantItemService: TenantItemService,
 
         @Inject(LocationService)
         private readonly locationService: LocationService,
     ) {}
 
     async create(createInventoryLocationDto: CreateInventoryLocationDto) {
-        const inventory = await this.inventoryService.findOne(
-            createInventoryLocationDto.inventoryId,
+        const tenantItem = await this.tenantItemService.findOne(
+            createInventoryLocationDto.tenantItemId,
         );
 
         const location = await this.locationService.findOne(
@@ -37,7 +37,7 @@ export class InventoryLocationService {
         );
 
         const inventoryLocation = new InventoryLocation();
-        inventoryLocation.inventory = inventory;
+        inventoryLocation.tenantItem = tenantItem;
         inventoryLocation.location = location;
         inventoryLocation.quantity = createInventoryLocationDto.quantity;
 

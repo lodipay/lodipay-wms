@@ -9,7 +9,6 @@ import {
     Unique,
 } from '@mikro-orm/core';
 import { ApiProperty } from '@nestjs/swagger';
-import { InventoryLocation } from './inventory-location.entity';
 import { TenantItem } from './tenant-item.entity';
 import { TransferItem } from './transfer-item.entity';
 
@@ -113,12 +112,6 @@ export class Inventory {
         mappedBy: 'inventory',
     })
     tenantItem = new Collection<TenantItem>(this);
-
-    @OneToMany({
-        entity: () => InventoryLocation,
-        mappedBy: 'inventory',
-    })
-    inventoryLocation = new Collection<InventoryLocation>(this);
 
     get parentId() {
         return this.parent?.id;
