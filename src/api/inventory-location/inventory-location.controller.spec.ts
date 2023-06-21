@@ -182,25 +182,10 @@ describe('InventoryLocationController', () => {
         );
     });
 
-    it('should remove inventory location by id', async () => {
-        const newInventoryLocation = new InventoryLocation();
-        newInventoryLocation.id = 1;
-        newInventoryLocation.tenantItem = tenantItem;
-        newInventoryLocation.location = location;
-        newInventoryLocation.createdAt = new Date();
-
-        jest.spyOn(inventoryLocationService, 'remove').mockImplementation(
-            () => {
-                return Promise.resolve('deleted');
-            },
-        );
-
-        expect(await controller.remove(`1`)).toBe('deleted');
-    });
-
     it('should update inventory status by id', async () => {
         const updateDto = {
             quantity: 10,
+            newInventoryLocationId: 2,
         };
 
         const newInventoryLocation = new InventoryLocation();
@@ -223,7 +208,33 @@ describe('InventoryLocationController', () => {
             return Promise.resolve(newInventoryLocation);
         });
 
-        expect(await controller.update(`1`, updateDto)).toStrictEqual(
+        expect(await controller.transferLocation(`1`, updateDto)).toStrictEqual(
+            newInventoryLocation,
+        );
+    });
+
+    it('should inventory location position to positioned', async () => {
+        const newInventoryLocation = new InventoryLocation();
+        newInventoryLocation.id = 1;
+        newInventoryLocation.tenantItem = tenantItem;
+        newInventoryLocation.location = location;
+        newInventoryLocation.createdAt = new Date();
+
+        jest.spyOn(inventoryLocationService, 'findOne').mockImplementation(
+            () => {
+                return Promise.resolve(newInventoryLocation);
+            },
+        );
+
+        jest.spyOn(
+            inventoryLocationService,
+            'updateToPositioned',
+        ).mockImplementation(() => {
+            newInventoryLocation.status = InventoryLocationStatus.POSITIONED;
+            return Promise.resolve(newInventoryLocation);
+        });
+
+        expect(await controller.updateToPositioned(`1`)).toStrictEqual(
             newInventoryLocation,
         );
     });

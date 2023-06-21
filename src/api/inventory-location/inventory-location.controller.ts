@@ -1,7 +1,6 @@
 import {
     Body,
     Controller,
-    Delete,
     Get,
     Param,
     Patch,
@@ -35,19 +34,14 @@ export class InventoryLocationController {
     }
 
     @Patch(':id')
-    update(
+    transferLocation(
         @Param('id') id: string,
         @Body() updateInventoryLocationDto: UpdateInventoryLocationDto,
     ) {
-        return this.inventoryLocationService.update(
+        return this.inventoryLocationService.transferLocation(
             +id,
             updateInventoryLocationDto,
         );
-    }
-
-    @Delete(':id')
-    remove(@Param('id') id: string) {
-        return this.inventoryLocationService.remove(+id);
     }
 
     @Post(':id/positioned')

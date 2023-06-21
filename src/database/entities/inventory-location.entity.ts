@@ -7,7 +7,7 @@ import { TenantItem } from './tenant-item.entity';
 @Entity()
 export class InventoryLocation extends ParentEntity {
     @Property()
-    quantity: number;
+    quantity = 0;
 
     @Property()
     status?: InventoryLocationStatus;

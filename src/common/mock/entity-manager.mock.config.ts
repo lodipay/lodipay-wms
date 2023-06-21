@@ -1,9 +1,9 @@
-import { EntityManager } from '@mikro-orm/core';
+import { EntityManager as CoreEntityManager } from '@mikro-orm/core';
 import { EntityManager as DriverEntityManager } from '@mikro-orm/postgresql';
 
 export function getEntityManagerMockConfig() {
     return {
-        provide: EntityManager,
+        provide: CoreEntityManager,
         useFactory: jest.fn(() => ({
             flush: jest.fn(),
             persistAndFlush: jest.fn(),

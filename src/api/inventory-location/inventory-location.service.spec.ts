@@ -6,6 +6,7 @@ import { plainToClass } from 'class-transformer';
 import { DateTime } from 'luxon';
 import { PaginatedDto } from '../../common/dto/paginated.dto';
 import { InventoryLocationStatus } from '../../common/enum/inventory-location-status.enum';
+import { InvalidArgumentException } from '../../common/exception/invalid.argument.exception';
 import {
     getEntityManagerMockConfig,
     getRepositoryMockConfig,
@@ -102,7 +103,6 @@ describe('InventoryLocationService', () => {
         tenantItem = new TenantItem();
         tenantItem.id = 1;
         tenantItem.tenant = tenant;
-        tenantItem.quantity = 100;
         tenantItem.inventory = inventory;
         tenantItem.quantity = 200;
         tenantItem.warehouse = warehouse;
@@ -110,44 +110,142 @@ describe('InventoryLocationService', () => {
         inventoryLocation = new InventoryLocation();
         inventoryLocation.id = 1;
         inventoryLocation.location = location;
-        inventoryLocation.quantity = 1000;
+        inventoryLocation.quantity = 10;
         inventoryLocation.status = InventoryLocationStatus.POSITIONED;
         inventoryLocation.tenantItem = tenantItem;
         inventoryLocation.createdAt = new Date();
     });
 
-    it('should be create new inventory location', async () => {
-        jest.spyOn(locationService, 'findOne').mockImplementation(() => {
-            return Promise.resolve(location);
-        });
+    describe('create', () => {
+        it('should create new inventory location', async () => {
+            jest.spyOn(locationService, 'findOne').mockImplementation(
+                (): Promise<Location> => {
+                    return Promise.resolve(location);
+                },
+            );
 
-        jest.spyOn(tenantItemService, 'findOne').mockImplementation((): any => {
-            return Promise.resolve(inventory);
-        });
+            jest.spyOn(tenantItemService, 'findOne').mockImplementation(
+                (): Promise<TenantItem> => {
+                    return Promise.resolve(tenantItem);
+                },
+            );
 
-        const createDto = {
-            tenantItemId: tenantItem.id,
-            locationId: location.id,
-            quantity: 10,
-        };
+            jest.spyOn(inventoryLocationRepository, 'find').mockImplementation(
+                (): any => {
+                    return Promise.resolve([]);
+                },
+            );
 
-        const inventoryLocation = new InventoryLocation();
+            const createDto = {
+                tenantItemId: tenantItem.id,
+                locationId: location.id,
+                quantity: 10,
+            };
 
-        jest.spyOn(em, 'persistAndFlush').mockImplementation(() => {
+            const inventoryLocation = new InventoryLocation();
+
             inventoryLocation.quantity = createDto.quantity;
             inventoryLocation.location = location;
             inventoryLocation.tenantItem = tenantItem;
-            inventoryLocation.createdAt = new Date();
+            jest.spyOn(em, 'persistAndFlush').mockImplementation(() => {
+                inventoryLocation.createdAt = new Date();
 
-            return Promise.resolve();
+                return Promise.resolve();
+            });
+
+            const result = await inventoryLocationService.create(createDto);
+            expect(result).toBeInstanceOf(InventoryLocation);
+            expect(result).toMatchObject({
+                location: location,
+                quantity: createDto.quantity,
+                createdAt: expect.any(Date),
+            });
         });
 
-        const result = await inventoryLocationService.create(createDto);
-        expect(result).toBeInstanceOf(InventoryLocation);
-        expect(result).toMatchObject({
-            location: location,
-            quantity: createDto.quantity,
-            createdAt: expect.any(Date),
+        it('should update inventory location quantity', async () => {
+            jest.spyOn(tenantItemService, 'findOne').mockImplementation(
+                (): any => {
+                    return Promise.resolve(tenantItem);
+                },
+            );
+
+            jest.spyOn(locationService, 'findOne').mockImplementation(() => {
+                return Promise.resolve(location);
+            });
+
+            jest.spyOn(inventoryLocationRepository, 'find').mockImplementation(
+                (): any => {
+                    return Promise.resolve([inventoryLocation]);
+                },
+            );
+
+            const createDto = {
+                tenantItemId: tenantItem.id,
+                locationId: location.id,
+                quantity: 10,
+            };
+
+            const inventoryLocation = new InventoryLocation();
+
+            inventoryLocation.quantity = 10;
+            inventoryLocation.location = location;
+            inventoryLocation.tenantItem = tenantItem;
+
+            jest.spyOn(em, 'persistAndFlush').mockImplementation(() => {
+                inventoryLocation.id = 1;
+                inventoryLocation.createdAt = new Date();
+                return Promise.resolve();
+            });
+
+            const result = await inventoryLocationService.create(createDto);
+            expect(result).toBeInstanceOf(InventoryLocation);
+            expect(result).toMatchObject({
+                location: location,
+                quantity: 20,
+                createdAt: expect.any(Date),
+            });
+        });
+
+        it('should throw error if quantity exceeds the tenant item quantity', async () => {
+            jest.spyOn(tenantItemService, 'findOne').mockImplementation(
+                (): any => {
+                    return Promise.resolve(tenantItem);
+                },
+            );
+
+            jest.spyOn(locationService, 'findOne').mockImplementation(() => {
+                return Promise.resolve(location);
+            });
+
+            jest.spyOn(inventoryLocationRepository, 'find').mockImplementation(
+                (): any => {
+                    return Promise.resolve([inventoryLocation]);
+                },
+            );
+
+            const createDto = {
+                tenantItemId: tenantItem.id,
+                locationId: location.id,
+                quantity: 10,
+            };
+
+            const inventoryLocation = new InventoryLocation();
+
+            inventoryLocation.quantity = 10000;
+            inventoryLocation.location = location;
+            inventoryLocation.tenantItem = tenantItem;
+
+            jest.spyOn(em, 'persistAndFlush').mockImplementation(() => {
+                inventoryLocation.id = 1;
+                inventoryLocation.createdAt = new Date();
+                return Promise.resolve();
+            });
+
+            const exception = expect(
+                inventoryLocationService.create(createDto),
+            ).rejects;
+            exception.toThrow(InvalidArgumentException);
+            exception.toThrowError('quantity exceeds the tenant item quantity');
         });
     });
 
@@ -232,6 +330,7 @@ describe('InventoryLocationService', () => {
 
         const updateDto = {
             quantity: 10,
+            newInventoryLocationId: 2,
         };
 
         jest.spyOn(em, 'persistAndFlush').mockImplementation(() => {
@@ -241,30 +340,11 @@ describe('InventoryLocationService', () => {
         });
 
         expect(
-            await inventoryLocationService.update(
+            await inventoryLocationService.transferLocation(
                 inventoryLocation.id,
                 updateDto,
             ),
         ).toEqual(inventoryLocation);
-    });
-
-    it('should delete inventory location', async () => {
-        const inventoryLocation = new InventoryLocation();
-        inventoryLocation.id = 1;
-        inventoryLocation.tenantItem = tenantItem;
-        inventoryLocation.location = location;
-
-        jest.spyOn(inventoryLocationRepository, 'findOne').mockResolvedValue(
-            inventoryLocation,
-        );
-
-        jest.spyOn(em, 'removeAndFlush').mockImplementation(() => {
-            return Promise.resolve();
-        });
-
-        expect(
-            await inventoryLocationService.remove(inventoryLocation.id),
-        ).toEqual('deleted');
     });
 
     it('should update inventory location status', async () => {

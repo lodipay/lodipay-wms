@@ -36,10 +36,39 @@ export class InventoryLocationService {
             createInventoryLocationDto.locationId,
         );
 
-        const inventoryLocation = new InventoryLocation();
-        inventoryLocation.tenantItem = tenantItem;
-        inventoryLocation.location = location;
-        inventoryLocation.quantity = createInventoryLocationDto.quantity;
+        const inventoryByTenant = await this.inventoryLocationRepository.find({
+            tenantItem: tenantItem,
+        });
+
+        if (inventoryByTenant.length > 0) {
+            const locatedTenantItemQuantity = inventoryByTenant.reduce(
+                (acc, curr) => {
+                    acc += curr.quantity;
+                    return acc;
+                },
+                0,
+            );
+            const newLocatedTenantItemQuantity =
+                locatedTenantItemQuantity + createInventoryLocationDto.quantity;
+
+            if (newLocatedTenantItemQuantity > tenantItem.quantity) {
+                throw new InvalidArgumentException(
+                    'quantity exceeds the tenant item quantity',
+                );
+            }
+        }
+
+        let inventoryLocation = inventoryByTenant.find(inventory => {
+            return inventory.location === location;
+        });
+
+        if (!inventoryLocation) {
+            inventoryLocation = new InventoryLocation();
+            inventoryLocation.tenantItem = tenantItem;
+            inventoryLocation.location = location;
+        }
+
+        inventoryLocation.quantity += createInventoryLocationDto.quantity;
 
         await this.em.persistAndFlush(inventoryLocation);
 
@@ -56,33 +85,44 @@ export class InventoryLocationService {
     async findOne(id: number) {
         const inventoryLocation =
             await this.inventoryLocationRepository.findOne({ id });
+
         if (!inventoryLocation) {
             throw new InvalidArgumentException('invalid inventory location id');
         }
+
         return inventoryLocation;
     }
 
-    async update(
+    async transferLocation(
         id: number,
         updateInventoryLocationDto: UpdateInventoryLocationDto,
     ) {
         const inventoryLocation = await this.findOne(id);
 
-        if (updateInventoryLocationDto.locationId) {
-            inventoryLocation.location = await this.locationService.findOne(
-                updateInventoryLocationDto.locationId,
+        let moveToIventoryLocation =
+            await this.inventoryLocationRepository.findOne({
+                location: updateInventoryLocationDto.newInventoryLocationId,
+            });
+
+        if (!moveToIventoryLocation) {
+            moveToIventoryLocation = new InventoryLocation();
+            const location = await this.locationService.findOne(
+                updateInventoryLocationDto.newInventoryLocationId,
             );
+            moveToIventoryLocation.location = location;
+
+            moveToIventoryLocation.tenantItem = inventoryLocation.tenantItem;
         }
-        inventoryLocation.quantity = updateInventoryLocationDto.quantity;
-        await this.em.persistAndFlush(inventoryLocation);
+
+        moveToIventoryLocation.quantity += updateInventoryLocationDto.quantity;
+
+        inventoryLocation.quantity -= updateInventoryLocationDto.quantity;
+
+        await this.em.persistAndFlush([
+            moveToIventoryLocation,
+            inventoryLocation,
+        ]);
         return inventoryLocation;
-    }
-
-    async remove(id: number) {
-        const inventoryLocation = await this.findOne(id);
-        await this.em.removeAndFlush(inventoryLocation);
-
-        return 'deleted';
     }
 
     async updateToPositioned(id: number) {
