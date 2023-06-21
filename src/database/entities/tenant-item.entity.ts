@@ -1,10 +1,13 @@
 import {
+    Collection,
     Entity,
     Filter,
     ManyToOne,
+    OneToMany,
     PrimaryKey,
     Property,
 } from '@mikro-orm/core';
+import { InventoryLocation } from './inventory-location.entity';
 import { Inventory } from './inventory.entity';
 import { ParentEntity } from './parent.entity';
 import { Tenant } from './tenant.entity';
@@ -35,4 +38,10 @@ export class TenantItem extends ParentEntity {
         entity: () => Inventory,
     })
     inventory: Inventory;
+
+    @OneToMany({
+        entity: () => InventoryLocation,
+        mappedBy: 'tenantItem',
+    })
+    inventoryLocations = new Collection<InventoryLocation>(this);
 }

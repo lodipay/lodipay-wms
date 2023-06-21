@@ -103,7 +103,6 @@ describe('InventoryService', () => {
             expireDate: expect.any(Date),
             tenantItem: expect.any(Collection),
             transferItem: expect.any(Collection),
-            inventoryLocation: expect.any(Collection),
         });
     });
 

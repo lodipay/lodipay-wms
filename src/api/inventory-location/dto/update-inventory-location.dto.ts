@@ -1,4 +1,4 @@
 export class UpdateInventoryLocationDto {
-    locationId?: number;
-    quantity?: number;
+    newInventoryLocationId: number;
+    quantity: number;
 }

@@ -9,6 +9,7 @@ export function getRepositoryMockConfig<T>(
             findAll: jest.fn(),
             findOne: jest.fn(),
             upsert: jest.fn(),
+            find: jest.fn(),
         })),
     };
 }
