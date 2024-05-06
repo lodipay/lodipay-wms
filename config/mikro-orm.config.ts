@@ -3,6 +3,7 @@ import { TSMigrationGenerator } from '@mikro-orm/migrations';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import * as dotenv from 'dotenv';
 import { CustomNamingStrategy } from './naming.strategy';
+import { EntityGenerator } from '@mikro-orm/entity-generator';
 
 dotenv.config();
 
@@ -41,6 +42,11 @@ const mikroOrmConfig: Options = {
         fileName: (className: string) => className, // seeder file naming convention
     },
     namingStrategy: CustomNamingStrategy,
+    extensions: [EntityGenerator],
+    entityGenerator: {
+        bidirectionalRelations: true,
+        identifiedReferences: true,
+    }
 };
 
 export default mikroOrmConfig;
