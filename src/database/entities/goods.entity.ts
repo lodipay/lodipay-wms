@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
+import { Entity, ManyToOne, Property } from '@mikro-orm/core';
 import { GoodsBrand } from './goods-brand.entity';
 import { GoodsClass } from './goods-class.entity';
 import { GoodsColor } from './goods-color.entity';
@@ -6,12 +6,10 @@ import { GoodsOrigin } from './goods-origin.entity';
 import { GoodsShape } from './goods-shape.entity';
 import { GoodsSpecs } from './goods-specs.entity';
 import { GoodsUnit } from './goods-unit.entity';
+import { ParentEntity } from './parent.entity';
 
 @Entity()
-export class Goods {
-    @PrimaryKey()
-    id!: number;
-
+export class Goods extends ParentEntity {
     @Property({ length: 255 })
     goodsCode!: string;
 
@@ -67,20 +65,8 @@ export class Goods {
     goodsPrice!: string;
 
     @Property({ length: 255 })
-    creater!: string;
-
-    @Property({ length: 255 })
     barCode!: string;
 
     @Property({ length: 255 })
     openid!: string;
-
-    @Property()
-    isDelete!: boolean;
-
-    @Property({ length: 6 })
-    createTime!: Date;
-
-    @Property({ length: 6, nullable: true })
-    updateTime?: Date;
 }

@@ -11,7 +11,4 @@ export class GoodsColor extends ParentEntity {
 
     @Property({ length: 255 })
     openid!: string;
-
-    @Property()
-    isDelete!: boolean;
 }

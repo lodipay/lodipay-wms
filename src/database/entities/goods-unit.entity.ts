@@ -7,11 +7,5 @@ export class GoodsUnit extends ParentEntity {
     goodsUnit!: string;
 
     @Property({ length: 255 })
-    creater!: string;
-
-    @Property({ length: 255 })
     openid!: string;
-
-    @Property()
-    isDelete!: boolean;
 }

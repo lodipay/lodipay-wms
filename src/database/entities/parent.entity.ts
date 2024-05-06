@@ -10,4 +10,10 @@ export abstract class ParentEntity {
 
     @Property({ onUpdate: () => new Date(), nullable: true })
     updatedAt: Date;
+
+    @Property({ default: false })
+    isDelete = false;
+
+    @Property({ length: 255, nullable: true })
+    creater?: string;
 }
