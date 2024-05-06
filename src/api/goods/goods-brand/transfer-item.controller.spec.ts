@@ -24,7 +24,7 @@ import { TransferService } from '../transfer/transfer.service';
 import { WarehouseService } from '../warehouse/warehouse.service';
 import { CreateTransferItemDto } from './dto/create-transfer-item.dto';
 import { TransferItemController } from './transfer-item.controller';
-import { TransferItemService } from './transfer-item.service';
+import { TransferItemService } from './goods-brand.service';
 
 describe('TransferItemController', () => {
     let controller: TransferItemController;

@@ -27,7 +27,7 @@ import { TenantService } from '../tenant/tenant.service';
 import { TransferService } from '../transfer/transfer.service';
 import { WarehouseService } from '../warehouse/warehouse.service';
 import { CreateTransferItemDto } from './dto/create-transfer-item.dto';
-import { TransferItemService } from './transfer-item.service';
+import { TransferItemService } from './goods-brand.service';
 
 describe('TransferItemService', () => {
     let service: TransferItemService;
