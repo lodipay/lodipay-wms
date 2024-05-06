@@ -10,7 +10,7 @@
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
         "start": "nest start",
         "start:watch": "npm start -- --watch",
-        "start:dev": "npm run build && npm run start:watch",
+        "start:dev": "npm run build && npm run database:prepare && npm run start:watch",
         "start:debug": "nest start --debug --watch",
         "start:prod": "node dist/main",
         "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
