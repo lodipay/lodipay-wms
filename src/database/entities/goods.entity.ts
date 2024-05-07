@@ -19,20 +19,20 @@ export class Goods extends ParentEntity {
     @Property({ length: 255 })
     goodsSupplier!: string;
 
-    @Property({ columnType: 'float8' })
-    goodsWeight!: string;
+    @Property()
+    goodsWeight!: number;
 
-    @Property({ columnType: 'float8' })
-    goodsW!: string;
+    @Property()
+    goodsW!: number;
 
-    @Property({ columnType: 'float8' })
-    goodsD!: string;
+    @Property()
+    goodsD!: number;
 
-    @Property({ columnType: 'float8' })
-    goodsH!: string;
+    @Property()
+    goodsH!: number;
 
-    @Property({ columnType: 'float8' })
-    unitVolume!: string;
+    @Property({ nullable: true })
+    unitVolume?: number;
 
     @ManyToOne(() => GoodsUnit)
     goodsUnit: GoodsUnit;
@@ -49,23 +49,23 @@ export class Goods extends ParentEntity {
     @ManyToOne(() => GoodsShape)
     goodsShape: GoodsShape;
 
-    @ManyToOne(() => GoodsSpecs)
+    @ManyToOne(() => GoodsSpecs, { nullable: true })
     goodsSpecs: GoodsSpecs;
 
     @ManyToOne(() => GoodsOrigin)
-    goodsOrigin: GoodsOrigin;
+    goodsOrigin?: GoodsOrigin;
 
-    @Property({ columnType: 'int8' })
-    safetyStock!: string;
+    @Property()
+    safetyStock: number;
 
-    @Property({ columnType: 'float8' })
-    goodsCost!: string;
+    @Property({ nullable: true })
+    goodsCost?: number;
 
-    @Property({ columnType: 'float8' })
-    goodsPrice!: string;
+    @Property()
+    goodsPrice!: number;
 
-    @Property({ length: 255 })
-    barCode!: string;
+    @Property({ length: 255, nullable: true })
+    barCode?: string;
 
     @Property({ length: 255 })
     openid!: string;

@@ -1,8 +1,8 @@
 import { IsOptional, IsString } from 'class-validator';
 
-export class CreateGoodsBrandDto {
+export class CreateGoodsSpecsDto {
     @IsString()
-    goodsBrand: string;
+    goodsSpecs: string;
 
     @IsOptional()
     @IsString()

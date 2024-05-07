@@ -7,8 +7,5 @@ export class GoodsColor extends ParentEntity {
     goodsColor!: string;
 
     @Property({ length: 255 })
-    creater!: string;
-
-    @Property({ length: 255 })
     openid!: string;
 }

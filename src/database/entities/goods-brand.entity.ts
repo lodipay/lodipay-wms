@@ -1,6 +1,5 @@
 import { Entity, Property } from '@mikro-orm/core';
 import { ParentEntity } from './parent.entity';
-
 @Entity()
 export class GoodsBrand extends ParentEntity {
     @Property({ length: 255 })

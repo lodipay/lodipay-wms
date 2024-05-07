@@ -7,8 +7,5 @@ export class GoodsSpecs extends ParentEntity {
     goodsSpecs!: string;
 
     @Property({ length: 255 })
-    creater!: string;
-
-    @Property({ length: 255 })
     openid!: string;
 }
