@@ -8,6 +8,7 @@ import { TenantModule } from './tenant/tenant.module';
 import { TransferItemModule } from './transfer-item/transfer-item.module';
 import { TransferModule } from './transfer/transfer.module';
 import { WarehouseModule } from './warehouse/warehouse.module';
+import { SupplierModule } from './supplier/supplier.module';
 
 @Module({
     imports: [
@@ -20,6 +21,7 @@ import { WarehouseModule } from './warehouse/warehouse.module';
         TenantModule,
         TenantItemModule,
         InventoryLocationModule,
+        SupplierModule,
     ],
 })
 export class ApiModule {}
