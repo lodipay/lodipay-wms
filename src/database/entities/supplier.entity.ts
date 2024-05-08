@@ -1,6 +1,7 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
 import { ParentEntity } from './parent.entity';
 import { SupplierLevel } from '@/common/enum/supplier-level.enum';
+import { Asndetail } from './asndetail.entity';
 
 @Entity()
 export class Supplier extends ParentEntity {
@@ -24,14 +25,7 @@ export class Supplier extends ParentEntity {
   @Property({ nullable: true, type: 'enum'})
   supplierLevel: SupplierLevel;
 
-  // relation
-  // @Property({ length: 255 })
-  // createrId: number;
-
   @Property({ length: 64 })
   openId!: string;
-
-  @Property({ nullable: true})
-  isDelete?: boolean;
 
 }
