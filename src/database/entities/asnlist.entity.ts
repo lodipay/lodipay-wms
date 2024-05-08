@@ -9,7 +9,7 @@ export class Asnlist extends ParentEntity{
   @Property({ length: 64 })
   asnCode!: string;
 
-  @Property()
+  @Property({ default: AsnStatus.PREDELIVERY })
   asnStatus: AsnStatus;
 
   @Property({ nullable: true })
