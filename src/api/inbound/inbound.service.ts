@@ -24,26 +24,18 @@ export class InboundService {
     ) {}
 
     async createAsn(createAsnDto: CreateAsnDto) {
-        const supplierExists = await this.asnDetailRepo.findOne({
+        const asnExists = await this.asnDetailRepo.findOne({
             openId: createAsnDto.openId,
         });
 
-        if (supplierExists) {
+        if (asnExists) {
             throw new InvalidArgumentException('Asn already exists');
         }
 
-        const supplierItem = new Supplier();
-        supplierItem.supplierName = createAsnDto.supplierName;
-        supplierItem.supplierCity = createAsnDto.supplierCity;
-        supplierItem.supplierAddress = createAsnDto.supplierAddress;
-        supplierItem.isDelete = false;
-        supplierItem.supplierContact = createAsnDto.supplierContact;
-        supplierItem.supplierManager = createAsnDto.supplierManager;
-        supplierItem.supplierLevel = createAsnDto.supplierLevel;
-        supplierItem.openId = createAsnDto.openId;
+        const asnItem = new Asndetail();
         
-        await this.em.persistAndFlush(supplierItem);
-        return supplierItem;
+        await this.em.persistAndFlush(asnItem);
+        return asnItem;
     }
 
     search(filterDto: FilterDto) {
@@ -51,11 +43,11 @@ export class InboundService {
     }
 
     async findOne(id: number) {
-        const supplier = await this.supplierRepo.findOne(id);
-        if (!supplier) {
-            throw new InvalidArgumentException('Supplier not found');
+        const asn = await this.asnDetailRepo.findOne(id);
+        if (!asn) {
+            throw new InvalidArgumentException('asn not found');
         }
-        return supplier;
+        return asn;
     }
 
     async update(id: number, updateAsnDto: UpdateAsnDto) {
@@ -67,22 +59,16 @@ export class InboundService {
             );
         }
 
-        if (updateAsnDto.supplierContact !== supplier.supplierContact) {
-            throw new InvalidArgumentException(
-                'Supplier cannot be changed. Delete this supplier and create a new one',
-            );
-        }
-
         // const transfer = await this.transferService.findOne(
         //     supplier.transfer.id,
         // );
 
-        supplier.supplierName =
-            updateAsnDto.supplierName || supplier.supplierName;
-        supplier.supplierManager =
-            updateAsnDto.supplierManager || supplier.supplierManager;
-        supplier.supplierCity = updateAsnDto.supplierCity || supplier.supplierCity;
-        supplier.supplierAddress = updateAsnDto.supplierAddress || supplier.supplierAddress;
+        // supplier.supplierName =
+        //     updateAsnDto.supplierName || supplier.supplierName;
+        // supplier.supplierManager =
+        //     updateAsnDto.supplierManager || supplier.supplierManager;
+        // supplier.supplierCity = updateAsnDto.supplierCity || supplier.supplierCity;
+        // supplier.supplierAddress = updateAsnDto.supplierAddress || supplier.supplierAddress;
 
         await this.em.persistAndFlush(supplier);
         return supplier;
