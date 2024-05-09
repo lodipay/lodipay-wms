@@ -277,7 +277,7 @@ describe('InventoryLocationService', () => {
 
         const result = [inventoryLocation, inventoryLocation2];
         const paginatedDto = new PaginatedDto();
-        paginatedDto.result = result;
+        paginatedDto.data = result;
         paginatedDto.page = query.page;
         paginatedDto.limit = query.limit;
         paginatedDto.total = 100;

@@ -13,5 +13,5 @@ export class PaginatedDto {
     @ApiProperty()
     totalPage: number;
 
-    result: any;
+    data: any;
 }

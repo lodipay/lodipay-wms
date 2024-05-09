@@ -36,7 +36,7 @@ export class FilterService {
         paginatedDto.limit = +limit;
         paginatedDto.page = +page;
         paginatedDto.total = count;
-        paginatedDto.result = result;
+        paginatedDto.data = result;
         paginatedDto.totalPage = Math.ceil(count / limit);
 
         return paginatedDto;

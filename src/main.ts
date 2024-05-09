@@ -20,6 +20,7 @@ async function bootstrap() {
             logOptions ? JSON.parse(logOptions) : null,
         ),
     });
+    app.enableCors();
 
     app.useGlobalPipes(
         new ValidationPipe({
@@ -35,9 +36,9 @@ async function bootstrap() {
 
     app.enableVersioning({
         type: VersioningType.URI,
-        prefix: 'v1',
+        prefix: 'api/v1',
     });
-    app.setGlobalPrefix('v1');
+    app.setGlobalPrefix('api/v1');
 
     const config = new DocumentBuilder()
         .setTitle('Lodi WHS')
@@ -52,7 +53,6 @@ async function bootstrap() {
     SwaggerModule.setup(swaggerPath, app, document);
 
     await app.listen(process.env.WHS_PORT);
-    console.log('zaaaa ');
     console.log(
         `Lodi WHS project is running on: http://0.0.0.0:${mainConfig.port}`,
     );
