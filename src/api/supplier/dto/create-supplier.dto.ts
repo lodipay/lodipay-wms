@@ -7,6 +7,7 @@ export class CreateSupplierDto extends OmitType(Supplier, [
     'id',
     'createdAt',
     'updatedAt',
+    'isDelete'
 ]) {
     @IsString()
     supplierName: string;

@@ -1,53 +1,54 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
 import { ParentEntity } from './parent.entity';
 import { AsnStatus } from '@/common/enum/asn-status.enum';
+import { Supplier } from './supplier.entity';
 
 @Entity()
 export class Asndetail extends ParentEntity{
 
-  @Property({ length: 255 })
+  @Property({ length: 64 })
   asnCode!: string;
 
-  @Property({ columnType: 'int8' })
-  asnStatus!: AsnStatus;
+  @Property({ default: AsnStatus.PREDELIVERY })
+  asnStatus: AsnStatus;
 
-  @Property({ length: 255 })
-  supplier!: string;
+  @ManyToOne({ entity: () => Supplier })
+  supplier!: Supplier;
 
-  @Property({ length: 255 })
+  @Property({ length: 64 })
   goodsCode!: string;
 
   @Property({ length: 255 })
   goodsDesc!: string;
 
-  @Property({ columnType: 'int8' })
+  @Property({length: 8})
   goodsQty!: string;
 
-  @Property({ columnType: 'int8' })
+  @Property({length: 8})
   goodsActualQty!: string;
 
-  @Property({ columnType: 'int8' })
+  @Property({length: 8})
   sortedQty!: string;
 
-  @Property({ columnType: 'int8' })
+  @Property({length: 8})
   goodsShortageQty!: string;
 
-  @Property({ columnType: 'int8' })
+  @Property({length: 8})
   goodsMoreQty!: string;
 
-  @Property({ columnType: 'int8' })
+  @Property({length: 8})
   goodsDamageQty!: string;
 
-  @Property({ columnType: 'float8' })
+  @Property()
   goodsWeight!: string;
 
-  @Property({ columnType: 'float8' })
+  @Property()
   goodsVolume!: string;
 
-  @Property({ columnType: 'float8' })
+  @Property()
   goodsCost!: string;
 
   @Property({ length: 255 })
-  openid!: string;
+  openId!: string;
 
 }

@@ -1,5 +1,5 @@
 export enum AsnStatus {
     ACTIVE = 'active',
-    INACTIVE = 'inactive',
+    PREDELIVERY = 'predelivery',
     INREVIEW = 'inreview',
 }

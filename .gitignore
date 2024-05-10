@@ -18,3 +18,4 @@ junit.xml
 coverage
 
 /temp/
+docker-compose.override.yml

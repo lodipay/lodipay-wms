@@ -152,7 +152,7 @@ describe('InventoryLocationController', () => {
         const paginatedDto = new PaginatedDto();
         jest.spyOn(inventoryLocationService, 'search').mockImplementation(
             (): any => {
-                paginatedDto.result = result;
+                paginatedDto.data = result;
                 paginatedDto.page = query.page;
                 paginatedDto.limit = query.limit;
                 paginatedDto.total = 10;

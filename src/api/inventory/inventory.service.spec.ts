@@ -241,7 +241,7 @@ describe('InventoryService', () => {
             (_, filterDto) => {
                 expect(filterDto).toStrictEqual(query);
                 const paginatedDto = new PaginatedDto();
-                paginatedDto.result = result;
+                paginatedDto.data = result;
                 paginatedDto.page = filterDto.page;
                 paginatedDto.limit = filterDto.limit;
                 paginatedDto.total = 100;
@@ -252,7 +252,7 @@ describe('InventoryService', () => {
         );
 
         const paginatedDto = new PaginatedDto();
-        paginatedDto.result = result;
+        paginatedDto.data = result;
         paginatedDto.page = query.page;
         paginatedDto.limit = query.limit;
         paginatedDto.total = 100;
