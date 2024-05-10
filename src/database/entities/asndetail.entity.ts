@@ -2,6 +2,7 @@ import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
 import { ParentEntity } from './parent.entity';
 import { AsnStatus } from '@/common/enum/asn-status.enum';
 import { Supplier } from './supplier.entity';
+import { Asnlist } from './asnlist.entity';
 
 @Entity()
 export class Asndetail extends ParentEntity{
@@ -50,5 +51,8 @@ export class Asndetail extends ParentEntity{
 
   @Property({ length: 255 })
   openId!: string;
+
+  @ManyToOne({ entity: () => Asnlist })
+  asnList!: Asnlist;
 
 }

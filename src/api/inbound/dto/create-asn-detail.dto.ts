@@ -1,10 +1,11 @@
 import { OmitType } from '@nestjs/swagger';
 import { IsArray, IsNumber, IsString } from 'class-validator';
+import { Supplier } from '../../../database/entities/supplier.entity';
 import { Collection } from '@mikro-orm/core';
 import { Goods } from '@/database/entities/goods.entity';
-import { Asnlist } from '@/database/entities/asnlist.entity';
+import { Asndetail } from '@/database/entities/asndetail.entity';
 
-export class CreateAsnDto extends OmitType(Asnlist, [
+export class CreateAsnDetailDto extends OmitType(Asndetail, [
     'id',
     'createdAt',
     'updatedAt',

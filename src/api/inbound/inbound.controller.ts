@@ -15,6 +15,7 @@ import { Supplier } from '../../database/entities/supplier.entity';
 import { CreateAsnDto } from './dto/create-asn.dto';
 import { UpdateAsnDto } from './dto/update-asn.dto';
 import { InboundService } from './inbound.service';
+import { Asnlist } from '@/database/entities/asnlist.entity';
 
 @Controller('inbound')
 @ApiTags('Inbound')
@@ -27,7 +28,7 @@ export class inboundController {
     }
 
     @Get()
-    @ApiPaginatedResponse(Supplier)
+    @ApiPaginatedResponse(Asnlist)
     search(@Query() filterDto: FilterDto) {
         return this.inboundService.search(filterDto);
     }

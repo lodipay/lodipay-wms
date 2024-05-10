@@ -1,7 +1,8 @@
-import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
+import { Collection, Entity, ManyToOne, OneToMany, PrimaryKey, Property } from '@mikro-orm/core';
 import { ParentEntity } from './parent.entity';
 import { AsnStatus } from '@/common/enum/asn-status.enum';
 import { Supplier } from './supplier.entity';
+import { Asndetail } from './asndetail.entity';
 
 @Entity()
 export class Asnlist extends ParentEntity{
@@ -32,5 +33,8 @@ export class Asnlist extends ParentEntity{
 
   @Property({ columnType: 'jsonb' })
   transportationFee!: any;
+
+  @OneToMany({ entity: () => Asndetail, mappedBy: 'asnList' })
+  asndetail = new Collection<Asndetail>(this);
 
 }

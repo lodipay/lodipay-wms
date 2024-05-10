@@ -34,8 +34,17 @@ export class InboundService {
 
         const asnItem = new Asndetail();
         
+        asnItem.openId = createAsnDto.openId;
+        const goods = createAsnDto.goods;
+
+
+
         await this.em.persistAndFlush(asnItem);
         return asnItem;
+    }
+
+    async createAsnDetail(createAsnDto: CreateAsnDto) {
+        
     }
 
     search(filterDto: FilterDto) {
