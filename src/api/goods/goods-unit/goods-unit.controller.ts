@@ -26,7 +26,7 @@ export class GoodsUnitController {
 
     @Get()
     @ApiPaginatedResponse(GoodsUnit)
-    search(@Query() filterDto: FilterDto) {
+    findAll(@Query() filterDto: FilterDto) {
         return this.goodsUnitService.search(filterDto);
     }
 

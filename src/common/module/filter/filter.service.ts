@@ -1,4 +1,4 @@
-import { EntityManager } from '@mikro-orm/core';
+import { EntityManager, QueryOrder } from '@mikro-orm/core';
 import { Global, Injectable } from '@nestjs/common';
 import { FilterDto } from '../../dto/filter.dto';
 import { PaginatedDto } from '../../dto/paginated.dto';
@@ -23,11 +23,11 @@ export class FilterService {
 
         const [result, count] = await this.em.findAndCount(
             entityClass,
-            filterDto?.query?.filter,
+            { ...filterDto?.query?.filter, isDelete: false },
             {
                 limit,
                 offset,
-                orderBy: filterDto?.query?.order || {},
+                orderBy: filterDto?.query?.order || { id: QueryOrder.DESC },
                 populate: filterDto?.query?.populate || [],
             },
         );
