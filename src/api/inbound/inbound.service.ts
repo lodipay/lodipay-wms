@@ -1,17 +1,16 @@
 import { FilterService } from '@/common/module/filter/filter.service';
+import { Asndetail } from '@/database/entities/asn-detail.entity';
+import { Asnlist } from '@/database/entities/asn-list.entity';
+import { Goods } from '@/database/entities/goods.entity';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import {
-    EntityManager,
-    EntityRepository,
-    QueryBuilder,
-} from '@mikro-orm/postgresql';
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
+import { Injectable } from '@nestjs/common';
 import { FilterDto } from '../../common/dto/filter.dto';
 import { InvalidArgumentException } from '../../common/exception/invalid.argument.exception';
 import { Supplier } from '../../database/entities/supplier.entity';
 import { CreateAsnDto } from './dto/create-asn.dto';
-import { UpdateAsnDto } from './dto/update-asn.dto';
-import { Asndetail } from '@/database/entities/asndetail.entity';
+import { UpdateAsnDetailDto } from './dto/update-asn-detail.dto';
+import { AsnStatus } from '@/common/enum/asn-status.enum';
 
 @Injectable()
 export class InboundService {
@@ -19,6 +18,11 @@ export class InboundService {
         @InjectRepository(Asndetail)
         private asnDetailRepo: EntityRepository<Asndetail>,
 
+        @InjectRepository(Supplier)
+        private supplierRepo: EntityRepository<Supplier>,
+
+        @InjectRepository(Goods)
+        private goodsRepo: EntityRepository<Goods>,
         private em: EntityManager,
         private filterService: FilterService,
     ) {}
@@ -31,24 +35,58 @@ export class InboundService {
         if (asnExists) {
             throw new InvalidArgumentException('Asn already exists');
         }
+        const supplier = await this.supplierRepo.findOne({
+            supplierName: createAsnDto.supplierName,
+        });
+        if (!supplier) {
+            throw new InvalidArgumentException('Supplier not found');
+        }
 
-        const asnItem = new Asndetail();
-        
+        const asnItem = new Asnlist();
         asnItem.openId = createAsnDto.openId;
-        const goods = createAsnDto.goods;
-
+        asnItem.supplier = supplier;
+        asnItem.barCode = createAsnDto.barCode;
+        asnItem.asnCode = createAsnDto.asnCode;
 
 
         await this.em.persistAndFlush(asnItem);
+
+        const goods = createAsnDto.goods;
+        goods.forEach(async good => {
+            const goodItem = await this.goodsRepo.findOne({
+                goodsCode: good.goodsCode,
+            });
+            if (!goodItem) {
+                throw new InvalidArgumentException('goods not found');
+            }
+            const asnItemDetail = new Asndetail();
+            asnItemDetail.goodsCode = goodItem.goodsCode;
+            asnItemDetail.goodsDesc = goodItem.goodsDesc;
+            asnItemDetail.goodsActualQty = good.goodsQty;
+            asnItemDetail.goodsQty = good.goodsQty;
+            asnItemDetail.sortedQty = good.goodsQty;
+            asnItemDetail.goodsShortageQty = good.goodsQty;
+            asnItemDetail.goodsMoreQty = good.goodsQty;
+            asnItemDetail.goodsDamageQty = good.goodsQty;
+
+            asnItemDetail.goodsWeight = goodItem.goodsWeight;
+            asnItemDetail.goodsVolume = goodItem.goodsW;
+            asnItemDetail.goodsCost = goodItem.goodsCost;
+
+            asnItemDetail.openId = createAsnDto.openId;
+            asnItemDetail.asnCode = createAsnDto.asnCode;
+            asnItemDetail.asnStatus = createAsnDto.asnStatus;
+            asnItemDetail.asnList = asnItem;
+            asnItemDetail.supplier = supplier;
+
+            await this.em.persistAndFlush(asnItemDetail);
+        });
+
         return asnItem;
     }
 
-    async createAsnDetail(createAsnDto: CreateAsnDto) {
-        
-    }
-
     search(filterDto: FilterDto) {
-        return this.filterService.search<Supplier>(Supplier, filterDto);
+        return this.filterService.search<Asndetail>(Asndetail, filterDto);
     }
 
     async findOne(id: number) {
@@ -58,31 +96,40 @@ export class InboundService {
         }
         return asn;
     }
+    async updateAsnDetail(id: number, updateAsnDetailDto: UpdateAsnDetailDto) {
+        const asnDetail = await this.findOne(id);
 
-    async update(id: number, updateAsnDto: UpdateAsnDto) {
-        const supplier = await this.findOne(id);
-
-        if (updateAsnDto.openId !== supplier.openId) {
-            throw new InvalidArgumentException(
-                'Supplier cannot be changed. Delete this supplier and create a new one',
-            );
-        }
-
-        // const transfer = await this.transferService.findOne(
-        //     supplier.transfer.id,
-        // );
-
-        // supplier.supplierName =
-        //     updateAsnDto.supplierName || supplier.supplierName;
-        // supplier.supplierManager =
-        //     updateAsnDto.supplierManager || supplier.supplierManager;
-        // supplier.supplierCity = updateAsnDto.supplierCity || supplier.supplierCity;
-        // supplier.supplierAddress = updateAsnDto.supplierAddress || supplier.supplierAddress;
-
-        await this.em.persistAndFlush(supplier);
-        return supplier;
+        const qb = this.em.createQueryBuilder(Asndetail, 'ad');
+        await qb.update({
+            goodsActualQty: updateAsnDetailDto.goodsActualQty
+                ? qb.raw(
+                      `ad.c_goods_actual_qty + ${updateAsnDetailDto.goodsActualQty}`,
+                  )
+                : updateAsnDetailDto.goodsActualQty,
+            sortedQty: updateAsnDetailDto.sortedQty,
+            goodsShortageQty: updateAsnDetailDto.goodsShortageQty,
+            goodsMoreQty: updateAsnDetailDto.goodsMoreQty
+                ? qb.raw(
+                      `ad.c_goods_more_qty + ${updateAsnDetailDto.goodsMoreQty}`,
+                  )
+                : updateAsnDetailDto.goodsMoreQty,
+            goodsDamageQty: updateAsnDetailDto.goodsDamageQty
+                ? qb.raw(
+                      `ad.c_goods_damage_qty + ${updateAsnDetailDto.goodsDamageQty}`,
+                  )
+                : updateAsnDetailDto.goodsDamageQty,
+        });
     }
 
+    async confirmAsn(id: number) {
+        const asn = await this.findOne(id);
+        if (asn.asnStatus === AsnStatus.CONFIRMED) {
+            throw new InvalidArgumentException('asn already confirmed');
+        }
+        asn.asnStatus = AsnStatus.CONFIRMED;
+        await this.em.persistAndFlush(asn);
+        return asn;
+    }
     async remove(id: number) {
         const supplier = await this.findOne(id);
 
@@ -90,5 +137,4 @@ export class InboundService {
 
         return 'deleted';
     }
-
 }

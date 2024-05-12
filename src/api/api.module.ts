@@ -18,6 +18,7 @@ import { TransferModule } from './transfer/transfer.module';
 import { WarehouseModule } from './warehouse/warehouse.module';
 import { SupplierModule } from './supplier/supplier.module';
 import { InboundModule } from './inbound/inbound.module';
+import { OutboundModule } from './outbound/outbound.module';
 
 @Module({
     imports: [
@@ -40,6 +41,7 @@ import { InboundModule } from './inbound/inbound.module';
         GoodsUnitModule,
         GoodsModule,
         InboundModule,
+        OutboundModule,
     ],
 })
 export class ApiModule {}

@@ -2,7 +2,7 @@ import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
 import { ParentEntity } from './parent.entity';
 import { AsnStatus } from '@/common/enum/asn-status.enum';
 import { Supplier } from './supplier.entity';
-import { Asnlist } from './asnlist.entity';
+import { Asnlist } from './asn-list.entity';
 
 @Entity()
 export class Asndetail extends ParentEntity{
@@ -23,33 +23,33 @@ export class Asndetail extends ParentEntity{
   goodsDesc!: string;
 
   @Property({length: 8})
-  goodsQty!: string;
+  goodsQty!: number;
 
   @Property({length: 8})
-  goodsActualQty!: string;
+  goodsActualQty!: number;
 
   @Property({length: 8})
-  sortedQty!: string;
+  sortedQty!: number;
 
   @Property({length: 8})
-  goodsShortageQty!: string;
+  goodsShortageQty!: number;
 
   @Property({length: 8})
-  goodsMoreQty!: string;
+  goodsMoreQty!: number;
 
   @Property({length: 8})
-  goodsDamageQty!: string;
+  goodsDamageQty!: number;
 
   @Property()
-  goodsWeight!: string;
+  goodsWeight!: number;
 
   @Property()
-  goodsVolume!: string;
+  goodsVolume!: number;
 
   @Property()
-  goodsCost!: string;
+  goodsCost!: number;
 
-  @Property({ length: 255 })
+  @Property({ length: 64 })
   openId!: string;
 
   @ManyToOne({ entity: () => Asnlist })

@@ -1,7 +1,7 @@
 import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
 import { ParentEntity } from './parent.entity';
 import { SupplierLevel } from '@/common/enum/supplier-level.enum';
-import { Asndetail } from './asndetail.entity';
+import { Asndetail } from './asn-detail.entity';
 
 @Entity()
 export class Supplier extends ParentEntity {

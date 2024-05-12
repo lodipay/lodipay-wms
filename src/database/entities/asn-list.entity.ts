@@ -2,7 +2,7 @@ import { Collection, Entity, ManyToOne, OneToMany, PrimaryKey, Property } from '
 import { ParentEntity } from './parent.entity';
 import { AsnStatus } from '@/common/enum/asn-status.enum';
 import { Supplier } from './supplier.entity';
-import { Asndetail } from './asndetail.entity';
+import { Asndetail } from './asn-detail.entity';
 
 @Entity()
 export class Asnlist extends ParentEntity{
@@ -11,16 +11,16 @@ export class Asnlist extends ParentEntity{
   asnCode!: string;
 
   @Property({ default: AsnStatus.PREDELIVERY })
-  asnStatus: AsnStatus;
+  asnStatus?: AsnStatus;
 
   @Property({ nullable: true })
-  totalWeight!: number;
+  totalWeight?: number;
 
   @Property({ nullable: true })
-  totalVolume!: number;
+  totalVolume?: number;
 
   @Property({ nullable: true })
-  totalCost!: number;
+  totalCost?: number;
 
   @ManyToOne({ entity: () => Supplier })
   supplier!: Supplier;
@@ -29,10 +29,10 @@ export class Asnlist extends ParentEntity{
   barCode!: string;
 
   @Property({ length: 64 })
-  openid!: string;
+  openId!: string;
 
   @Property({ columnType: 'jsonb' })
-  transportationFee!: any;
+  transportationFee?: any;
 
   @OneToMany({ entity: () => Asndetail, mappedBy: 'asnList' })
   asndetail = new Collection<Asndetail>(this);

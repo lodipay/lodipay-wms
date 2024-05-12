@@ -11,15 +11,14 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { ApiPaginatedResponse } from '../../common/decorator/api-paginated-response.decorator';
 import { FilterDto } from '../../common/dto/filter.dto';
-import { Supplier } from '../../database/entities/supplier.entity';
 import { CreateAsnDto } from './dto/create-asn.dto';
 import { UpdateAsnDto } from './dto/update-asn.dto';
 import { InboundService } from './inbound.service';
-import { Asnlist } from '@/database/entities/asnlist.entity';
+import { Asnlist } from '@/database/entities/asn-list.entity';
 
 @Controller('inbound')
 @ApiTags('Inbound')
-export class inboundController {
+export class InboundController {
     constructor(private readonly inboundService: InboundService) {}
 
     @Post('asn')
@@ -38,13 +37,22 @@ export class inboundController {
         return this.inboundService.findOne(+id);
     }
 
-    @Patch(':id')
-    update(
-        @Param('id') id: string,
-        @Body() updateAsnDto: UpdateAsnDto,
-    ) {
-        return this.inboundService.update(+id, updateAsnDto);
+    @Post('asndetail/:id')
+    updateAsnDetail(@Param('id') id: string, @Body() updateAsnDto: UpdateAsnDto) {
+        return this.inboundService.updateAsnDetail(+id, updateAsnDto);
     }
+
+    @Post('confirm/:id')
+    confirmAsn(@Param('id') id: string) {
+        return this.inboundService.confirmAsn(+id);
+    }
+    // @Patch(':id')
+    // update(
+    //     @Param('id') id: string,
+    //     @Body() updateAsnDto: UpdateAsnDto,
+    // ) {
+    //     return this.inboundService.update(+id, updateAsnDto);
+    // }
 
     @Delete(':id')
     remove(@Param('id') id: string) {
