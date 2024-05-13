@@ -3,7 +3,7 @@ import { ParentEntity } from './parent.entity';
 import { Supplier } from './supplier.entity';
 
 @Entity()
-export class Stocklist extends ParentEntity {
+export class StockList extends ParentEntity {
     @Property({ length: 255 })
     goodsCode!: string;
 
