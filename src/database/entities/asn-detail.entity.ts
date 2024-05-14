@@ -10,7 +10,7 @@ export class Asndetail extends ParentEntity{
   @Property({ length: 64 })
   asnCode!: string;
 
-  @Property({ default: AsnStatus.PREDELIVERY })
+  @Property({ default: AsnStatus.PENDINGARRIVAL })
   asnStatus: AsnStatus;
 
   @ManyToOne({ entity: () => Supplier })

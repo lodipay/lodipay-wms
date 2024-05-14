@@ -5,9 +5,10 @@ import { OutboundService } from './outbound.service';
 import { Goods } from '@/database/entities/goods.entity';
 import { Dndetail } from '@/database/entities/dn-detail.entity';
 import { Dnlist } from '@/database/entities/dn-list';
+import { StockList } from '@/database/entities/stock-list.entity';
 
 @Module({
-    imports: [MikroOrmModule.forFeature([Dndetail, Goods, Dnlist]),
+    imports: [MikroOrmModule.forFeature([Dndetail, Goods, Dnlist, StockList]),
     ],
     controllers: [OutboundController],
     providers: [OutboundService],

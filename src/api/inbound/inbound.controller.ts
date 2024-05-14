@@ -34,7 +34,7 @@ export class InboundController {
 
     @Get(':id')
     findOne(@Param('id') id: string) {
-        return this.inboundService.findOne(+id);
+        return this.inboundService.findAsnListOne(+id);
     }
 
     @Post('asndetail/:id')
@@ -42,17 +42,25 @@ export class InboundController {
         return this.inboundService.updateAsnDetail(+id, updateAsnDto);
     }
 
-    @Post('confirm/:id')
-    confirmAsn(@Param('id') id: string) {
-        return this.inboundService.confirmAsn(+id);
+    @Post('confirm-arrival/:id')
+    confirmArrival(@Param('id') id: string) {
+        return this.inboundService.confirmArrival(+id);
     }
-    // @Patch(':id')
-    // update(
-    //     @Param('id') id: string,
-    //     @Body() updateAsnDto: UpdateAsnDto,
-    // ) {
-    //     return this.inboundService.update(+id, updateAsnDto);
-    // }
+    @Post('confirm-unloading/:id')
+    confirmUnloading(@Param('id') id: string) {
+        return this.inboundService.confirmUnloading(+id);
+    }
+    @Post('confirm-sorting/:id')
+    confirmSorting(@Param('id') id: string, @Body() goods: Array<{ goodsCode: string; goodsActualQty: number}>) {
+        return this.inboundService.confirmSorting(+id, goods);
+    }
+    @Patch(':id')
+    update(
+        @Param('id') id: string,
+        @Body() updateAsnDto: UpdateAsnDto,
+    ) {
+        return this.inboundService.update(+id, updateAsnDto);
+    }
 
     @Delete(':id')
     remove(@Param('id') id: string) {

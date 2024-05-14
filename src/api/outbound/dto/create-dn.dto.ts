@@ -1,4 +1,5 @@
 import { AsnStatus } from '@/common/enum/asn-status.enum';
+import { DnStatus } from '@/common/enum/dn-status.enum';
 import { OmitType } from '@nestjs/swagger';
 import { IsArray, IsNumber, IsString } from 'class-validator';
 
@@ -11,5 +12,5 @@ export class CreateDnDto {
     @IsString()
     openId: string;
     backOrderLabel: boolean;
-    dnStatus: string;
+    dnStatus: DnStatus;
 }

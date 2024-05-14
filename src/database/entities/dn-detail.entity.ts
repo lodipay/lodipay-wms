@@ -1,6 +1,7 @@
 import { Collection, Entity, ManyToOne, OneToMany, PrimaryKey, Property } from '@mikro-orm/core';
 import { ParentEntity } from './parent.entity';
 import { Dnlist } from './dn-list';
+import { DnStatus } from '@/common/enum/dn-status.enum';
 
 @Entity()
 export class Dndetail extends ParentEntity {
@@ -8,8 +9,8 @@ export class Dndetail extends ParentEntity {
   @Property({ length: 64 })
   dnCode!: string;
 
-  @Property({ columnType: 'int8' })
-  dnStatus!: string;
+  @Property({ default: DnStatus.PREDELIVERY })
+  dnStatus: DnStatus;
 
   @Property({ length: 255 })
   customer!: string;

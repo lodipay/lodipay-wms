@@ -6,9 +6,10 @@ import { Supplier } from '@/database/entities/supplier.entity';
 import { Asndetail } from '@/database/entities/asn-detail.entity';
 import { Goods } from '@/database/entities/goods.entity';
 import { Asnlist } from '@/database/entities/asn-list.entity';
+import { StockList } from '@/database/entities/stock-list.entity';
 
 @Module({
-    imports: [MikroOrmModule.forFeature([Asndetail, Supplier, Goods, Asnlist]),
+    imports: [MikroOrmModule.forFeature([Asndetail, Supplier, Goods, Asnlist, StockList]),
     ],
     controllers: [InboundController],
     providers: [InboundService],
