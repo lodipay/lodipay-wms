@@ -19,6 +19,7 @@ import { WarehouseModule } from './warehouse/warehouse.module';
 import { SupplierModule } from './supplier/supplier.module';
 import { InboundModule } from './inbound/inbound.module';
 import { OutboundModule } from './outbound/outbound.module';
+import { StockListModule } from './stock-list/stock-list.module';
 
 @Module({
     imports: [
@@ -41,6 +42,7 @@ import { OutboundModule } from './outbound/outbound.module';
         GoodsUnitModule,
         GoodsModule,
         InboundModule,
+        StockListModule,
         OutboundModule,
     ],
 })
