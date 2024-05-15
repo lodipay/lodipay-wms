@@ -21,8 +21,8 @@ export class Dnlist extends ParentEntity {
   @Property()
   totalCost?: number;
 
-  @Property({ length: 255 })
-  customer!: string;
+  // @Property({ length: 255 })
+  // customer!: string;
 
   @Property({ length: 64 })
   barCode!: string;

@@ -12,8 +12,8 @@ export class Dndetail extends ParentEntity {
   @Property({ default: DnStatus.PREDELIVERY })
   dnStatus: DnStatus;
 
-  @Property({ length: 255 })
-  customer!: string;
+  // @Property({ length: 255 })
+  // customer!: string;
 
   @Property({ length: 64 })
   goodsCode!: string;
@@ -46,13 +46,13 @@ export class Dndetail extends ParentEntity {
   deliveryDamageQty!: number;
 
   @Property()
-  goodsWeight!: number;
+  goodsWeight?: number;
 
   @Property()
-  goodsVolume!: number;
+  goodsVolume?: number;
 
   @Property()
-  goodsCost!: number;
+  goodsCost?: number;
 
   @Property()
   backOrderLabel!: boolean;

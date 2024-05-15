@@ -47,7 +47,8 @@ export class OutboundService {
         dnItem.dnCode = createDnDto.dnCode;
         dnItem.dnStatus = createDnDto.dnStatus;
         dnItem.backOrderLabel = createDnDto.backOrderLabel;
-
+        await this.em.persistAndFlush(dnItem);
+        
         const goods = createDnDto.goods;
         goods.forEach(async good => {
             const goodItem = await this.goodsRepo.findOne({
@@ -90,7 +91,7 @@ export class OutboundService {
 
             await this.em.persistAndFlush(dnItemDetail);
         });
-        await this.em.persistAndFlush(dnItem);
+        
         return dnItem;
     }
 
