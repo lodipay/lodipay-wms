@@ -10,6 +10,6 @@ export const CONFIG_NAME_MAIN = 'MAIN_CONFIG';
 
 export default registerAs(CONFIG_NAME_MAIN, () => ({
     inDevelopment: process.env.ENVIRONMENT === process.env.ENVIRONMENT_DEV,
-    port: parseInt(process.env.WHS_PORT) || 13000,
+    port: process.env.WHS_PORT || 13000,
     apiDomain: process.env.API_URL,
 }));
