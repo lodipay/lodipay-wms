@@ -49,7 +49,7 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, config, {
         extraModels: [GenericResponseDto, PaginatedDto, FilterDto, QueryDto],
     });
-    const swaggerPath = `${mainConfig.port}/swagger`;
+    const swaggerPath = `${mainConfig.apiPrefix}/swagger`;
     SwaggerModule.setup(`${swaggerPath}`, app, document);
 
     await app.listen(mainConfig.port);
