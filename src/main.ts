@@ -36,9 +36,9 @@ async function bootstrap() {
 
     app.enableVersioning({
         type: VersioningType.URI,
-        prefix: 'wms/api/v1',
+        prefix: mainConfig.apiPrefix,
     });
-    app.setGlobalPrefix('wms/api/v1');
+    app.setGlobalPrefix(mainConfig.apiPrefix);
 
     const config = new DocumentBuilder()
         .setTitle('Lodi WHS')
@@ -49,10 +49,10 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, config, {
         extraModels: [GenericResponseDto, PaginatedDto, FilterDto, QueryDto],
     });
-    const swaggerPath = 'swagger';
-    SwaggerModule.setup(swaggerPath, app, document);
+    const swaggerPath = `${mainConfig.port}/swagger`;
+    SwaggerModule.setup(`${swaggerPath}`, app, document);
 
-    await app.listen(process.env.WHS_PORT);
+    await app.listen(mainConfig.port);
     console.log(
         `Lodi WMS project is running on: http://0.0.0.0:${mainConfig.port}`,
     );
