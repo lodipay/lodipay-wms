@@ -36,9 +36,9 @@ async function bootstrap() {
 
     app.enableVersioning({
         type: VersioningType.URI,
-        prefix: 'api/v1',
+        prefix: 'wms/api/v1',
     });
-    app.setGlobalPrefix('api/v1');
+    app.setGlobalPrefix('wms/api/v1');
 
     const config = new DocumentBuilder()
         .setTitle('Lodi WHS')
@@ -54,7 +54,7 @@ async function bootstrap() {
 
     await app.listen(process.env.WHS_PORT);
     console.log(
-        `Lodi WHS project is running on: http://0.0.0.0:${mainConfig.port}`,
+        `Lodi WMS project is running on: http://0.0.0.0:${mainConfig.port}`,
     );
     console.log(
         `Swagger path: http://0.0.0.0:${mainConfig.port}/${swaggerPath}`,
